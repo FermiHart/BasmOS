@@ -22,6 +22,8 @@ contracts, not cryptographic provenance by themselves.
 ## 3. QEMU Behavior
 
 - The record sector must reach VGA `3/6/9`.
+- Task 0 is CPU-bound and never sleeps; the 6, the 9 and a heartbeat byte at
+  `0x6FC` that must keep incrementing require asynchronous IRQ0 preemption.
 - IDT and PDE bytes are read through QMP.
 - The CPL3 sector must demonstrate IRQ0, TSS state, module load, execution and
   return.
@@ -35,8 +37,11 @@ QEMU runs with a read-only image, networking disabled and sandboxing enabled.
 record sector, the documented 171-byte machine contract and the CPL3 serial
 protocol. Host-side wall-clock timeouts bound automated runs.
 
-The bEMU timer model injects one interrupt after guest `HLT`; QEMU is the stronger
-test for legacy PIT/PIC behavior.
+In plain record-boot mode the VMM is an 18.2 Hz periodic PIT: ticks are
+delivered through the KVM interrupt-window mechanism, preempting a CPU-bound
+guest mid-computation (measured: 64 ticks, 32 of which preempt the producer).
+The bEMU contract mode injects one interrupt after guest `HLT`; QEMU is the
+stronger test for legacy PIT/PIC behavior.
 
 ## 5. Parser And Mutation Gates
 
@@ -58,7 +63,10 @@ context with a time limit, not in the Node host global context.
 
 - physical IA-32/BIOS coverage;
 - UART behavior on multiple hardware generations;
-- a CPU-bound task that never executes `HLT` to strengthen asynchronous
-  preemption evidence;
 - broader negative fuzzing of assembler input and third-party Packs;
 - signed release provenance tied to tags and CI.
+
+The former "CPU-bound task that never executes HLT" residual was closed on
+2026-08-19: the record producer is now CPU-bound on metal, and all three
+executors (QEMU, KVM with the periodic-PIT VMM model, and the browser
+interpreter) prove asynchronous preemption of a task that never sleeps.

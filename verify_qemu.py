@@ -105,6 +105,17 @@ try:
     idt, _ = read_phys(0x500, 35 * 8)
     pde, _ = read_phys(0x1000, 4)
 
+    # Heartbeat: the timer handler increments the byte at 0x6FC on every
+    # serviced IRQ0. Two reads separated by half a second must differ.
+    beat1, _ = read_phys(0x6FC, 1)
+    time.sleep(0.5)
+    beat2, _ = read_phys(0x6FC, 1)
+    b1 = beat1[0] if beat1 else None
+    b2 = beat2[0] if beat2 else None
+    delta = ((b2 - b1) & 0xFF) if (b1 is not None and b2 is not None) else 0
+    # 18.2 Hz PIT over ~0.5 s: expect ~9 ticks; allow noisy scheduling.
+    heartbeat_ok = b1 is not None and b2 is not None and 1 <= delta <= 127
+
     print("VGA @0xB8000:", dump.strip().replace("\r\n", " "))
     print("bytes:", " ".join(f"{b:02x}" for b in vals))
 
@@ -119,7 +130,7 @@ try:
     )
     pde_value = int.from_bytes(bytes(pde), "little") if len(pde) == 4 else 0
     paging_ok = (pde_value & 0x83) == 0x83 and (pde_value & 0xFFC00000) == 0
-    ok = ok and idt_ok and paging_ok
+    ok = ok and idt_ok and paging_ok and heartbeat_ok
     checks = [
         (0, 0x33, "task0 '3' char @B8000"),
         (1, 0x0F, "task0 attr white @B8001"),
@@ -138,8 +149,12 @@ try:
 
     live_status = "PASS" if live else "FAIL"
     print(f"  [{live_status}] QEMU running after 2.0s dwell: status={qemu_status!r}")
-    print("  [PASS] preemption source: tasks wait in HLT; IRQ0 is required"
-          if live else "  [FAIL] preemption/liveness contract")
+    print("  [PASS] preemption source: task0 is CPU-bound and never sleeps;"
+          if live and heartbeat_ok else
+          "  [FAIL] preemption/liveness contract",
+          "the 6, the 9 and the heartbeat require asynchronous IRQ0 preemption")
+    print(f"  [{'PASS' if heartbeat_ok else 'FAIL'}] heartbeat @0x6FC: "
+          f"{b1} -> {b2} (+{delta} ticks in 0.5s); a frozen byte would betray a dead PIT")
     print(f"  [{'PASS' if idt_ok else 'FAIL'}] IDT: 32 fail-stop + 3 service gates")
     print(f"  [{'PASS' if paging_ok else 'FAIL'}] PDE0: present | rw | 4MB page "
           f"(runtime={pde_value:#010x})")

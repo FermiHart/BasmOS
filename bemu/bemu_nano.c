@@ -5,11 +5,16 @@
  * Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
  *
  * This VMM runs BasmOS guests directly through /dev/kvm without firmware, a
- * bootloader or an ELF loader. It provides a minimal timer model, which injects
- * IRQ0 vector 0x20 after each eligible HLT, and a minimal COM1 UART model for
- * scripted or interactive serial I/O. PIC and PIT port writes are accepted but
- * do not configure separate emulated devices. The VGA text page at 0xB8000 is
- * guest RAM that can be inspected or rendered by the host.
+ * bootloader or an ELF loader. In plain record-boot mode the machine is also
+ * the PIT: an 18.2 Hz periodic timer (the period the guest itself programs)
+ * preempts the vCPU asynchronously through the interrupt-window mechanism, so
+ * a CPU-bound task is preempted mid-computation exactly like on real iron. A
+ * halted CPU simply waits for the next period. Scripted serial modes and the
+ * bEMU contract keep the documented HLT-driven tick model, and a minimal COM1
+ * UART model serves scripted or interactive serial I/O. PIC and PIT port
+ * writes are accepted but do not configure separate emulated devices. The VGA
+ * text page at 0xB8000 is guest RAM that can be inspected or rendered by the
+ * host.
  *
  * SUPPORTED MODES:
  *   record (default):       a 512-byte boot record with signature 0xAA55 is
@@ -51,6 +56,7 @@
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 #include <termios.h>
 #include <linux/kvm.h>
 
@@ -87,6 +93,16 @@ static const uint8_t machine_gdt[GDT_SIZE] = {
 };
 
 static void die(const char *msg) { perror(msg); exit(1); }
+
+/* ── metal-mode PIT: the machine is the timer the guest programmed ────────
+ * SIGALRM marks a tick period (54.926 ms = 1.193182 MHz / 65536, the divisor
+ * the record artifact writes into channel 0). The handler only latches a
+ * flag; delivery happens in the run loop through the interrupt-window
+ * mechanism, so a CPU-bound task is preempted mid-computation. Two latches
+ * are needed: g_pit_tick says a period elapsed, g_pit_pending says the tick
+ * still owes the guest an injection. */
+static volatile sig_atomic_t g_pit_tick, g_pit_pending;
+static void on_pit_tick(int sig) { (void)sig; g_pit_tick = 1; }
 
 static struct termios g_saved_tio;
 static int g_tio_active;
@@ -297,6 +313,24 @@ int main(int argc, char **argv)
                contract ? "PM32+paging DIRECT ENTRY, machine-owned GDT/PD"
                         : "real mode, KVM direct");
 
+    /* The periodic PIT applies to the plain record boot: the machine is the
+     * 18.2 Hz timer the guest itself programs. Scripted serial modes keep
+     * their documented HLT-driven tick contract, and the bEMU contract keeps
+     * time-as-a-service (hlt asks the machine for the next tick). */
+    int pit = !contract && !serial_hex && !serial_expect && !serial_stdio;
+    if (pit) {
+        struct sigaction sa;
+        memset(&sa, 0, sizeof sa);
+        sa.sa_handler = on_pit_tick;
+        sigemptyset(&sa.sa_mask);          /* no SA_RESTART: KVM_RUN must see EINTR */
+        if (sigaction(SIGALRM, &sa, NULL) < 0) die("sigaction SIGALRM");
+        struct itimerval pit_timer = {
+            .it_interval = {0, 54926},     /* 1.193182 MHz / 65536 */
+            .it_value = {0, 54926},
+        };
+        if (setitimer(ITIMER_REAL, &pit_timer, NULL) < 0) die("setitimer");
+    }
+
     if (serial_stdio && isatty(STDIN_FILENO)) {
         struct termios live;
         if (tcgetattr(STDIN_FILENO, &g_saved_tio) < 0) die("tcgetattr");
@@ -313,7 +347,19 @@ int main(int argc, char **argv)
     int matched = 0, uart_lcr = 0, seen_monitor = 0, seen_module = 0;
     int stdin_pending = -1, stdin_eof = 0, rx_probe = 0;
     while (exits++ < max_exits) {
-        if (ioctl(vcpu, KVM_RUN, 0) < 0) die("KVM_RUN");
+        if (pit && g_pit_tick) {
+            /* A PIT period elapsed while the guest ran. Ask KVM for the next
+             * moment the guest can accept the tick (IF=1): for a CPU-bound
+             * task that moment is the preemption point itself. */
+            g_pit_tick = 0;
+            g_pit_pending = 1;
+            run->request_interrupt_window = 1;
+        }
+        if (ioctl(vcpu, KVM_RUN, 0) < 0) {
+            if (pit && errno == EINTR) continue;   /* SIGALRM: loop top delivers */
+            die("KVM_RUN");
+        }
+        int ticked = 0;
         switch (run->exit_reason) {
         case KVM_EXIT_IO:
         {
@@ -399,19 +445,29 @@ int main(int argc, char **argv)
                                 irqs, fault_cs);
                 goto fail;
             }
-            /* the only device in this machine: one tick per HLT */
+            if (pit) {
+                /* metal: a halted CPU waits for the PIT grid, like real iron */
+                while (!g_pit_tick) pause();
+                g_pit_tick = 0;
+                g_pit_pending = 0;
+                run->request_interrupt_window = 0;
+            }
+            /* contract/scripted modes: one tick per HLT (time as a service) */
             if (ioctl(vcpu, KVM_INTERRUPT, &(struct kvm_interrupt){ IRQ0_VEC }) < 0)
                 die("KVM_INTERRUPT");
             irqs++;
-            if (g_show) show_frame(ram + GPA_VGA);
-            if (!matched && ram[GPA_VGA+0] == 0x33 && ram[GPA_VGA+1] == 0x0F
-                         && ram[GPA_VGA+2] == 0x36 && ram[GPA_VGA+3] == 0x0F
-                         && ram[GPA_VGA+4] == 0x39 && ram[GPA_VGA+5] == 0x0A) {
-                printf("[bemu-nano] 3/6/9 observed at tick %ld: "
-                       "task0, task1 and the IPC ring are alive\n", irqs);
-                matched = 1;
+            ticked = 1;
+            break;
+        case KVM_EXIT_IRQ_WINDOW_OPEN:
+            /* The guest can now take the pending PIT tick (IF=1). */
+            run->request_interrupt_window = 0;
+            if (pit && g_pit_pending) {
+                g_pit_pending = 0;
+                if (ioctl(vcpu, KVM_INTERRUPT, &(struct kvm_interrupt){ IRQ0_VEC }) < 0)
+                    die("KVM_INTERRUPT");
+                irqs++;
+                ticked = 1;
             }
-            if (matched && irqs >= want_irqs) goto done;
             break;
         case KVM_EXIT_SHUTDOWN:
             fprintf(stderr, "[bemu-nano] CRASH: triple fault after %ld ticks\n", irqs);
@@ -424,6 +480,17 @@ int main(int argc, char **argv)
             fprintf(stderr, "[bemu-nano] unexpected exit reason %u\n",
                     run->exit_reason);
             goto fail;
+        }
+        if (ticked) {
+            if (g_show) show_frame(ram + GPA_VGA);
+            if (!matched && ram[GPA_VGA+0] == 0x33 && ram[GPA_VGA+1] == 0x0F
+                         && ram[GPA_VGA+2] == 0x36 && ram[GPA_VGA+3] == 0x0F
+                         && ram[GPA_VGA+4] == 0x39 && ram[GPA_VGA+5] == 0x0A) {
+                printf("[bemu-nano] 3/6/9 observed at tick %ld: "
+                       "task0, task1 and the IPC ring are alive\n", irqs);
+                matched = 1;
+            }
+            if (matched && irqs >= want_irqs) goto done;
         }
     }
     fprintf(stderr, "[bemu-nano] gave up after %ld exits (%ld ticks)\n",

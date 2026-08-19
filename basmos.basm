@@ -31,10 +31,21 @@
 ;   H8  IDT/ring/page directory/stack in low RAM, away from the EBDA
 ;   H9  yield=int 32, send=int 33, recv=int 34
 ;
+; Round I (the asynchronous preemption proof, metal personality only):
+;   I1  task0 is CPU-bound: its loop never executes hlt, never yields; every
+;       task1 slice is therefore an asynchronous IRQ0 preemption of a task
+;       that was mid-computation, not sleeping (supersedes H7 on metal)
+;   I2  the timer handler increments a heartbeat byte at 0x6FC on every
+;       serviced tick; a frozen heartbeat betrays a dead timer on any
+;       executor (the initial RAM value is irrelevant: the proof is the delta)
+;   I3  the bEMU contract keeps H7 semantics untouched: time there is a
+;       machine service requested by hlt, so basmos-vm.bin stays byte-identical
+;
 ; Memory map (all accesses remain within the 4 MB identity-mapped PDE):
 ;   0x00500  IDT (35 gates)              0x00620  GDT (contract: written by VMM)
-;   0x00700  ring IPC (256 bytes)        0x01000  page directory + stack0
-;   0x07C00  image (this sector)         0xB8000  VGA text
+;   0x006FC  heartbeat tick counter      0x00700  ring IPC (256 bytes)
+;   0x01000  page directory + stack0     0x07C00  image (this sector)
+;   0xB8000  VGA text
 ; ============================================================================
 
 %ifdef BEMU_CONTRACT
@@ -145,7 +156,10 @@ t1frame:
 ; ---------------------------------------------------------------------- Tasks
 ; The display is the proof: 3 (displayed by task0), 6 (displayed by task1), and 9
 ; (the byte appears only because it TRAVELED through the ring; task0 displays 3
-; but sends 9).
+; but sends 9). On metal, task0 never sleeps: its loop holds no hlt and no
+; yield, so the 6 and the 9 can only exist if IRQ0 interrupted a task that was
+; mid-computation. That is asynchronous preemption, the strongest claim a
+; timer-preempted 512-byte artifact can make.
 task0:
     sti
     mov ax, 0x0F33          ; white '3'
@@ -153,8 +167,12 @@ task0:
     mov al, 0x39            ; AL='9': the IPC byte, displayed in green by task1
 .loop:
     int 33                  ; send(AL)
-    hlt                     ; only the PIT wakes and preempts the task
+%ifndef BEMU_CONTRACT
+    jmp .loop               ; CPU-bound: task0 spins forever; only IRQ0 preempts
+%else
+    hlt                     ; contract: time is a machine service; hlt asks for it
     jmp .loop
+%endif
 
 task1:
     mov word [0xB8002], 0x0F36 ; white '6'
@@ -178,8 +196,11 @@ timer_handler:              ; IRQ0 or voluntary yield via int 32
 %ifndef BEMU_CONTRACT
     mov al, 0x20
     out 0x20, al            ; the yield's spurious EOI is a no-op with an empty ISR
+    db 0xFE, 0x05           ; inc byte [0x6FC] (BASM has no inc-with-memory yet)
+    dd 0x6FC                ; heartbeat: every serviced tick leaves a trace
 %endif
-                            ; contract: there is no PIC; the tick originates in the VMM
+                            ; contract: there is no PIC and no heartbeat; the
+                            ; tick originates in the VMM and time is hlt-requested
 
 do_switch:
     db 0x87, 0x25           ; xchg esp,[other_sp] (BASM accepts only reg,reg)

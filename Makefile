@@ -22,7 +22,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-qemu verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sensitivity verify-qemu verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -35,6 +35,7 @@ help: ## display this menu
 	@printf '  \033[1mmake verify\033[0m   verify the record with QEMU, the JS interpreter and KVM\n'
 	@printf '  \033[1mmake verify-shell\033[0m\n               verify TSS, IRQ0, CPL3 module load, execution and return\n'
 	@printf '  \033[1mmake verify-jash\033[0m\n               verify ANSI, commands, Deck switching and CPL3 selectors\n'
+	@printf '  \033[1mmake verify-sensitivity\033[0m\n               flip every byte, boot in QEMU, classify the effect (~6 min)\n'
 	@printf '  \033[1mmake proof\033[0m    run the full artifact, QEMU, KVM, PTY and browser gate\n'
 	@printf '  \033[1mmake verify-bear\033[0m\n               optional cc-vs-Bear byte identity; set BEAR=/path/to/bear\n'
 	@printf '  \033[1mmake run\033[0m      boot the record artifact interactively in QEMU\n'
@@ -172,6 +173,12 @@ verify-jash-bemu: $(SHKERN) $(JASH) $(JPACK)
 verify-hardening: all $(PROOFCTL) ## command fuzzing and mutation gate
 	python3 verify_jash_fuzz.py bemu/bemu-nano $(SHKERN) $(JASH) $(JPACK)
 	python3 verify_mutations.py
+
+# Byte-sensitivity map: every byte of the record sector is flipped once,
+# booted in QEMU and classified by its observable effect on the contract.
+# Slow (~6 min, 512 boots); writes evidence/byte-sensitivity.{json,md}.
+verify-sensitivity: $(KERNEL) $(BASM) ## map every byte's observable effect
+	python3 verify_sensitivity.py $(KERNEL)
 
 manifest: all ## generate deterministic hashes and sizes
 	@sh scripts/artifact_manifest.sh > ARTIFACTS.manifest

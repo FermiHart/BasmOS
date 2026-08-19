@@ -45,8 +45,11 @@ for (const [name, claim] of siteClaims) {
 console.log('  crash: ' + (s.crash ? JSON.stringify(s.crash) : 'none'));
 console.log('  telemetry: ' + s.insns + ' insns / ' + s.ticks + ' timer irqs / ' +
              s.yields + ' yields / ' + s.sends + ' sends / ' + s.recvs + ' recvs');
+console.log('  heartbeat: ' + CPU.heartbeat() + ' (== ticks: ' +
+            (CPU.heartbeat() === s.ticks) + ')');
 console.log('  artifact: ' + (identical ? 'website bytes match basmos.bin' : 'MISMATCH'));
-pass = pass && !s.crash && identical && s.ticks > 0 && s.yields === 0;
+pass = pass && !s.crash && identical && s.ticks > 0 && s.yields === 0
+        && CPU.heartbeat() === s.ticks;
 console.log(pass
   ? 'RESULT: PASS - in-page interpreter boots the real 512 bytes'
   : 'RESULT: FAIL');

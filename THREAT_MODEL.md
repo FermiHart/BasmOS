@@ -100,8 +100,10 @@ of every guest instruction stream. The VMM has no built-in seccomp, chroot, or
 privilege separation. Run modified guests without elevated privileges and with
 external process, filesystem, and resource isolation.
 
-The bEMU timer is intentionally simplified: it injects IRQ0 after guest `HLT`.
-It is not equivalent to QEMU's PIC/PIT model or physical hardware.
+The bEMU timer is intentionally simplified. In plain record-boot mode it is a
+periodic 18.2 Hz model delivered through the KVM interrupt-window mechanism;
+in scripted serial and contract modes it injects IRQ0 after guest `HLT`.
+Neither is equivalent to QEMU's PIC/PIT model or physical hardware.
 
 ### Browser And Node Execution
 

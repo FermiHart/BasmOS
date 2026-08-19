@@ -10,22 +10,26 @@ release.
 
 | Artifact | Total | Payload | Free before signature |
 |---|---:|---:|---:|
-| `basmos.bin` | 512 B | 287 B | 223 B |
+| `basmos.bin` | 512 B | 292 B | 218 B |
 
 The payload contains boot entry, PM32 transition, PSE paging, IDT, PIC/PIT,
-timer-driven switching, two tasks, SPSC IPC, VGA output and data structures.
+timer-driven switching of a CPU-bound and a sleeping task, SPSC IPC, a tick
+heartbeat and VGA output.
 
 The expected VGA evidence is:
 
 | Address | Value | Meaning |
 |---|---|---|
 | `0xB8000` | white `3` | task 0 executed |
-| `0xB8002` | white `6` | task 1 executed after timer switching |
+| `0xB8002` | white `6` | task 1 ran after IRQ0 preempted the CPU-bound task 0 |
 | `0xB8004` | green `9` | task 1 received the byte sent by task 0 |
+| `0x6FC` | increasing | every serviced IRQ0 increments the heartbeat byte |
 
 Task 0 displays `3` but sends `9`; task 1 is the only code path that displays
 the received byte. This makes `9` evidence of queue transfer rather than a
-shared display constant.
+shared display constant. Task 0's loop contains no `hlt` and no yield, and the
+heartbeat must keep advancing, so the observable state requires asynchronous
+timer preemption of a task that was mid-computation.
 
 ## Current Techniques
 
@@ -52,6 +56,17 @@ page-table hierarchy.
 `xchg esp,[other_sp]` atomically saves one task stack and restores the other.
 `popad` and `iretd` restore the complete integer/interrupt frame.
 
+### CPU-bound producer and tick heartbeat
+
+The producer's loop is `int 33; jmp` — no `hlt`, no yield. It is CPU-bound, so
+every task-1 slice is an asynchronous IRQ0 preemption of a task that was
+mid-computation, which is strictly stronger evidence than waking a sleeping
+task. The timer handler additionally executes `inc byte [0x6FC]` (6 bytes,
+emitted through `db`/`dd` because `basm-nano` has no `inc` with a memory
+operand yet), leaving a trace of every serviced tick; verifiers require the
+byte to keep advancing. The bEMU contract keeps the previous sleeping-task
+semantics, so `basmos-vm.bin` stays byte-identical at 171 bytes.
+
 ### Context-owned IPC cursors
 
 Producer and consumer cursors live in each endpoint's saved ECX. The opposite
@@ -70,6 +85,18 @@ and shallow interrupt paths.
 `basm-nano` implements only the source forms used by BasmOS. Rare encodings not
 supported as mnemonics are emitted explicitly with `db`/`dd`. `make verify-nasm`
 assembles the same five artifacts with NASM and requires byte identity.
+
+## Byte-Sensitivity Map
+
+`make verify-sensitivity` flips every byte of the record sector (XOR 0xFF),
+boots the mutant in QEMU and classifies the observable effect on the
+demonstrated contract (3/6/9, liveness, heartbeat). Current result over the
+292-byte payload: 214 payload bytes are DEAD when flipped, 27 visibly ALTER
+the contract, 2 freeze only the timer evidence, and 51 are observably dead
+under normal operation — including the entire fail-stop exception handler
+(never entered in a healthy boot), the architecturally ignored bits 31:16 of
+the pushed CS in `iretd`, and unused descriptor bytes. The full map and the
+per-symbol breakdown are committed in `evidence/byte-sensitivity.md`.
 
 ## Measured Symbol Map
 
@@ -93,6 +120,8 @@ change should report the old and new symbol budgets and regenerate
 - Hardware coverage is narrower than QEMU/KVM coverage.
 - PSE is required, so the target is Pentium-class IA-32 or compatible rather
   than an original 80386.
+- The heartbeat counter starts from uninitialized RAM; its liveness proof is
+  the delta between two reads, not an absolute value.
 
 The separate `basmos-sh.bin` artifact explores CPL3/TSS boundaries without
 changing the byte budget or feature set of `basmos.bin`.
