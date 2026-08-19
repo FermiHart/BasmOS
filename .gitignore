@@ -1,0 +1,26 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Host build products
+/basm-nano/basm-nano
+/bemu/bemu-nano
+/tools/proofctl
+
+# Python and editor state
+__pycache__/
+*.py[cod]
+*.swp
+*.swo
+.DS_Store
+.idea/
+.vscode/
+
+# Runtime and test state
+*.sock
+*.log
+*.core
+core
+
+# Private due-diligence and development records
+/PRIVATE_AUDIT_AND_VALUATION.md
+/PRIVATE_HISTORICAL_AUDIT.md
+/PRIVATE_DEVELOPMENT_LOG.md

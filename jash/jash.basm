@@ -1,0 +1,159 @@
+; ============================================================================
+; JASH nucleus - 256-byte ring-3 shell engine for BasmOS.
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+;
+; Native code owns no presentation strings. It receives a J-Pack into the
+; non-executable arena, then provides line editing, table dispatch, two logical
+; Decks and the int 0x80 console boundary. CS can execute only these 256 bytes.
+; ============================================================================
+
+BITS 32
+org 0
+section .text
+
+start:
+    cld
+    xor eax, eax
+    mov ebp, 0x200         ; capability base: every J-Pack derives from this register
+    mov [ebp - 128], al
+
+    ; Bootstrap packet: uint16 length followed by the non-executable J-Pack.
+    mov edi, ebp
+    call getc
+    db 0x91                ; xchg eax,ecx: low length byte, ECX was initialized to zero
+    call getc
+    mov ch, al
+.load:
+    call getc
+    db 0xAA                ; stosb
+    loop .load
+
+    ; Identity measures the vendor at CPL3 and publishes the selector only after validation.
+    mov esi, [ebp + 72]    ; capability identity: truth ledger
+    db 0x8D, 0x7E, 21      ; lea edi,[esi+21]: cpu.vendor field
+    xor eax, eax
+    db 0x0F, 0xA2          ; cpuid leaf 0
+    db 0x89, 0x1F          ; mov [edi],ebx
+    db 0x89, 0x57, 4       ; mov [edi+4],edx
+    db 0x89, 0x4F, 8       ; mov [edi+8],ecx
+    db 0x0E, 0x58          ; push cs; pop eax
+    cmp al, 0x2B
+    jne start               ; identity fails closed: do not publish the shell
+    xor ebx, ebx
+    db 0xF7, 0xE3          ; mul ebx: clear EDX:EAX after CPUID
+    mov esi, [ebp + 32]
+
+emit:
+    call puts
+
+prompt:
+    mov al, [ebp - 128]         ; upper EAX remains zero under the int 0x80 ABI
+    db 0x8B, 0x74, 0x85, 0    ; mov esi,[ebp+eax*4]
+.show:
+    call puts
+    mov di, 0x100          ; the entire arena remains below 64 KiB
+    xor ecx, ecx
+
+.read:
+    call getc
+    cmp al, 13
+    je enter
+    cmp al, 8
+    je .back
+    cmp al, 127
+    je .back
+    cmp ecx, 79
+    je .read
+    db 0xAA                ; stosb
+    inc ecx
+    db 0x93                ; xchg eax,ebx: BL=character, EAX becomes selector
+    mov al, 1
+    int 0x80
+    jmp .read
+
+.back:
+    test ecx, ecx
+    jz .read
+    dec edi
+    dec ecx
+    mov esi, [ebp + 24]
+    call puts
+    jmp .read
+
+do_select:
+    mov al, [ebp - 128]
+    db 0x8B, 0x74, 0x85, 36   ; EMIT output[deck], without jumping into the Pack
+emit_late:
+    jmp emit
+
+enter:
+    mov byte [edi], 0
+    mov esi, [ebp + 20]
+    call puts
+
+    db 0x8D, 0x75, 104     ; lea esi,[ebp+104]: name/target table
+.find:
+    mov edx, [esi]
+    test edx, edx
+    jz .unknown
+    push esi
+    mov di, 0x100
+.compare:
+    mov al, [edx]
+    inc edx
+    db 0xAE                ; scasb: exact comparison, including NUL
+    jne .miss
+    test al, al
+    jnz .compare
+    pop esi
+    mov esi, [esi + 4]
+    mov esi, [esi]
+    dec esi                ; sentinel 1: jack
+    je do_jack
+    dec esi                ; sentinel 2: bye
+    je do_bye
+    dec esi                ; sentinel 3: total SELECT(deck, pair)
+    je do_select
+    inc esi
+    inc esi
+    inc esi
+    jmp emit_late
+.miss:
+    pop esi
+    db 0x83, 0xC6, 8       ; add esi,8
+    jmp .find
+.unknown:
+    mov esi, [ebp + 16]
+    jmp emit_late
+
+do_jack:
+    db 0x80, 0x75, 0x80, 1 ; xor byte [ebp-128],1
+    mov al, [ebp - 128]
+    db 0x8B, 0x74, 0x85, 8    ; jack message[deck]
+    jmp emit_late
+
+do_bye:
+    mov esi, [ebp + 28]
+    call puts
+    mov al, 4
+    int 0x80
+
+getc:
+    mov al, 2
+    int 0x80
+    ret
+
+puts:
+    lodsb
+    test al, al
+    jz .done
+    db 0x93                ; xchg eax,ebx
+    mov al, 1
+    int 0x80
+    jmp puts
+.done:
+    ret
+
+nucleus_end:
+    times 256 - ($ - $$) db 0

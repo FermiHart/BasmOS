@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
+* text=auto eol=lf
+
+*.basm text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+Makefile text eol=lf
+
+*.bin binary
+*.png binary
+*.jpg binary
+*.gif binary

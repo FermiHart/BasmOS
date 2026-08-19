@@ -1,0 +1,215 @@
+; J-Pack: presentation and typed vocabulary for the 256-byte JASH nucleus.
+; It is loaded at DS:0x200, outside the module CS limit, and is never native code.
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+
+BITS 32
+org 0x200
+section .text
+
+    dd prompt_zero, prompt_lab
+    dd jack_zero, jack_lab
+    dd unknown, newline, erase, goodbye, banner
+    dd memory_map, denied
+
+; Capability cells. Values >=0x200 are EMIT(string); 1/2 are native JACK/BYE;
+; 3 is the total SELECT(deck, policy_map) instruction. SELECT has one fixed
+; pair, no Pack-controlled jump, no loop and no writable policy.
+cap_map:         dd 3
+cap_help:        dd help
+cap_info:        dd info
+cap_surfaces:    dd surfaces
+cap_decks:       dd decks
+cap_theme:       dd theme
+cap_clear:       dd clear
+cap_identity:    dd identity
+cap_whatif_zero: dd whatif_zero
+cap_whatif_lab:  dd whatif_lab
+cap_diff:        dd deck_diff
+cap_cannot:      dd cannot_out
+cap_anatomy:     dd anatomy
+cap_jack:        dd 1
+cap_bye:         dd 2
+
+; Exact name pointer + immutable capability-cell pointer. Every word, including
+; native jack/bye, resolves through one cell; aliases share the same address.
+table:
+    dd name_uname, cap_identity, name_probe, cap_identity
+    dd name_map, cap_map, name_why_map, cap_map
+    dd name_whatif_zero, cap_whatif_zero, name_whatif_lab, cap_whatif_lab
+    dd name_diff, cap_diff, name_cannot, cap_cannot, name_anatomy, cap_anatomy
+    dd name_help, cap_help, name_h, cap_help
+    dd name_info, cap_info, name_i, cap_info
+    dd name_surfaces, cap_surfaces, name_s, cap_surfaces
+    dd name_decks, cap_decks, name_d, cap_decks
+    dd name_jack, cap_jack, name_j, cap_jack
+    dd name_theme, cap_theme, name_t, cap_theme
+    dd name_clear, cap_clear, name_c, cap_clear
+    dd name_words, cap_help, name_w, cap_help
+    dd name_bye, cap_bye, name_b, cap_bye
+    dd 0, 0
+
+name_help:     db "help",0
+name_info:     db "info",0
+name_surfaces: db "surfaces",0
+name_decks:    db "decks",0
+name_jack:     db "jack",0
+name_theme:    db "theme",0
+name_clear:    db "clear",0
+name_words:    db "words",0
+name_map:      db "map",0
+name_bye:      db "bye",0
+name_uname:    db "uname -a",0
+name_probe:    db "probe",0
+name_why_map:  db "why map",0
+name_whatif_zero: db "whatif zero map",0
+name_whatif_lab:  db "whatif lab map",0
+name_diff:     db "diff zero lab",0
+name_cannot:   db "cannot out",0
+name_anatomy:  db "anatomy",0
+name_h: db "h",0
+name_i: db "i",0
+name_s: db "s",0
+name_d: db "d",0
+name_j: db "j",0
+name_t: db "t",0
+name_c: db "c",0
+name_w: db "w",0
+name_b: db "b",0
+
+banner:
+    db 27,"[2J",27,"[H"
+    db 27,"[38;5;46mJASH/2030",27,"[0m  CAPSULE USERLAND",13,10
+    db 27,"[38;5;46m[OK]",27,"[0m CAPSULE LINK CS:002b",13,10
+    db 27,"[38;5;51m[OK]",27,"[0m 6 TYPED SURFACES SFC1",13,10
+    db 27,"[38;5;214m[OK]",27,"[0m DECK ZERO DCK1",13,10
+    db 27,"[38;5;201m[OK]",27,"[0m WIRE COM1/INT80",13,10
+    db "nucleus 253+3B   pack DATA/NX   kernel SEALED",13,10,13,10,0
+
+prompt_zero:
+    db 27,"[38;5;46mjash",27,"[38;5;51m@basmos.org",27,"[38;5;214m:/"
+    db 27,"[38;5;201m# ",27,"[0m",27,"[3 q",0
+prompt_lab:
+    db 27,"[38;5;51mjash",27,"[38;5;45m@basmos.org",27,"[38;5;141m:/"
+    db 27,"[38;5;213m# ",27,"[0m",27,"[3 q",0
+
+newline: db 13,10,0
+erase:   db 8," ",8,0
+goodbye: db 27,"[0 q",27,"[38;5;46mJASH:EOT",27,"[0m",13,10,0
+
+help:
+    db 27,"[38;5;46mWORDS",27,"[0m",13,10
+    db "help info surfaces decks jack theme clear words map uname -a probe",13,10
+    db "why map whatif zero map whatif lab map",13,10
+    db "diff zero lab cannot out anatomy bye",13,10
+    db "aliases: h i s d j t c w b",13,10,0
+
+info:
+    db 27,"[38;5;51mCAPSULE",27,"[0m",13,10
+    db "cpl 3   cs 002b [RX 0000..00ff]",13,10
+    db "ds 0023 [RW 0000..0fff]",13,10
+    db "kernel sealed   native 256B   jpack non-exec",13,10,0
+
+surfaces:
+    db 27,"[38;5;141mSURFACES",27,"[0m",13,10
+    db "wire0 Duplex<Byte>",13,10
+    db "glyph0 Sink<Glyph>",13,10
+    db "arena Region<RW,4096>",13,10
+    db "code Region<RX,256>",13,10
+    db "facts Facts<RO>",13,10
+    db "kernel Sealed",13,10,0
+
+decks:
+    db 27,"[38;5;214mDECKS",27,"[0m",13,10
+    db "* zero LIVE phosphor",13,10
+    db "  lab READY ice",13,10
+    db "jack toggles the active composition",13,10,0
+
+jack_lab:
+    db 27,"[38;5;51mJACKED lab",27,"[0m",13,10
+    db "deck lab   view ice   surfaces unchanged",13,10,0
+jack_zero:
+    db 27,"[38;5;46mJACKED zero",27,"[0m",13,10
+    db "deck zero  view phosphor",13,10,0
+
+theme:
+    db 27,"[38;5;46mINT ",27,"[38;5;51mSPAN ",27,"[38;5;214mADDR "
+    db 27,"[38;5;201mCAP ",27,"[38;5;196mFAULT",27,"[0m",13,10,0
+
+clear:
+    db 27,"[2J",27,"[H",0
+
+memory_map:
+    db 27,"[38;5;214mARENA",27,"[0m",13,10
+    db "[POLICY] map ALLOW required=08 available=1F deck=zero",13,10
+    db "PRF1|POLICY|MAP|08|1F|ALLOW",13,10
+    db "000..0ff nucleus RX",13,10
+    db "100..14f line",13,10
+    db "180      deck state",13,10
+    db "200..    J-Pack DATA/NX",13,10,0
+
+denied:
+    db 27,"[38;5;196mDENIED",27,"[0m requires code.read deck lab",13,10
+    db "[POLICY] map DENIED required=08 available=17 deck=lab",13,10
+    db "PRF1|POLICY|MAP|08|17|DENY",13,10,0
+
+whatif_zero:
+    db "[MODEL] whatif zero map 08&1F=08 state.changed=no",13,10
+    db "PRF1|MODEL|MAP|08|1F|ALLOW",13,10,0
+whatif_lab:
+    db "[MODEL] whatif lab map 08&17=00 state.changed=no",13,10
+    db "PRF1|MODEL|MAP|08|17|DENY",13,10,0
+deck_diff:
+    db "[MODEL] diff zero lab 1F^17=08 -code.read",13,10
+    db "affected map,why map",13,10
+    db "PRF1|MODEL|DECKDIFF|1F|17|08",13,10,0
+cannot_out:
+    db "[DERIVED] cannot out CPL3>IOPL0 => #GP13",13,10
+    db "[EXTERNAL] hostile/out PASS",13,10
+    db "PRF1|EXTERNAL|OUT|3|0|GP13",13,10,0
+anatomy:
+    db "[ARTIFACT] anatomy native=253 reserve=3 CS.limit=FF",13,10
+    db "map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch",13,10
+    db "PRF1|ARTIFACT|JASH|253|3|FF",13,10,0
+
+; The first 21 bytes form the nucleus ABI: CPUID writes the vendor only into the
+; placeholder. The remaining lines explicitly declare their source of truth.
+identity:
+    db "[RUNTIME] cpu.vendor ","????????????",13,10
+    db "[RUNTIME] privilege cpl=3 cs=002b",13,10
+    db "[ARTIFACT] iopl=0 limits cs=000000ff ds=00000fff",13,10
+    db "[ARTIFACT] kernel basmos-sh.bin 512B SEALED",13,10
+    db "[ARTIFACT] nucleus jash.bin 256B RX; pack DATA/NX",13,10
+    db "[PROOF] shell.sha256 4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7",13,10
+    db "[PROOF] jash.sha256 5cceb51d8037f790943b4ddc5df42e70025188daa1ca1da23c3d931a398ba309",13,10
+    db "[PROOF] required BASM+QEMU+KVM+PTY+browser",13,10,0
+
+unknown:
+    db 27,"[38;5;196mNO WORD",27,"[0m  try help",13,10,0
+
+; Machine-readable manifests. Surface entry = kind, rights, base, extent.
+; Rights: R=1, W=2, X=4. Deck entry = id, state, theme, Surface mask.
+evidence_vm_manifest:
+    db "EVM1", 1, 4           ; version 1: EMIT, JACK, BYE, SELECT
+
+surface_manifest:
+    db "SFC1", 6
+    db 1, 3
+    dw 0, 1                 ; wire0: Duplex<Byte>
+    db 2, 2
+    dw 0, 1                 ; glyph0: Sink<Glyph>
+    db 3, 3
+    dw 0, 4096              ; arena: Region<RW,4096>
+    db 3, 5
+    dw 0, 256               ; code: Region<RX,256>
+    db 4, 1
+    dw 0, 1                 ; facts: Facts<RO>
+    db 5, 0
+    dw 0, 0                 ; kernel: Sealed
+
+deck_manifest:
+    db "DCK1", 2
+    db 0, 1, 0, 0x1F       ; zero: LIVE, phosphor
+    db 1, 2, 1, 0x17       ; lab: READY, ice, attenuated mask
+
+pack_end:

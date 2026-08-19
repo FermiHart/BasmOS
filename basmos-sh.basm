@@ -1,0 +1,263 @@
+; ============================================================================
+; basmos-sh.basm - CPL3 serial monitor in one 512-byte sector.
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+;
+; Kernel ring 0: PM32, PSE paging, IDT 0..0x80, PIC/PIT, TSS, and COM1 UART.
+; User ring 3: segment-isolated monitor; receives up to 256 bytes in the arena
+; and executes the module under a different user CS. Hardware and kernel memory
+; are accessible only through the int 0x80 ABI.
+;
+; Monitor: ? -> print 3; r + size byte + payload -> load; x -> run.
+; ABI: EAX=1 putc(BL), 2 getc()->AL, 3 exec, 4 return from module to monitor.
+; ============================================================================
+
+BITS 16
+org 0x7C00
+section .text
+
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    lgdt [gdt]
+    mov eax, cr0
+    inc ax
+    mov cr0, eax
+    jmp 0x08:pm
+
+BITS 32
+pm:
+    mov eax, 0x10
+    mov ds, ax
+    mov ss, ax
+
+    ; IDT built backward: syscall 0x80, faults 33..127, IRQ0 at vector 32, and
+    ; faults 0..31. The syscall is a DPL3 trap gate (0xEF), so IRQ0 can still
+    ; preempt a blocked call.
+    mov esp, 0x00908
+    xor edx, edx
+    mov dh, 0xEF
+    mov eax, syscall_handler + 0x80000
+    push edx
+    push eax
+    mov dh, 0x8E
+    mov eax, exception_handler + 0x80000
+    push 95
+    pop ecx
+.idt_hi:
+    push edx
+    push eax
+    db 0xE2, 0xFC
+    mov eax, timer_handler + 0x80000
+    push edx
+    push eax
+    mov eax, exception_handler + 0x80000
+    push 32
+    pop ecx
+.idt_lo:
+    push edx
+    push eax
+    db 0xE2, 0xFC
+    lidt [idtr]
+
+    ; One user-accessible PSE page covers 0..4 MiB. Write and execution isolation
+    ; comes from the user descriptors, whose bases and limits exclude the kernel.
+    mov eax, cr4
+    or al, 0x10
+    mov cr4, eax
+    mov eax, 0x01000
+    mov dword [eax], 0x87
+    mov cr3, eax
+    mov esp, eax
+    mov eax, cr0
+    db 0x0F, 0xBA, 0xE8, 31
+    mov cr0, eax
+
+    ; PIC at 0x20, IRQ0 only; PIT mode 3 at ~4.66 kHz. The high frequency makes
+    ; CPL3 preemption observable even during a submillisecond boot.
+    mov al, 0x11
+    out 0x20, al
+    mov al, 0x20
+    out 0x21, al
+    mov al, 4
+    out 0x21, al
+    mov al, 1
+    out 0x21, al
+    mov al, 0xFE
+    out 0x21, al
+    mov al, 0x36
+    out 0x43, al
+    xor al, al
+    out 0x40, al
+    inc al
+    out 0x40, al
+
+    ; Minimal TSS: one ring 0 stack and no I/O bitmap (all CPL3 I/O fails).
+    mov dword [0x00A04], 0x01000
+    mov word [0x00A08], 0x10
+    mov word [0x00A66], 0x68
+    mov ax, 0x30
+    ltr ax
+
+    ; COM1 115200 8N1. The divisor is 1; UART interrupts remain disabled.
+    mov dx, 0x03FB
+    mov al, 0x80
+    out dx, al
+    mov dl, 0xF8
+    mov al, 1
+    out dx, al
+    inc edx
+    xor al, al
+    out dx, al
+    mov dl, 0xFB
+    mov al, 3
+    out dx, al
+
+    ; First boundary: iretd loads RPL3 CS/SS, and the TSS then governs every
+    ; return to the kernel. DS/ES point only to the 0x8000..0x8FFF arena.
+    push 0x23
+    push 0x0FFC
+    push 0x202
+    push 0x1B
+    push 0
+    mov ax, 0x23
+    mov ds, ax
+    mov es, ax
+    xor eax, eax
+    mov fs, ax
+    mov gs, ax
+    iretd
+
+; ----------------------------------------------------------------- Ring 0
+exception_handler:
+    hlt
+    jmp exception_handler
+
+timer_handler:
+    pushad
+    mov al, 0x20
+    out 0x20, al
+    mov dx, 0x03F8
+    mov al, 0x2E
+    out dx, al              ; each dot proves IRQ0: CPL3 -> TSS -> ring 0 -> CPL3
+    popad
+    iretd
+
+syscall_handler:
+    cmp eax, 1
+    je uart_putc
+    cmp eax, 2
+    je uart_getc
+    cmp eax, 3
+    je enter_module
+    cmp eax, 4
+    je leave_module
+    iretd
+
+uart_putc:
+    mov dx, 0x03FD
+.wait:
+    in al, dx
+    test al, 0x20
+    jz .wait
+    mov al, bl
+    mov dl, 0xF8
+    out dx, al
+    iretd
+
+uart_getc:
+    mov dx, 0x03FD
+.wait:
+    in al, dx
+    test al, 1
+    jz .wait
+    mov dl, 0xF8
+    in al, dx
+    iretd
+
+enter_module:
+    mov dword [esp], 0
+    mov dword [esp + 4], 0x2B
+    iretd
+
+leave_module:
+    mov dword [esp], capsule.resume - capsule
+    mov dword [esp + 4], 0x1B
+    iretd
+
+; ----------------------------------------------------------------- Ring 3
+; CS base=capsule and limit=capsule_end-1. The monitor cannot access kernel code.
+capsule:
+    xor ebx, ebx
+    mov bl, 0x3E
+    mov eax, 1
+    int 0x80
+.loop:
+    mov eax, 2
+    int 0x80
+    mov bl, al
+    mov eax, 1
+    int 0x80
+    cmp ebx, 0x3F
+    je .status
+    cmp ebx, 0x72
+    je .recv
+    cmp ebx, 0x78
+    je .exec
+    jmp .loop
+.status:
+    mov bl, 0x33
+    mov eax, 1
+    int 0x80
+    jmp .loop
+.recv:
+    mov eax, 2
+    int 0x80
+    mov cl, al
+    xor edi, edi
+.rx:
+    mov eax, 2
+    int 0x80
+    mov [edi], al
+    inc edi
+    dec cl
+    jnz .rx
+    jmp .loop
+.exec:
+    mov eax, 3
+    int 0x80
+.resume:
+    mov bl, 0x3E            ; proves that control returned to the isolated monitor
+    mov eax, 1
+    int 0x80
+    jmp .loop
+capsule_end:
+
+; -------------------------------------------------------------------- Data
+idtr:
+    dw 129 * 8 - 1
+    dd 0x00500
+
+; The two bytes preceding gdt complete the null descriptor. It is followed by:
+; kernel code/data, monitor CS, arena DS/SS, module CS, and TSS.
+gdt:
+    dw gdt_end - gdt + 1
+    dd gdt - 2
+    dw 0xFFFF, 0x0000
+    db 0x00, 0x9A, 0xCF, 0x00
+    dw 0xFFFF, 0x0000
+    db 0x00, 0x92, 0xCF, 0x00
+    dw capsule_end - capsule - 1, capsule
+    db 0x00, 0xFA, 0x40, 0x00
+    dw 0x0FFF, 0x8000
+    db 0x00, 0xF2, 0x40, 0x00
+    dw 0x00FF, 0x8000
+    db 0x00, 0xFA, 0x40, 0x00
+    dw 0x0067, 0x0A00
+    db 0x00, 0x89, 0x00, 0x00
+gdt_end:
+
+payload_end:
+    times 510 - ($ - $$) db 0
+    dw 0xAA55

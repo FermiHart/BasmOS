@@ -1,0 +1,35 @@
+# SPDX-License-Identifier: BSD-3-Clause
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential nasm nodejs python3 qemu-system-x86
+
+      - name: Build exact artifacts
+        run: make all
+
+      - name: Verify committed hashes
+        run: sha256sum -c SHA256SUMS
+
+      - name: Verify QEMU and browser contracts
+        run: make verify-ci
+
+      - name: Check independent NASM assembly
+        run: make verify-nasm
+
+      - name: Ensure generated artifacts are current
+        run: make manifest && git diff --exit-code -- ARTIFACTS.manifest SHA256SUMS basmos.bin basmos-vm.bin basmos-sh.bin jash/jash.bin jash/jash-pack.bin

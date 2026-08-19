@@ -1,0 +1,241 @@
+; ============================================================================
+; basmos.basm - the ENTIRE OS in ONE 512-byte sector.
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+;
+; boot + Protected Mode 32 + paging PSE + IDT exception-safe + PIC/PIT +
+; 2 tasks + SPSC IPC (256-byte ring) + VGA, assembled entirely with BASM.
+; No INT 13h: the BIOS has already loaded this sector at 0x7C00.
+;
+; TWO PERSONALITIES, ONE SOURCE:
+;   metal (default):  basm -f bin -o basmos.bin basmos.basm
+;                     classic BIOS boot sector, 512 bytes with 0xAA55.
+;   contract (-D):    basm -f bin -DBEMU_CONTRACT -o basmos-vm.bin basmos.basm
+;                     "boot without boot": bemu-nano enters PM32+paging DIRECTLY
+;                     (the GDT, PD, CR3, CR0, CR4, and segments are machine state
+;                     written by the VMM). The guest omits the real-mode prologue,
+;                     GDT, paging, PIC, and PIT; only the product remains: the IDT,
+;                     preemptive scheduler, IPC, and tasks.
+;
+; Build: basm -f bin -o basmos.bin basmos.basm
+; Run:   make run   /   Verify: make verify
+;
+; Round H (hardening + code golf, no features removed):
+;   H1  ESP builds IDT entries 0..34 backward; faults become fail-stop
+;   H2  PIC remapped to 0x20 and PIT initialized; IRQ0 does not collide with #DF
+;   H3  CR4 preserved; no push uses the stack inherited from the BIOS
+;   H4  scheduler = xchg esp,[other_sp] + popad + iretd
+;   H5  IPC cursors reside in each endpoint's saved ECX
+;   H6  a full ring discards the new byte without corrupting empty/full state
+;   H7  tasks use hlt: 3/6/9 now proves physical preemption by the PIT
+;   H8  IDT/ring/page directory/stack in low RAM, away from the EBDA
+;   H9  yield=int 32, send=int 33, recv=int 34
+;
+; Memory map (all accesses remain within the 4 MB identity-mapped PDE):
+;   0x00500  IDT (35 gates)              0x00620  GDT (contract: written by VMM)
+;   0x00700  ring IPC (256 bytes)        0x01000  page directory + stack0
+;   0x07C00  image (this sector)         0xB8000  VGA text
+; ============================================================================
+
+%ifdef BEMU_CONTRACT
+BITS 32                     ; the VMM has already entered PM32 with paging enabled
+%else
+BITS 16
+%endif
+org 0x7C00
+section .text
+
+%ifndef BEMU_CONTRACT
+start:
+    cli
+    xor ax, ax
+    mov ds, ax              ; lgdt uses DS:offset in real mode
+    lgdt [gdt]
+    mov eax, cr0
+    inc ax                  ; PE=0 in real mode: inc ax is equivalent to or eax,1
+    mov cr0, eax
+    jmp 0x08:pm
+%endif
+
+; --------------------------------------------------------------- Protected PM
+BITS 32
+pm:
+%ifndef BEMU_CONTRACT
+    mov eax, 0x10           ; do not touch the stack before SS is known
+    mov ds, ax
+    mov ss, ax
+%endif
+
+    ; H1: build the IDT backward using push. The three service gates are pushed
+    ; first, followed by 32 identical exception gates.
+    ; CONSTRAINT: all four handlers remain within the same 256-byte page because
+    ; mov al below changes only offset_low[7:0]. make map verifies the layout.
+    mov esp, 0x00618        ; IDT_BASE + 35*8
+    xor edx, edx
+    mov dh, 0x8E            ; offset_hi=0, present interrupt gate, DPL0
+    mov eax, sys_recv + 0x80000
+    push edx
+    push eax                ; vector 34: recv
+    mov al, sys_send
+    push edx
+    push eax                ; vector 33: send
+    mov al, timer_handler
+    push edx
+    push eax                ; vector 32: IRQ0 / yield
+    mov al, exception_handler
+    push 32
+    pop ecx
+.idt_fill:
+    push edx
+    push eax
+    db 0xE2, 0xFC           ; loop -4 (BASM does not yet support loop)
+    lidt [idtr]
+
+%ifndef BEMU_CONTRACT
+    mov eax, cr4            ; enable PSE without clearing firmware state
+    or al, 0x10
+    mov cr4, eax
+
+    ; One identity-mapped PSE PDE covers the first 4 MB.
+    mov eax, 0x01000
+    mov dword [eax], 0x83   ; present | rw | PS
+    mov cr3, eax
+    mov esp, eax            ; stack0 grows below the page directory
+    mov eax, cr0
+    db 0x0F, 0xBA, 0xE8, 31 ; bts eax,31: CR0.PG (BASM does not yet support bts)
+    mov cr0, eax
+
+    ; Reinitialize the master PIC at 0x20 and leave only IRQ0 enabled.
+    mov al, 0x11
+    out 0x20, al
+    mov al, 0x20
+    out 0x21, al
+    mov al, 4
+    out 0x21, al
+    mov al, 1
+    out 0x21, al
+    mov al, 0xFE
+    out 0x21, al
+
+    ; PIT channel 0, mode 3, divisor 65536 (~18.2 Hz).
+    mov al, 0x36
+    out 0x43, al
+    xor al, al
+    out 0x40, al
+    out 0x40, al
+%else
+    ; bemu-nano contract: GDT/PD/CR0/CR3/CR4/segments are already machine state
+    ; written by the VMM. There is no PIC or PIT: time advances through hlt.
+    mov esp, 0x1000         ; stack0 below the machine's page directory
+%endif
+
+    ; The IDT loop left ECX=0. ECX=0x700 initializes both cursors: task0 retains
+    ; the value; task1 receives it in the ECX slot of the first popad.
+    mov ch, 7
+    mov [t1frame - 8], ecx
+    jmp task0
+
+; task1's initial popad consumes 32 bytes of dead initialization data above;
+; iretd consumes this frame. Its stack then cycles within the same 44-byte range.
+t1frame:
+    dd task1
+    dd 8
+    dd 0x202                ; IF=1
+
+; ---------------------------------------------------------------------- Tasks
+; The display is the proof: 3 (displayed by task0), 6 (displayed by task1), and 9
+; (the byte appears only because it TRAVELED through the ring; task0 displays 3
+; but sends 9).
+task0:
+    sti
+    mov ax, 0x0F33          ; white '3'
+    mov [0xB8000], ax
+    mov al, 0x39            ; AL='9': the IPC byte, displayed in green by task1
+.loop:
+    int 33                  ; send(AL)
+    hlt                     ; only the PIT wakes and preempts the task
+    jmp .loop
+
+task1:
+    mov word [0xB8002], 0x0F36 ; white '6'
+.loop:
+    int 34                  ; recv() -> AL, zero if empty
+    test al, al
+    jz .empty
+    mov ah, 0x0A
+    mov [0xB8004], ax       ; green '9' proves end-to-end IPC
+.empty:
+    hlt
+    jmp .loop
+
+; --------------------------------------------------------- Interrupt handlers
+exception_handler:
+    hlt                     ; the interrupt gate has already cleared IF
+    jmp exception_handler   ; NMI/SMI only returns execution to fail-stop
+
+timer_handler:              ; IRQ0 or voluntary yield via int 32
+    pushad
+%ifndef BEMU_CONTRACT
+    mov al, 0x20
+    out 0x20, al            ; the yield's spurious EOI is a no-op with an empty ISR
+%endif
+                            ; contract: there is no PIC; the tick originates in the VMM
+
+do_switch:
+    db 0x87, 0x25           ; xchg esp,[other_sp] (BASM accepts only reg,reg)
+    dd other_sp
+    popad
+    iretd
+
+sys_send:                   ; AL=byte; ECX=producer's private cursor
+    mov edx, ecx
+    inc dl                  ; next tail, modulo 256
+    mov ebx, [other_sp]
+    cmp edx, [ebx + 24]     ; consumer's saved ECX = head
+    je .out                 ; full: discard the new byte, leaving the queue intact
+    mov [ecx], al
+    mov ecx, edx
+.out:
+    iretd
+
+sys_recv:                   ; ECX=consumer's private cursor
+    xor al, al
+    mov edx, [other_sp]
+    cmp ecx, [edx + 24]     ; producer's saved ECX = tail
+    je .out
+    mov al, [ecx]
+    inc cl
+.out:
+    iretd
+
+; ----------------------------------------------------------------------- Data
+; Vectors 0..31 are fail-stop; 32=timer/yield, 33=send, 34=recv. An out-of-range
+; vector raises #GP, which has a valid gate, rather than escalating to #DF.
+idtr:
+    dw 35 * 8 - 1
+    dd 0x00500
+
+; The GDTR occupies six bytes of the null descriptor. Base-2 makes selector 0x08
+; point to the first real descriptor without consuming the null's first two bytes.
+; Under the contract, the VMM writes the entire GDT at 0x620 (machine state).
+%ifndef BEMU_CONTRACT
+gdt:
+    dw gdt_end - gdt + 1
+    dd gdt - 2
+    dw 0xFFFF, 0x0000
+    db 0x00, 0x9A, 0xCF, 0x00
+    dw 0xFFFF, 0x0000
+    db 0x00, 0x92, 0xCF, 0x00
+gdt_end:
+%endif
+
+; While one task runs, this cell contains the other's saved ESP. IPC reads that
+; frame's ECX at offset +24, as defined by the pushad layout.
+other_sp: dd t1frame - 32
+
+payload_end:
+%ifndef BEMU_CONTRACT
+    times 510 - ($ - $$) db 0
+    dw 0xAA55
+%endif
+; contract: neither padding nor 0xAA55; the VMM is not a BIOS, and the file is the payload.
