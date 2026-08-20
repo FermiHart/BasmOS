@@ -8,7 +8,7 @@ BasmOS is designed and authored by:
 <contact@fermihart.com><br>
 <https://nanokernel.org>
 
-The spaced form and infinity symbol above are the canonical public spelling of
+The spaced form and `∞` above are the canonical public spelling of
 the author name.
 
 Contributors are listed in the Git history. Contributions are accepted under

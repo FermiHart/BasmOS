@@ -22,19 +22,29 @@ jobs:
       - name: Build exact artifacts
         run: make all
 
+      - name: Verify executable Metatron source art
+        run: make verify-sacred
+
       - name: Verify committed hashes
-        run: sha256sum -c SHA256SUMS
+        run: |
+          sha256sum -c SHA256SUMS
+          sha256sum -c evidence/jash-session.manifest
 
       - name: Verify QEMU and browser contracts
         run: make verify-ci
 
-      - name: Verify KVM contracts (domains and both personalities)
+      - name: Require KVM
         run: |
-          if [ -e /dev/kvm ] && [ -w /dev/kvm ]; then
-            make verify-domains verify-bemu
-          else
-            echo "SKIP: /dev/kvm unavailable; the domain and KVM gates did not run"
-          fi
+          test -c /dev/kvm
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+
+      - name: Verify KVM contracts (domains, IPC and both personalities)
+        run: |
+          make verify-domains verify-ipc verify-bemu verify-shell-bemu \
+            verify-jash-bemu verify-jash-capture
+          python3 verify_jash_fuzz.py bemu/bemu-nano basmos-sh.bin \
+            jash/jash.bin jash/jash-pack.bin
 
       - name: Check independent NASM assembly
         run: make verify-nasm

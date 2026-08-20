@@ -25,6 +25,8 @@ Then execute the release gates:
 ```sh
 make clean-room-proof
 make verify-nasm
+make verify-sacred
+make verify-jash-capture
 git add --dry-run .
 git status --short --ignored
 ```
@@ -88,18 +90,24 @@ Do not use `git add -f` on ignored files.
 
 ## 4. Enable GitHub Pages
 
-The pinned `.github/workflows/pages.yml` workflow publishes the static site.
-Enable workflow-based Pages and run it after the first push:
+The committed `CNAME` makes `nanokernel.org` the custom domain on the first
+deploy, so point and verify DNS before enabling Pages. The pinned
+`.github/workflows/pages.yml` workflow publishes automatically after CI succeeds
+for the current `main` revision. After the repository's first push, enable
+workflow-based Pages and rerun that verified push's CI attempt:
 
 ```sh
 gh api --method POST "repos/$OWNER/$REPO/pages" -f build_type=workflow
-gh workflow run Pages --repo "$OWNER/$REPO"
-gh run watch --repo "$OWNER/$REPO"
+RUN_ID=$(gh run list --repo "$OWNER/$REPO" --workflow CI --branch main \
+  --event push --limit 1 --json databaseId --jq '.[0].databaseId')
+gh run watch "$RUN_ID" --repo "$OWNER/$REPO"
+gh run rerun "$RUN_ID" --repo "$OWNER/$REPO"
+gh run watch "$RUN_ID" --repo "$OWNER/$REPO"
 ```
 
-The default URL is `https://OWNER.github.io/REPO/`. Configure the
-`nanokernel.org` custom domain only after its DNS records point to GitHub Pages;
-domain and DNS ownership are deployment concerns outside this repository.
+The default URL is `https://OWNER.github.io/REPO/`; the committed `CNAME`
+selects `nanokernel.org`. Domain and DNS ownership remain deployment concerns
+outside this repository.
 
 ## 5. Tag And Publish A Release
 

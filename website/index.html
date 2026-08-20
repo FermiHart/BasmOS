@@ -8,13 +8,23 @@
 <title>Nanokernel.org — nanokernels: proof, not promise</title>
 <meta name="description" content="Nanokernel.org builds nanokernels: operating systems small enough to read, honest enough to prove. First project: BasmOS — a complete OS in one 512-byte boot sector, bootable in your browser.">
 <meta name="author" content="F E R M I ∞ H A R T — contact@fermihart.com">
+<link rel="canonical" href="https://nanokernel.org/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nanokernel.org/">
 <meta property="og:title" content="Nanokernel.org — nanokernels: proof, not promise">
 <meta property="og:description" content="BasmOS: a complete x86-32 nanokernel in one 512-byte boot sector. The site contains the product — inspect every byte, boot it in your browser.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%23060806'/%3E%3Ctext x='8' y='12' font-family='monospace' font-size='10' fill='%2346ff7d' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
+<meta property="og:image" content="https://nanokernel.org/jash-live.svg">
+<meta property="og:image:alt" content="Verified JASH KVM transcript">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Nanokernel.org — nanokernels: proof, not promise">
+<meta name="twitter:description" content="Inspect and boot BasmOS, a complete 512-byte IA-32 nanokernel.">
+<meta name="twitter:image" content="https://nanokernel.org/jash-live.svg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2016%2016%22%3E%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%23060806%22%2F%3E%3Cpath%20d%3D%22M4%2012V4h2l4%205V4h2v8h-2L6%207v5z%22%20fill%3D%22%2346ff7d%22%2F%3E%3C%2Fsvg%3E">
+<script>document.documentElement.classList.add('js')</script>
 <style>
 :root{
   --bg:#060806; --panel:#0b0f0b; --panel2:#101510; --line:#1d271d;
-  --fg:#c8e6c8; --dim:#6e8a6e; --green:#46ff7d; --amber:#ffb020;
+  --fg:#c8e6c8; --dim:#91ad91; --green:#46ff7d; --amber:#ffb020;
   --mono:ui-monospace,'SF Mono',Menlo,Consolas,'Liberation Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -27,32 +37,44 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9001;
   background:radial-gradient(ellipse at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%)}
 ::selection{background:var(--green);color:#031}
 a{color:var(--green)}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.skip{position:fixed;left:1rem;top:.6rem;z-index:10000;padding:.45rem .7rem;background:var(--green);color:#02120a;
+  transform:translateY(-180%);transition:transform .12s;text-decoration:none;font-weight:700}
+.skip:focus{transform:translateY(0)}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+  overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
 h2{color:var(--green);font-size:1.25rem;letter-spacing:.06em;margin-bottom:.35rem;text-shadow:0 0 12px rgba(70,255,125,.35)}
 h2::before{content:"▚ ";color:var(--dim)}
 .sub{color:var(--dim);margin-bottom:1.4rem}
 section{max-width:1060px;margin:0 auto;padding:3.2rem 1.2rem 1rem}
+section[id]{scroll-margin-top:4.25rem}
 code,pre{font-family:var(--mono)}
 kbd{border:1px solid var(--line);border-bottom-width:3px;border-radius:4px;padding:0 .4em;background:var(--panel2)}
 main[hidden]{display:none}
 
 /* POST overlay */
-#post{position:fixed;inset:0;z-index:9500;background:#020302;color:#b8ffb8;padding:6vh 8vw;
+#post{display:none;position:fixed;inset:0;z-index:9500;background:#020302;color:#b8ffb8;padding:6vh 8vw;
   font-size:clamp(13px,1.9vw,17px);cursor:pointer;transition:opacity .45s ease;white-space:pre-wrap}
+.js #post{display:block}
+#post[hidden]{display:none}
 #post.off{opacity:0;pointer-events:none}
 #post .cur{display:inline-block;width:.6em;height:1.1em;background:#b8ffb8;vertical-align:-.15em;animation:blink 1s steps(1) infinite}
-#post small{position:absolute;bottom:4vh;left:8vw;color:#4d6b4d}
+#post small{position:absolute;bottom:4vh;left:8vw;color:var(--dim)}
 @keyframes blink{50%{opacity:0}}
 
 /* topbar */
-nav{position:sticky;top:0;z-index:800;display:flex;gap:1rem;align-items:center;padding:.55rem 1.2rem;
-  background:rgba(6,8,6,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(4px);font-size:.85rem;flex-wrap:wrap}
+nav{position:sticky;top:0;z-index:800;display:flex;gap:.7rem;align-items:center;padding:.55rem 1.2rem;
+  background:rgba(6,8,6,.96);border-bottom:1px solid var(--line);backdrop-filter:blur(4px);font-size:.85rem;
+  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin}
 nav .brand{color:var(--green);font-weight:700;letter-spacing:.08em;text-decoration:none}
-nav a{color:var(--dim);text-decoration:none;padding:.1rem .4rem}
+nav a{color:var(--dim);text-decoration:none;padding:.1rem .35rem;white-space:nowrap}
 nav a:hover,nav a.brand:hover{color:var(--green)}
 nav .spacer{flex:1}
 nav .badge{color:var(--amber);border:1px solid #3a2e10;padding:.05rem .5rem;border-radius:3px;font-size:.75rem}
-.bnav{display:none}
-body[data-route="basmos"] .bnav{display:contents}
+.bnav{display:none;align-items:center;gap:.35rem;white-space:nowrap}
+body[data-route="basmos"] .bnav{display:flex}
+@media(max-width:700px){nav{gap:.25rem;padding:.42rem .55rem;font-size:.76rem}nav a{padding:.12rem .28rem}
+  nav .spacer{display:none}.bnav{gap:.08rem}.bnav .badge{padding:.04rem .3rem}}
 
 /* hero (shared) */
 header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:center}
@@ -107,7 +129,8 @@ header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:cent
 .paper .abstract{border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:1rem 1.2rem;
   font-size:.85rem;margin:1.2rem 0;color:var(--fg)}
 .paper .abstract b{color:var(--green)}
-.paper h3{color:var(--green);margin:1.8rem 0 .5rem;font-size:1rem}
+.paper h2{color:var(--green);margin:1.8rem 0 .5rem;font-size:1rem;letter-spacing:0;text-shadow:none}
+.paper h2::before{content:none}
 .paper p{margin:.55rem 0;font-size:.88rem}
 .paper table{border-collapse:collapse;width:100%;font-size:.78rem;margin:.8rem 0}
 .paper th,.paper td{border:1px solid var(--line);padding:.28rem .55rem;text-align:left;color:var(--fg)}
@@ -145,9 +168,10 @@ header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:cent
 #bytegrid{display:grid;grid-template-columns:auto repeat(32,minmax(0,1fr));gap:2px;background:var(--panel);
   border:1px solid var(--line);border-radius:6px;padding:.7rem;font-size:.62rem}
 @media(max-width:700px){#bytegrid{grid-template-columns:auto repeat(16,minmax(0,1fr))}}
-#bytegrid .addr{color:#41553f;padding-right:.5rem;align-self:center;font-size:.6rem}
-#bytegrid .b{text-align:center;padding:.18rem 0;border-radius:2px;cursor:crosshair;color:#031007;font-weight:700;transition:transform .06s}
-#bytegrid .b:hover{transform:scale(1.5);outline:1px solid #fff;z-index:5;position:relative}
+#bytegrid .addr{color:#91a991;padding-right:.5rem;align-self:center;font-size:.6rem}
+#bytegrid .b{font:inherit;text-align:center;padding:.18rem 0;border:0;border-radius:2px;cursor:pointer;color:#031007;
+  font-weight:700;transition:transform .06s;min-width:0}
+#bytegrid .b:hover,#bytegrid .b:focus-visible{transform:scale(1.5);outline:1px solid #fff;z-index:5;position:relative}
 #bytegrid.filtered .b:not(.hit){opacity:.13}
 .inspector{position:sticky;top:3.4rem;border:1px solid var(--line);background:var(--panel);border-radius:6px;padding:1rem;min-height:12rem}
 .inspector .iaddr{color:var(--amber);font-size:1.05rem}
@@ -155,7 +179,7 @@ header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:cent
 .inspector .idesc{color:var(--fg);font-size:.82rem}
 .inspector .ibytes{color:var(--dim);font-size:.75rem;margin-top:.6rem}
 .legend{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.9rem}
-.chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:var(--panel2);
+.chip{display:inline-flex;align-items:center;gap:.35rem;border:1px solid var(--line);background:var(--panel2);font-family:var(--mono);
   border-radius:3px;padding:.12rem .5rem;font-size:.72rem;cursor:pointer;color:var(--fg)}
 .chip:hover,.chip.pin{border-color:var(--green)}
 .chip i{width:.65rem;height:.65rem;border-radius:2px;display:inline-block}
@@ -171,11 +195,10 @@ header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:cent
 .feat .n{float:right;color:var(--amber);font-size:1.05rem;font-weight:700}
 
 /* memory map */
-.mem{position:relative;height:7.5rem;border:1px solid var(--line);background:var(--panel);border-radius:6px;margin-top:1rem}
-.mem .seg{position:absolute;top:1.1rem;height:2.3rem;border-radius:3px;font-size:.62rem;color:#031007;font-weight:700;
-  display:flex;align-items:center;justify-content:center;overflow:visible;white-space:nowrap}
-.mem .tick{position:absolute;top:3.9rem;color:var(--dim);font-size:.62rem;transform:translateX(-50%);text-align:center}
-.mem .tick::before{content:"";display:block;width:1px;height:.5rem;background:var(--line);margin:0 auto .15rem}
+.mem{width:100%;border-collapse:collapse;background:var(--panel);margin-top:1rem;font-size:.8rem}
+.mem th,.mem td{border:1px solid var(--line);padding:.5rem .65rem;text-align:left;vertical-align:top}
+.mem th{color:var(--green)}.mem td:first-child,.mem td:nth-child(2){white-space:nowrap;color:var(--amber)}
+.mem code{color:var(--fg)}
 .memnote{color:var(--dim);font-size:.8rem;margin-top:.8rem}
 .memnote b{color:#ff5fd0}
 
@@ -192,7 +215,7 @@ header{max-width:1060px;margin:0 auto;padding:4.5rem 1.2rem 2rem;text-align:cent
 .cmpnote{color:var(--dim);font-size:.74rem;margin-top:.6rem}
 
 pre.term{background:#020402;border:1px solid var(--line);border-radius:6px;padding:1.1rem 1.2rem;overflow-x:auto;font-size:.83rem;line-height:1.7}
-pre.term .p{color:var(--dim)} pre.term .c{color:#4d6b4d} pre.term .k{color:var(--green)}
+pre.term .p{color:var(--dim)} pre.term .c{color:#86a086} pre.term .k{color:var(--green)}
 
 /* JASH artifact captures */
 .shellshots{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1rem;margin:1.2rem 0}
@@ -202,10 +225,10 @@ pre.term .p{color:var(--dim)} pre.term .c{color:#4d6b4d} pre.term .k{color:var(-
 .shellshot::after{content:"";position:absolute;inset:2.15rem 0 2rem;pointer-events:none;z-index:2;
   background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(70,255,125,.025) 3px 4px)}
 .shotbar{height:2.15rem;display:flex;align-items:center;gap:.38rem;padding:0 .7rem;border-bottom:1px solid #1b251b;
-  background:linear-gradient(180deg,#111711,#090d09);color:#607660;font-size:.65rem;letter-spacing:.08em}
+  background:linear-gradient(180deg,#111711,#090d09);color:#91ad91;font-size:.65rem;letter-spacing:.08em}
 .shotbar .lamp{width:.48rem;height:.48rem;border-radius:50%;background:#293329}
 .shotbar .lamp.live{background:var(--green);box-shadow:0 0 8px rgba(70,255,125,.7)}
-.shotbar b{margin-left:.35rem;color:#8ca88c;font-weight:400}.shotbar em{margin-left:auto;color:#4b614b;font-style:normal}
+.shotbar b{margin-left:.35rem;color:#a9c3a9;font-weight:400}.shotbar em{margin-left:auto;color:#91ad91;font-style:normal}
 .shotbody{position:relative;z-index:1;margin:0;padding:1rem 1.05rem;min-height:16.5rem;overflow:auto;
   background:radial-gradient(circle at 15% 5%,rgba(70,255,125,.055),transparent 42%);color:#abc4ab;
   font:clamp(.66rem,1.1vw,.76rem)/1.55 var(--mono);white-space:pre}
@@ -214,18 +237,25 @@ pre.term .p{color:var(--dim)} pre.term .c{color:#4d6b4d} pre.term .k{color:var(-
 .shotbody .artifact{color:#ffe45c}.shotbody .external{color:#ff9432}.shotbody .deny{color:#ff6262}
 .shotbody .proof{color:#718871}.shotbody .hash{color:#8ca88c}
 .shotcap{position:relative;z-index:3;display:flex;justify-content:space-between;gap:.8rem;padding:.48rem .75rem;
-  border-top:1px solid #172017;background:#070a07;color:#4f654f;font-size:.63rem;letter-spacing:.05em}
-.shotcap b{color:#789578;font-weight:400}
+  border-top:1px solid #172017;background:#070a07;color:#91ad91;font-size:.63rem;letter-spacing:.05em}
+.shotcap b{color:#aac2aa;font-weight:400}
+.jash-evidence{margin:1.2rem 0}.jash-evidence img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:7px}
+.jash-evidence figcaption{margin-top:.55rem;color:var(--dim);font-size:.78rem}
 @media(max-width:800px){.shellshot:nth-child(n){grid-column:1/-1}.shotbody{min-height:0;font-size:.68rem}}
 
 footer{max-width:1060px;margin:3rem auto 0;padding:2rem 1.2rem 3rem;border-top:1px solid var(--line);color:var(--dim);font-size:.8rem;text-align:center}
-footer .joke{margin-top:.8rem;color:#41553f}
-@media(prefers-reduced-motion:reduce){#post{display:none}.b,html{transition:none!important;scroll-behavior:auto}}
+footer .joke{margin-top:.8rem;color:#91ad91}
+@media(max-width:700px){#post{display:none!important}}
+@media(prefers-reduced-motion:reduce){#post{display:none!important}*,*::before,*::after{animation-duration:.01ms!important;
+  animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
+<noscript><style>#post{display:none!important}</style></noscript>
 </head>
 <body>
 
-<div id="post" title="click to skip"><span id="postout"></span><span class="cur"></span><small>press any key to skip</small></div>
+<a class="skip" href="#pg-home">Skip to content</a>
+<div id="route-status" class="sr-only" role="status" aria-live="polite"></div>
+<div id="post" aria-hidden="true" title="click to skip"><span id="postout"></span><span class="cur"></span><small>press any key to skip</small></div>
 
 <nav>
   <a class="brand" href="#/">NANOKERNEL.ORG</a>
@@ -233,22 +263,22 @@ footer .joke{margin-top:.8rem;color:#41553f}
   <a href="#/paper">NK-TR-001</a>
   <span class="spacer"></span>
   <span class="bnav">
-    <a href="#proof">proof</a>
-    <a href="#anatomy">anatomy</a>
-    <a href="#engineering">engineering</a>
-    <a href="#ring3">ring 3</a>
-    <a href="#jash">JASH</a>
-    <a href="#bootless">232 B</a>
-    <a href="#determinism">determinism</a>
-    <a href="#record">record</a>
-    <a href="#memory">memory</a>
-    <a href="#run">run</a>
+    <a href="#/basmos/proof">proof</a>
+    <a href="#/basmos/anatomy">anatomy</a>
+    <a href="#/basmos/engineering">engineering</a>
+    <a href="#/basmos/ring3">ring 3</a>
+    <a href="#/basmos/jash">JASH</a>
+    <a href="#/basmos/bootless">232 B</a>
+    <a href="#/basmos/determinism">determinism</a>
+    <a href="#/basmos/record">record</a>
+    <a href="#/basmos/memory">memory</a>
+    <a href="#/basmos/run">run</a>
     <span class="badge">QEMU · JS · KVM VERIFIED</span>
   </span>
 </nav>
 
 <!-- ═══════════════ HOME ═══════════════ -->
-<main id="pg-home">
+<main id="pg-home" tabindex="-1">
   <header>
     <div class="h-eyebrow">OPERATING SYSTEMS · SMALL ENOUGH TO READ · HONEST ENOUGH TO PROVE</div>
     <h1 class="hubtitle" style="margin-top:.6rem">NANOKERNEL<span>.ORG</span></h1>
@@ -313,10 +343,10 @@ footer .joke{margin-top:.8rem;color:#41553f}
 </main>
 
 <!-- ═══════════════ BASMOS ═══════════════ -->
-<main id="pg-basmos" hidden>
+<main id="pg-basmos" tabindex="-1" hidden>
   <header>
     <div class="h-eyebrow">A NANOKERNEL · ONE SECTOR · ONE BINARY</div>
-    <div class="h-512">512<small>BYTES</small></div>
+    <h1 class="h-512">512<small>BYTES</small></h1>
     <p class="h-tag">
       <b>BasmOS</b> is a <b>nanokernel</b>: a complete x86-32 operating system — boot, protected
       mode, paging, preemptive scheduling, two tasks and IPC — living in a single boot sector.
@@ -331,9 +361,9 @@ footer .joke{margin-top:.8rem;color:#41553f}
       <div class="stat"><b>256</b><span>IPC RING (B)</span></div>
     </div>
     <div class="ctas">
-      <button class="cta" id="btnboot">▶ BOOT IT IN YOUR BROWSER</button>
-      <button class="cta alt" id="btndl">⬇ basmos.bin (512 B)</button>
-      <button class="cta alt" id="btnhex">⧉ copy hex</button>
+      <button type="button" class="cta" id="btnboot">▶ BOOT IT IN YOUR BROWSER</button>
+      <button type="button" class="cta alt" id="btndl">⬇ basmos.bin (512 B)</button>
+      <button type="button" class="cta alt" id="btnhex">⧉ copy hex</button>
     </div>
     <p class="weightjoke" id="joke">the entire binary is embedded in this page.</p>
   </header>
@@ -351,24 +381,24 @@ footer .joke{margin-top:.8rem;color:#41553f}
     </p>
     <div id="emu">
       <pre id="vscreen"></pre>
-      <div id="emustatus">cold. press BOOT.</div>
-      <div id="telemetry"></div>
-      <div class="emubtns"><button id="btnreboot">⟲ reboot</button></div>
+      <div id="emustatus" role="status" aria-live="polite">cold. press BOOT.</div>
+      <div id="telemetry" aria-label="Emulator telemetry"></div>
+      <div class="emubtns"><button type="button" id="btnreboot">⟲ reboot</button></div>
     </div>
   </section>
 
   <section id="anatomy">
     <h2>ANATOMY — 512 BYTES, EACH ONE NAMED</h2>
-    <p class="sub">this is not an illustration: these are the <em>actual</em> bytes of <code>basmos.bin</code>, colored by symbol. hover any byte.</p>
+    <p class="sub">this is not an illustration: these are the <em>actual</em> bytes of <code>basmos.bin</code>, colored by symbol. Hover, focus or tap any byte.</p>
     <div class="anat">
       <div>
-        <div id="bytegrid" role="img" aria-label="Interactive grid of the 512 real bytes of the binary, colored by symbol"></div>
-        <div class="legend" id="legend"></div>
+        <div id="bytegrid" aria-label="Interactive grid of the 512 real bytes of the binary, colored by symbol"></div>
+        <div class="legend" id="legend" aria-label="Byte region filters"></div>
       </div>
       <aside class="inspector" id="inspector">
         <div class="iaddr" id="iaddr">0x7C00 … 0x7DFF</div>
         <div class="iname" id="iname">the whole sector</div>
-        <div class="idesc" id="idesc">399 bytes of payload, 111 bytes of headroom, and the 0xAA55 signature. Hover a byte to see which symbol owns it and what it does. The domain gate separately requires cross-domain data and code accesses to enter #GP13 — each task owns its data window <em>and</em> its fetch window.</div>
+        <div class="idesc" id="idesc">399 bytes of payload, 111 bytes of headroom, and the 0xAA55 signature. Inspect a byte to see which symbol owns it and what it does. The domain gate separately requires cross-domain data and code accesses to enter #GP13 — each task owns its data window <em>and</em> its fetch window.</div>
         <div class="ibytes" id="ibytes"></div>
       </aside>
     </div>
@@ -423,73 +453,30 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
 
   <section id="jash">
     <h2>JASH — THE SHELL THAT KNOWS WHAT IT KNOWS</h2>
-    <p class="sub">No Python, no TTY, no code hidden in the host. A 256-byte IA-32 nucleus at CPL3 distinguishes runtime measurement, live policy, finite models, artifact facts and external proof.</p>
+    <p class="sub">The current artifact is a 255-byte IA-32 nucleus plus one reserved byte, executing at CPL3 with a 3,584-byte data Pack. It offers 14 exact commands and labels shipped facts separately from the runtime CPUID vendor measurement.</p>
     <div class="feats">
-      <div class="feat"><span class="n">253+3</span><h3 style="color:#15ff5c">A COMPLETE NATIVE NUCLEUS</h3>
-        <p>253 bytes implement CPUID identity, line editing, exact dispatch, immutable capability cells and a total Evidence VM. Three bytes remain; hardware still enforces the 256-byte CS limit.</p></div>
-      <div class="feat"><span class="n">3055 B</span><h3 style="color:#38d9ff">COMPUTATION LIVES IN NX DATA</h3>
-        <p>The J-Pack at DS:0x200 carries ANSI, 27 words, 15 cells, PRF1 and EVM1 manifests. It is readable data outside module CS: rich semantics without native Pack execution.</p></div>
+      <div class="feat"><span class="n">255+1</span><h3 style="color:#15ff5c">A COMPLETE NATIVE NUCLEUS</h3>
+        <p>255 native bytes implement Pack loading, CPUID vendor measurement, line editing, exact table dispatch, output, Deck selection and the <code>int 0x80</code> console boundary. One byte is reserved; CS limits execution to the 256-byte nucleus.</p></div>
+      <div class="feat"><span class="n">3584 B</span><h3 style="color:#38d9ff">PRESENTATION LIVES OUTSIDE CS</h3>
+        <p>The J-Pack at DS:0x200 carries text, a 15-cell dispatch vocabulary and EVM1/SFC1/DCK1/SIG1 manifests. It is outside module CS and is not fetched as code, but it remains writable through the arena DS; this is not an immutable or hardware-NX claim.</p></div>
       <div class="feat"><span class="n">SFC1</span><h3 style="color:#cf7dff">TYPED SURFACES, NOT TTY</h3>
-        <p>Each Surface is a binary <code>(kind, rights, base, extent)</code> descriptor. JASH publishes <code>wire0:Duplex&lt;Byte&gt;</code>, <code>glyph0:Sink&lt;Glyph&gt;</code>, arena/code regions, facts and <code>kernel:Sealed</code>.</p></div>
+        <p>The six descriptive Surface entries publish <code>wire0:Duplex&lt;Byte&gt;</code>, <code>glyph0:TextOverWire</code>, arena and code views, convention-stable facts and a kernel outside user segments. The facts storage is physically writable, as the live transcript states.</p></div>
       <div class="feat"><span class="n">DCK1</span><h3 style="color:#ffb020">DECKS ARE LIVE COMPOSITIONS</h3>
-        <p><code>zero</code> is LIVE/phosphor; <code>lab</code> removes <code>code.read</code>. Immutable <code>cap_map=SELECT</code> chooses one fixed output pair without writing policy or calling the kernel.</p></div>
-      <div class="feat"><span class="n">27→15</span><h3 style="color:#ffe45c">WORDS BECOME CAPABILITIES</h3>
-        <p>27 exact dispatch words converge on 15 immutable cells. <code>map</code>/<code>why map</code> share policy; <code>uname -a</code>/<code>probe</code> share identity. Aliases cannot silently gain different authority.</p></div>
-      <div class="feat"><span class="n">×2</span><h3 style="color:#ff5fd0">THE HOST DOES NOT GET TO PRETEND</h3>
-        <p>QEMU permits only CPUID evidence bytes to differ in physical Pack readback. Native proofctl bounds every cell and validates EVM1/PRF1. Python remains external verification only.</p></div>
+        <p><code>jack</code> toggles one real UI composition bit. In <code>lab</code>, <code>map</code> selects a masked response; in <code>zero</code>, it selects the visible map. The bytes and hardware permissions do not change, so this is view composition, not authority attenuation.</p></div>
+      <div class="feat"><span class="n">14</span><h3 style="color:#ffe45c">EXACT COMMANDS</h3>
+        <p><code>map</code>, <code>help</code>, <code>uname -a</code>, <code>sigil</code>, <code>layout</code>, <code>surfaces</code>, <code>decks</code>, <code>attest</code>, <code>palette</code>, <code>anatomy</code>, <code>clear</code>, <code>limits</code>, <code>jack</code> and <code>bye</code>. There are no aliases or canned counterfactual commands.</p></div>
+      <div class="feat"><span class="n">SIG1</span><h3 style="color:#ff5fd0">ARTIFACT-BOUND SIGIL</h3>
+        <p><code>NK-SIGIL/1</code> encodes the first 16 bytes of <code>SHA256(basmos-sh.bin || jash.bin)</code>; each braille dot represents one bit. The full root is <code>123d1b5b871ace1549494355dba65267a28d1ba53d6fa860e42f317c894f3da0</code>.</p></div>
     </div>
-    <div class="shellshots" id="jash-screens" aria-label="Real JASH command captures">
-      <figure class="shellshot">
-        <div class="shotbar"><span class="lamp live"></span><span class="lamp"></span><span class="lamp"></span><b>CAPTURE 01 · IDENTITY</b><em>KVM / CPL3</em></div>
-        <pre class="shotbody"><span class="cmd">jash@basmos.org:/# uname -a</span>
-<span class="runtime">[RUNTIME] cpu.vendor GenuineIntel</span>
-<span class="runtime">[RUNTIME] privilege cpl=3 cs=002b</span>
-<span class="artifact">[ARTIFACT] iopl=0 limits cs=000000ff ds=00000fff</span>
-<span class="artifact">[ARTIFACT] kernel basmos-sh.bin 512B SEALED</span>
-<span class="artifact">[ARTIFACT] nucleus jash.bin 256B RX; pack DATA/NX</span>
-<span class="proof">[PROOF] shell.sha256</span>
-<span class="hash">4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7</span>
-<span class="proof">[PROOF] jash.sha256</span>
-<span class="hash">5cceb51d8037f790943b4ddc5df42e70025188daa1ca1da23c3d931a398ba309</span></pre>
-        <figcaption class="shotcap"><b>measured, artifact-bound identity</b><span>CAP_IDENTITY · READ ONLY</span></figcaption>
-      </figure>
-
-      <figure class="shellshot">
-        <div class="shotbar"><span class="lamp live"></span><span class="lamp"></span><span class="lamp"></span><b>CAPTURE 02 · AUTHORITY</b><em>EVM1 / SELECT</em></div>
-        <pre class="shotbody"><span class="cmd">jash@basmos.org:/# why map</span>
-<span class="policy">[POLICY] map ALLOW</span>
-required=08 available=1F deck=zero
-<span class="proof">PRF1|POLICY|MAP|08|1F|ALLOW</span>
-
-<span class="cmd">jash@basmos.org:/# jack</span>
-JACKED lab
-
-<span class="cmd">jash@basmos.org:/# why map</span>
-<span class="deny">DENIED requires code.read deck lab</span>
-<span class="proof">PRF1|POLICY|MAP|08|17|DENY</span></pre>
-        <figcaption class="shotcap"><b>one immutable cell, two proven outcomes</b><span>PACK WRITES · 0</span></figcaption>
-      </figure>
-
-      <figure class="shellshot">
-        <div class="shotbar"><span class="lamp live"></span><span class="lamp"></span><span class="lamp"></span><b>CAPTURE 03 · COUNTERFACTUAL / NEGATIVE AUTHORITY</b><em>PRF1 · STRICT ASCII</em></div>
-        <pre class="shotbody"><span class="cmd">jash@basmos.org:/# whatif lab map</span>
-<span class="model">[MODEL] whatif lab map 08&amp;17=00 state.changed=no</span>
-<span class="proof">PRF1|MODEL|MAP|08|17|DENY</span>
-
-<span class="cmd">jash@basmos.org:/# cannot out</span>
-<span class="external">[DERIVED] cannot out CPL3&gt;IOPL0 =&gt; #GP13</span>
-<span class="external">[EXTERNAL] hostile/out PASS</span>
-<span class="proof">PRF1|EXTERNAL|OUT|3|0|GP13</span>
-
-<span class="cmd">jash@basmos.org:/# anatomy</span>
-<span class="artifact">[ARTIFACT] anatomy native=253 reserve=3 CS.limit=FF</span>
-map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
-<span class="proof">PRF1|ARTIFACT|JASH|253|3|FF</span></pre>
-        <figcaption class="shotcap"><b>the shell distinguishes model, oracle and artifact</b><span>QEMU · KVM · NATIVE CHECKS</span></figcaption>
-      </figure>
-    </div>
-    <pre class="term"><span class="p">$</span> <span class="k">make jash-live</span>  <span class="c"># open the real shell; these captures are contract output</span></pre>
-    <p class="sub" style="margin-top:.8rem"><b>Epistemic honesty is structural:</b> <code>RUNTIME</code> is measured in CPL3, <code>POLICY</code> is selected by immutable EVM1, <code>MODEL</code> is a finite counterfactual, <code>ARTIFACT</code> names shipped bytes and <code>EXTERNAL</code> cites an oracle. PRF1 is verified evidence, not a cryptographic signature.</p>
+    <figure class="jash-evidence">
+      <img src="jash-live.svg" width="1320" height="1136" loading="lazy" alt="Verified real KVM and CPL3 JASH transcript showing NK-SIGIL/1, attest, map, jack, surfaces, anatomy and bye">
+      <figcaption>Verified real KVM transcript rendered from <code>website/jash-live.svg</code>. Read the
+        <a href="evidence/jash-session.txt">plain transcript</a>,
+        <a href="evidence/jash-session.manifest">session manifest</a>, and
+        <a href="ARTIFACTS.manifest">artifact manifest</a>.</figcaption>
+    </figure>
+    <pre class="term"><span class="p">$</span> <span class="k">make jash-live</span>  <span class="c"># open the real native C/KVM Wire session</span></pre>
+    <p class="sub" style="margin-top:.8rem"><b>Current identities:</b> prompt <code>jash@nanokernel.org</code> · nucleus SHA-256 <code>3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d</code> · Pack SHA-256 <code>97789cb32d65251f9f748bd4efbb4e3c6a8c2a0aff6bc71abd31a9d72d61f3f0</code>. PRF1 lines are evidence records checked externally, not cryptographic signatures.</p>
   </section>
 
   <section id="bootless">
@@ -497,7 +484,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     <p class="sub">the same <code>basmos.basm</code> source assembles into two personalities. The second one never boots at all.</p>
     <div class="feats">
       <div class="feat"><span class="n">232 B</span><h3 style="color:#15ff5c">ZERO BYTES OF BOOT</h3>
-        <p><code>basm -DBEMU_CONTRACT</code> drops the real-mode prologue, the embedded GDT, paging setup, PIC and PIT — <b>146 bytes that were never the product</b>. What remains is pure kernel: IDT, bounded task domains, preemptive scheduler, IPC and tasks. <code>bemu-nano</code> starts the vCPU <em>directly in protected mode with paging on</em>.</p></div>
+        <p><code>basm -DBEMU_CONTRACT</code> drops the real-mode prologue, embedded GDT, paging setup, PIC and PIT. The 232-byte contract guest is <b>167 bytes smaller than the 399-byte payload</b> and <b>280 bytes smaller than the complete 512-byte sector</b>. What remains is IDT, task domains, scheduler, IPC and tasks; <code>bemu-nano</code> starts the vCPU directly in protected mode with paging on.</p></div>
       <div class="feat"><span class="n">0</span><h3 style="color:#38d9ff">PORTS TOUCHED</h3>
         <p>Under the contract the guest speaks to <b>no device at all</b> — measured PIO writes: <b>zero</b>. There is no PIC and no PIT. Time is one instruction: <code>hlt</code> asks the machine for the next tick, and the VMM injects vector 0x20. The guest defines its own physics.</p></div>
       <div class="feat"><span class="n">KVM</span><h3 style="color:#ff9432">AUDITABLE HOST RUNNER</h3>
@@ -514,9 +501,11 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
       <div class="feat"><span class="n">QEMU</span><h3 style="color:#4a86ff">REAL EMULATED SILICON</h3>
         <p><code>make verify-qemu</code> boots the sector, dwells 2&nbsp;s, then reads physical VGA through the QMP monitor: <code>33 0f 36 0f 39 0a</code>. task0 never sleeps, and a heartbeat byte at 0x6FC must keep incrementing — the green 9 and the living heartbeat are impossible without asynchronous IRQ0 preemption.</p></div>
       <div class="feat"><span class="n">JS</span><h3 style="color:#ffe45c">THE INTERPRETER IN THIS PAGE</h3>
-        <p>The emulator below runs the <em>actual shipped bytes</em> embedded in this HTML: 2,000,000 instructions, 44 timer IRQs, 0 yields, 126,144 sends, 22 receives, heartbeat = ticks — and compares all 512 bytes before accepting. Press BOOT.</p></div>
+        <p>The emulator below runs the <em>actual shipped bytes</em> embedded in this HTML and stops at exactly 2,000,000 instructions: 44 timer IRQs, 0 yields, 126,144 sends, 22 receives and heartbeat 44. It models only the instruction, segmentation and timer behavior needed by this artifact; it does not model paging, the PIC or the PIT. Press BOOT.</p></div>
       <div class="feat"><span class="n">KVM</span><h3 style="color:#ff5fd0">BARE-HYPERVISOR EXECUTION</h3>
         <p><code>make verify-bemu</code> runs both personalities through Linux KVM: 64 ticks, 32 of which preempt the CPU-bound producer mid-loop (the VMM is the 18.2&nbsp;Hz PIT), with <code>pio-outs=0</code> on the 232-byte contract build.</p></div>
+      <div class="feat"><span class="n">C</span><h3 style="color:#15ff5c">EXECUTABLE SACRED GEOMETRY</h3>
+        <p><a href="basm-nano/basm_sacred.c"><code>basm_sacred.c</code></a> is a generated Metatron's Cube translation unit around the <a href="basm-nano/basm_nano.c">readable assembler</a>. CI compiles both with warnings as errors and requires all five guest artifacts to remain byte-identical.</p></div>
     </div>
     <p class="sub" style="text-align:center;margin-top:1rem">this is the disruptiveness nobody is selling: not “trust the hardware vendor's attestation”,
       but <b>an implementation small enough to inspect directly</b> — 512 bytes of guest plus a purpose-built VMM and assembler whose complete source is in this repository —
@@ -526,9 +515,23 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
   <section id="memory">
     <h2>MEMORY MAP — EVERYTHING BELOW 1 MB</h2>
     <p class="sub">a single 4 MB PSE entry covers this kernel's entire universe.</p>
-    <div class="mem" id="memmap"></div>
-    <p class="memnote">★ task1's stack has <b>no allocation of its own</b>: it starts inside the image at <code>t1frame−32</code>
-    (0x7C8F), recycling the init bytes that never execute again.</p>
+    <table class="mem" id="memmap">
+      <thead><tr><th scope="col">range</th><th scope="col">size</th><th scope="col">use</th></tr></thead>
+      <tbody>
+        <tr><td><code>0x00500–0x00617</code></td><td>280 B</td><td>IDT, 35 gates</td></tr>
+        <tr><td><code>0x006FC</code></td><td>1 B</td><td>timer heartbeat</td></tr>
+        <tr><td><code>0x00700–0x007FF</code></td><td>256 B</td><td>SPSC IPC ring</td></tr>
+        <tr><td><code>0x00800–0x008FF</code></td><td>256 B</td><td>task0 DS window</td></tr>
+        <tr><td><code>0x00900–0x009FF</code></td><td>256 B</td><td>task1 DS window</td></tr>
+        <tr><td><code>0x00FD4–0x00FFF</code></td><td>44 B</td><td>task0 saved registers and interrupt frame; stack grows down from <code>0x1000</code></td></tr>
+        <tr><td><code>0x01000–0x01FFF</code></td><td>4 KiB</td><td>page directory; PDE0 at <code>0x1000</code></td></tr>
+        <tr><td><code>0x07C00–0x07DFF</code></td><td>512 B</td><td>kernel and boot-sector image</td></tr>
+        <tr><td><code>0x07C8F–0x07CBA</code></td><td>44 B</td><td>task1 recycled register/interrupt frame and stack, overlapping dead initialization bytes in the image</td></tr>
+        <tr><td><code>0xB8000–0xB8F9F</code></td><td>4,000 B</td><td>VGA text memory</td></tr>
+      </tbody>
+    </table>
+    <p class="memnote">task1 has <b>no separate stack allocation</b>: <code>other_sp = t1frame−32 = 0x7C8F</code>.
+      Its 32-byte saved-register frame and 12-byte interrupt frame cycle through <code>0x7C8F–0x7CBA</code>.</p>
   </section>
 
   <section id="vs">
@@ -538,26 +541,24 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
   </section>
 
   <section id="record">
-    <h2>THE RECORD — CLAIMED PRECISELY, SO IT SURVIVES AUDIT</h2>
-    <p class="sub">we searched GitHub, the web, the academic literature and the demoscene before writing this sentence.
+    <h2>THE RECORD — A DATED SURVEY RESULT</h2>
+    <p class="sub">the public prior-art survey covered GitHub, the web, academic literature and the demoscene.
        Full evidence table and limitations: <a href="RESEARCH.md"><code>RESEARCH.md</code></a>.</p>
     <div class="feats">
       <div class="feat"><span class="n">512 B</span><h3 style="color:#15ff5c">THE CLAIM (BARE METAL)</h3>
-        <p>Eligibility requires every feature; implementations with additional features remain eligible. In the public
-        survey completed on 2026-08-19, BasmOS is the smallest verified artifact found combining:
-        <b>32-bit protected mode + paging + timer-preemptive multitasking + trap services + IPC</b>.
-        NanoOS 2.1 and pczero are partial prior art, not competitors: each lacks required features.</p></div>
+        <p>In the public survey completed on 2026-08-19, BasmOS is the smallest publicly verifiable IA-32 nanokernel found in the category requiring protected mode, active paging, IDT and timer, at least two timer-preempted tasks and functional IPC. The complete bare-metal artifact is 512 bytes; its payload is 399 bytes.</p></div>
       <div class="feat"><span class="n">232 B</span><h3 style="color:#38d9ff">THE CLAIM (MACHINE CONTRACT)</h3>
         <p>Under the bemu-nano contract the same source ships as 232 bytes — always labeled as such,
         never as bare metal. On bare metal the answer stays 512&nbsp;B / 399&nbsp;B, full stop.</p></div>
-      <div class="feat"><span class="n">150×</span><h3 style="color:#ff9432">SMALLER THAN THE PAPER THAT NAMED THE CATEGORY</h3>
-        <p>KeyKOS (USENIX 1992) coined “nanokernel” at ~60&nbsp;KB of executable code.
+      <div class="feat"><span class="n">150×</span><h3 style="color:#ff9432">RELATED 1992 NANOKERNEL SCALE</h3>
+        <p>The 1992 KeyKOS nanokernel paper describes about 60&nbsp;KB of executable code.
          BasmOS implements a compact kernel core — preemption, trap services and logical IPC between shared-CPL0 tasks —
         in 399 bytes. With the machine contract: 259× smaller.</p></div>
       <div class="feat"><span class="n">3</span><h3 style="color:#cf7dff">EXECUTORS THAT MUST AGREE</h3>
         <p>QEMU and the interpreter execute the 512-byte sector; bare KVM (bemu-nano) checks its BIOS personality
         and the separate 232-byte machine-contract build. Their specified observables must agree or verification fails.</p></div>
     </div>
+    <p class="sub" style="text-align:center;margin-top:.8rem">The ranking counts every byte required from BIOS entry to demonstrated behavior; every listed feature is required and additional features are allowed. This is a reproducible dated survey result, <b>not certification by an external record authority</b>.</p>
     <p class="sub" style="text-align:center;margin-top:.8rem"><b>What we deliberately do NOT claim:</b>
       “smallest OS ever” without qualifiers — 512-byte real-mode shells and language interpreters exist
       (bootOS, SectorLISP, SectorForth); they are different classes with no MMU and no concurrency.
@@ -572,6 +573,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
  <span class="p">$</span> <span class="k">make shell</span>      <span class="c"># load a binary module through COM1 and run it in ring 3</span>
  <span class="p">$</span> <span class="k">make jash-live</span>  <span class="c"># native C/KVM Wire to the real 256-byte CPL3 shell</span>
  <span class="p">$</span> <span class="k">make verify-jash</span> <span class="c"># QEMU + KVM, manifests, Decks, ANSI, CS and byte readback</span>
+ <span class="p">$</span> <span class="k">make verify-sacred</span> <span class="c"># compile Metatron C source art; require 5/5 byte identity</span>
  <span class="p">$</span> <span class="k">make proof</span>      <span class="c"># native proofctl + every QEMU/KVM/PTY/browser/hardening gate</span>
  <span class="p">$</span> <span class="k">make clean-room-proof</span> <span class="c"># erase outputs, rebuild, verify, hash</span>
  <span class="p">$</span> <span class="k">make run</span>        <span class="c"># QEMU with a read-only floppy image and no network</span>
@@ -587,9 +589,9 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
 </main>
 
 <!-- ═══════════════ PAPER ═══════════════ -->
-<main id="pg-paper" hidden>
+<main id="pg-paper" tabindex="-1" hidden>
   <article class="paper">
-    <div class="tr">NANOKERNEL.ORG · TECHNICAL REPORT NK-TR-001 · JULY 2026</div>
+    <div class="tr">NANOKERNEL.ORG · TECHNICAL REPORT NK-TR-001 · AUGUST 2026 · CURRENT REVISION</div>
     <h1>BasmOS: A Complete Protected-Mode Operating System in a Single 512-Byte Boot Sector</h1>
     <div class="meta"><b style="color:var(--green);letter-spacing:.18em">F E R M I ∞ H A R T</b> ·
       <a href="mailto:contact@fermihart.com">contact@fermihart.com</a> · Nanokernel.org<br>
@@ -604,12 +606,12 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
       padding ahead of the mandatory <code>0xAA55</code> signature. The kernel is assembled
       entirely with BASM and requires no second-stage loader: the kernel <em>is</em> the boot
       record. Behavior is verified deterministically by reading VGA text memory back from
-      QEMU after boot, and independently by a small x86 interpreter embedded in the project's
-      web page that executes the same shipped bytes. This report documents the design, the
+      QEMU after boot, by a small x86 interpreter embedded in the project's web page that
+      executes the same shipped bytes, and through Linux KVM. This report documents the design, the
       size-engineering techniques, and the verification methodology.
     </div>
 
-    <h3>1 · Introduction</h3>
+    <h2>1 · Introduction</h2>
     <p>We use <em>nanokernel</em> for a kernel whose complete implementation fits inside one
     512-byte disk sector — the smallest unit a PC BIOS will load and jump to. Under that
     constraint, "complete" must be earned rather than asserted: BasmOS enters 32-bit
@@ -618,17 +620,17 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     boot record.</p>
     <p>Contributions: (i) a full protected-mode OS in 399 payload bytes; (ii) a set of
     reusable size-engineering techniques (§4); (iii) a deterministic, externally observable
-    verification method (§6.1); (iv) a second, independent executor — an x86 interpreter
-    embedded in the project page — providing dual-implementation agreement (§6.2).</p>
+     verification method (§6.1); (iv) independently implemented QEMU, browser-interpreter and
+     KVM execution paths with specified observable agreement (§6.2).</p>
 
-    <h3>2 · Boot and mode transition</h3>
+    <h2>2 · Boot and mode transition</h2>
     <p>Execution starts in real mode at <code>0x7C00</code>: <code>cli</code>, DS=0,
     <code>lgdt</code>, then protected mode. Because CR0.PE is architecturally 0 at reset,
     <code>inc ax</code> implements <code>or eax,1</code> in a single byte with no carry
     possible. A far jump into a flat 4&nbsp;GB code segment completes the transition.
     The entire real-mode prologue is 22 bytes.</p>
 
-    <h3>3 · Memory</h3>
+    <h2>3 · Memory</h2>
     <p>Paging is enabled with exactly one store: a single PSE page-directory entry
     (<code>mov dword [eax],0x83</code>, EAX=0x1000) identity-maps the first 4&nbsp;MB, and
     the same register value is immediately reused as CR3. Everything the kernel touches —
@@ -641,7 +643,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     a five-byte <code>push/push/retf</code> prologue enters task0 through its window, task1's
     frame ships CS directly, and runaway execution beyond a window raises #GP13 at the fetch.</p>
 
-    <h3>4 · Concurrency</h3>
+    <h2>4 · Concurrency</h2>
     <p>The scheduler state is one cell, <code>other_sp</code>. The complete switch is
     <code>xchg esp,[es:other_sp] · popad · mov ds,bp · iretd</code>: 11 bytes, no current-task
     index and no branch. EBP carries the incoming task's bounded DS selector, and the
@@ -652,7 +654,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     outside the exception range; <code>int 32</code> remains the voluntary yield ABI and
     shares that handler.</p>
 
-    <h3>5 · IPC</h3>
+    <h2>5 · IPC</h2>
     <p>A single-producer/single-consumer byte ring at 0x700 occupies 256 bytes. Its head and
     tail live in each endpoint's saved ECX; <code>inc cl</code> provides modulo 256 for free.
     Comparing the opposite saved cursor distinguishes full and empty, yielding 255 usable
@@ -662,7 +664,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     is patched to a distinct fail-stop gate for exact negative testing. The GDT remains
     assembled data, with its 6-byte descriptor hidden inside its own null slot.</p>
 
-    <h3>6 · Verification</h3>
+    <h2>6 · Verification</h2>
     <p><b>6.1 External.</b> QEMU boots <code>basmos.bin</code>; a script then reads guest VGA
     memory and asserts six bytes: <code>'3',0x0F</code> at 0xB8000 (task0 output),
     <code>'6',0x0F</code> at 0xB8002 (task1 was preemptively scheduled),
@@ -671,9 +673,10 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     heartbeat byte at 0x6FC that must keep incrementing require asynchronous IRQ0
     preemption of a task that was mid-computation. QEMU must remain running for a
     further two-second dwell.</p>
-    <p><b>6.2 Internal.</b> The project page embeds an x86 interpreter covering exactly the
-    kernel's instruction subset (~40 opcode handlers) and executes the same bytes the page displays
-    and distributes. A sampled 2.0×10⁶-instruction run:</p>
+    <p><b>6.2 Browser.</b> The project page embeds a deliberately limited x86 interpreter covering
+    the kernel's required instruction and segmentation behavior and executes the same bytes the page
+    displays and distributes. It does not model paging, the PIC or the PIT. Its virtual timer supplies
+    only the deterministic scheduling behavior needed by this artifact. The bounded 2.0×10⁶-instruction run:</p>
     <table>
       <tr><th>metric</th><th>value</th></tr>
       <tr><td>timer IRQs delivered</td><td class="num">44</td></tr>
@@ -686,7 +689,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     <p>Independent executors reaching the same observable state provide corroborating
     implementation evidence while retaining different modeling assumptions.</p>
 
-    <h3>7 · Size accounting</h3>
+    <h2>7 · Size accounting</h2>
     <table>
       <tr><th>symbol</th><th>bytes</th><th>role</th></tr>
       <tr><td>start</td><td class="num">22</td><td>real-mode entry, PE enable, far jmp</td></tr>
@@ -705,28 +708,28 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
       <tr><td>padding + 0xAA55</td><td class="num">113</td><td>111 headroom + 2-byte signature</td></tr>
     </table>
 
-    <h3>8 · Related magnitude</h3>
+    <h2>8 · Related magnitude</h2>
     <p>The broad predecessor is NanoOS 2.1 (2004), a 512-byte real-mode OS with
     timer-preemptive multitasking and blocking copy IPC, but no PM32 or paging.
     A close PM32 scheduler neighbor is <code>pczero</code>; its reproduced functional
     image is 18,060 bytes and the reviewed code has no paging or IPC.
     No prior artifact was found with the complete BasmOS feature intersection.</p>
 
-    <h3>9 · Limitations</h3>
+    <h2>9 · Limitations</h2>
     <p>Scope decisions, not accidents: a single privilege level (ring 0); no interactive
     input; trusted CPL0 task code (windows contain runaway fetches, not deliberate far transfers); a static two-task set; a 4&nbsp;MB identity map; PSE-capable IA-32 hardware; and no
     recovery policy beyond fail-stop for CPU exceptions. The PIC and PIT are initialized,
     every architectural exception has a valid gate, and 111 payload bytes remain available.</p>
 
-    <h3>10 · Reproducibility</h3>
+    <h2>10 · Reproducibility</h2>
     <p><code>make</code> assembles the sector with BASM; <code>make verify</code> performs the
     QEMU readback of §6.1; <code>make map</code> prints the per-symbol byte budget behind §7.
     The full binary is embedded in the project page — downloadable, copyable as hex, and
     executable in place. BasmOS is released under the BSD 3-Clause license.</p>
 
     <div class="abstract" style="margin-top:1.2rem">
-      <b>Addendum (August 2026).</b> Since this report: (a) verification is now
-      <b>three-way</b>, not two — a source-available KVM VMM (<code>bemu-nano</code>, this repo)
+      <b>Current revision (August 2026).</b> (a) Verification is
+      <b>three-way</b> — a source-available KVM VMM (<code>bemu-nano</code>, this repo)
       boots the sector on bare hardware virtualization with zero firmware, alongside QEMU
       and this page's interpreter; (b) the same source assembles a second personality,
       <code>basmos-vm.bin</code> (<b>232 bytes</b>), which the VMM enters directly in
@@ -734,16 +737,16 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
        (web, GitHub, academic literature, demoscene — <a href="RESEARCH.md"><code>RESEARCH.md</code></a>) found no
        prior one-sector x86 artifact combining protected mode, paging, preemptive multitasking
        and IPC. This is a dated search result, not a certified world record. The 512-byte sector described by this
-       report has since gained bounded DS domains and an exact #GP denial probe; (d) the sibling artifact
+       report includes bounded DS domains and exact data/code #GP denial probes; (d) the sibling artifact
        <code>basmos-sh.bin</code> spends 498 payload bytes on TSS-backed CPL3, a serial monitor,
        and loading/executing 256-byte user modules, independently verified by QEMU and KVM;
-       (e) JASH is a 253+3-byte native CPL3 epistemic shell with a 3055-byte
-       non-executable J-Pack, 27 words over 15 immutable cells, a total four-opcode
-       EVM1, PRF1 evidence and a direct C/KVM interactive Wire.
+       (e) JASH is a 255+1-byte native CPL3 shell with a 3,584-byte data Pack outside
+       module CS, 14 exact commands over 15 cells, a four-operation EVM1 manifest,
+       NK-SIGIL/1, PRF1 evidence and a direct C/KVM interactive Wire.
     </div>
 
     <div class="refs">
-      <h3>References</h3>
+      <h2>References</h2>
       <p>[1] Intel® 64 and IA-32 Architectures Software Developer's Manual, Vol. 3A:
       System Programming Guide — mode transitions, PSE paging, interrupt descriptors.</p>
       <p>[2] calint/pczero — github.com/calint/pczero (magnitude reference).</p>
@@ -801,8 +804,15 @@ const $ = id => document.getElementById(id);
 
 /* ── byte grid ── */
 const grid = $('bytegrid');
-const COLS = matchMedia('(max-width:700px)').matches ? 16 : 32;
-{
+const gridMedia = matchMedia('(max-width:700px)');
+let COLS, pinned = null;
+function buildByteGrid(){
+  const active = document.activeElement;
+  const restoreFocus = grid.contains(active) && active.matches('.b');
+  const selected = restoreFocus ? active : grid.querySelector('.b[tabindex="0"]');
+  const selectedIndex = selected ? Number(selected.dataset.i) : 0;
+  COLS = gridMedia.matches ? 16 : 32;
+  grid.replaceChildren();
   const frag = document.createDocumentFragment();
   for (let i = 0; i < 512; i++) {
     if (i % COLS === 0) {
@@ -811,17 +821,43 @@ const COLS = matchMedia('(max-width:700px)').matches ? 16 : 32;
       frag.appendChild(a);
     }
     const r = regOf(i);
-    const d = document.createElement('span');
+    const d = document.createElement('button');
+    d.type = 'button';
     d.className = 'b'; d.dataset.r = r[2]; d.textContent = hex2(BIN[i]);
+    d.dataset.i = i; d.tabIndex = i === selectedIndex ? 0 : -1;
+    if (pinned && r[2] === pinned) d.classList.add('hit');
     d.style.background = r[5];
-    if (r[2]==='pad') { d.style.color = '#3d4d3c'; d.style.fontWeight='400'; }
+    if (r[2]==='pad') { d.style.color = '#9cb09c'; d.style.fontWeight='400'; }
     if (r[2]==='sig') { d.style.background='#d0342c'; d.style.color='#fff'; }
     d.title = `0x${(0x7C00+i).toString(16).toUpperCase()} · ${r[3]}`;
+    d.setAttribute('aria-label', `Address 0x${(0x7C00+i).toString(16).toUpperCase()}, byte ${hex2(BIN[i])}, ${r[3]}`);
     d.addEventListener('mouseenter', () => inspect(i));
+    d.addEventListener('focus', () => inspect(i));
+    d.addEventListener('click', () => inspect(i));
     frag.appendChild(d);
   }
   grid.appendChild(frag);
+  grid.classList.toggle('filtered', Boolean(pinned));
+  if (restoreFocus) grid.querySelector(`.b[data-i="${selectedIndex}"]`).focus({preventScroll:true});
 }
+buildByteGrid();
+gridMedia.addEventListener('change', buildByteGrid);
+grid.addEventListener('focusin', e => {
+  if (!e.target.matches('.b')) return;
+  const current = grid.querySelector('.b[tabindex="0"]');
+  if (current && current !== e.target) current.tabIndex = -1;
+  e.target.tabIndex = 0;
+});
+grid.addEventListener('keydown', e => {
+  if (!e.target.matches('.b')) return;
+  const i = Number(e.target.dataset.i);
+  const moves = {ArrowLeft:i-1, ArrowRight:i+1, ArrowUp:i-COLS, ArrowDown:i+COLS,
+                 Home:0, End:511};
+  if (!(e.key in moves)) return;
+  e.preventDefault();
+  const next = Math.max(0, Math.min(511, moves[e.key]));
+  grid.querySelector(`.b[data-i="${next}"]`).focus();
+});
 function inspect(i){
   const r = regOf(i);
   $('iaddr').textContent = `0x${(0x7C00+i).toString(16).toUpperCase()}  ·  byte ${hex2(BIN[i])}  ·  offset ${i}`;
@@ -833,10 +869,12 @@ function inspect(i){
 
 /* ── legend with filter ── */
 {
-  const leg = $('legend'); let pinned = null;
+  const leg = $('legend');
   REG.forEach(r => {
-    const c = document.createElement('span');
+    const c = document.createElement('button');
+    c.type = 'button';
     c.className = 'chip';
+    c.setAttribute('aria-pressed', 'false');
     c.innerHTML = `<i style="background:${r[5]}"></i>${r[2]} <small>${r[1]}B</small>`;
     const on  = () => { grid.classList.add('filtered');
       grid.querySelectorAll('.b').forEach(b => b.classList.toggle('hit', b.dataset.r === r[2])); };
@@ -844,38 +882,17 @@ function inspect(i){
     c.addEventListener('mouseenter', on);
     c.addEventListener('mouseleave', off);
     c.addEventListener('click', () => {
-      if (pinned === r[2]) { pinned = null; c.classList.remove('pin'); grid.classList.remove('filtered'); }
-      else { pinned = r[2]; leg.querySelectorAll('.chip').forEach(x=>x.classList.remove('pin')); c.classList.add('pin'); on(); }
+      if (pinned === r[2]) { pinned = null; c.classList.remove('pin'); c.setAttribute('aria-pressed','false'); grid.classList.remove('filtered'); }
+      else { pinned = r[2]; leg.querySelectorAll('.chip').forEach(x=>{x.classList.remove('pin');x.setAttribute('aria-pressed','false');});
+        c.classList.add('pin'); c.setAttribute('aria-pressed','true'); on(); }
     });
     leg.appendChild(c);
   });
 }
 
-/* ── memory map ── */
-(() => {
-  const M = $('memmap'), TOP = 0xC0000;
-   [[0x00500, 280,   'IDT · 35 gates',           '#ffe45c', 1.4],
-    [0x006FC, 1,     'timer heartbeat',           '#ff5252', 1.4],
-    [0x00700, 256,   'IPC ring · 256 B',         '#cf7dff', 1.4],
-    [0x00800, 256,   'task0 DS domain',           '#46ff7d', 1.4],
-    [0x00900, 256,   'task1 DS domain',           '#b9ff4f', 1.4],
-    [0x00F00, 256,   'task0 active stack',       '#4a86ff', 1.4],
-    [0x01000, 0x1000,'page directory (1 PSE)',   '#ffb020', 1.4],
-    [0x07C00, 512,   'image = kernel = boot ★', '#46ff7d', 3.5],
-   [0xB8000, 4000,  'VGA text',                '#ff5fd0', 2.2],
-  ].forEach(([a, sz, name, color, wmin]) => {
-    const s = document.createElement('div'); s.className = 'seg';
-    s.style.left = (a/TOP*100) + '%'; s.style.width = Math.max(sz/TOP*100, wmin) + '%';
-    s.style.background = color; s.textContent = name;
-    const t = document.createElement('div'); t.className = 'tick';
-    t.style.left = (a/TOP*100) + '%'; t.textContent = '0x' + a.toString(16).toUpperCase();
-    M.appendChild(s); M.appendChild(t);
-  });
-})();
-
 /* ── scale ── */
 (() => {
-  const pageBytes = document.documentElement.outerHTML.length;
+  const pageBytes = new TextEncoder().encode(document.documentElement.outerHTML).byteLength;
   const rows = [
     ['BasmOS-vm (bemu contract)', 232,       '232 B',  true ],
     ['BasmOS (boot included)', 512,         '512 B',  true ],
@@ -913,7 +930,9 @@ $('btnhex').addEventListener('click', async e => {
 /* ── POST overlay ── */
 (() => {
   const post = $('post'), out = $('postout');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { post.classList.add('off'); return; }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches || matchMedia('(max-width: 700px)').matches) {
+    post.hidden=true; return;
+  }
   const lines = [
     'NanokernelBIOS v1.0 — Nanokernel.org',
     'Detecting CPU ........ PSE-capable IA-32',
@@ -924,8 +943,14 @@ $('btnhex').addEventListener('click', async e => {
     'Signature ............ 0xAA55 OK',
     '', 'JMP 0x7C00', ''
   ];
-  let li = 0, ch = 0, t;
-  const kill = () => { clearTimeout(t); post.classList.add('off'); };
+  let li = 0, ch = 0, t, watchdog, closing = false;
+  const kill = () => {
+    if (closing) return;
+    closing = true;
+    clearTimeout(t); clearTimeout(watchdog);
+    post.classList.add('off');
+    setTimeout(() => { post.hidden=true; }, 500);
+  };
   const type = () => {
     if (li >= lines.length) { setTimeout(kill, 400); return; }
     const L = lines[li];
@@ -934,6 +959,7 @@ $('btnhex').addEventListener('click', async e => {
   };
   post.addEventListener('click', kill);
   addEventListener('keydown', kill);
+  watchdog = setTimeout(kill, 3000);
   t = setTimeout(type, 250);
 })();
 
@@ -946,6 +972,7 @@ const CPU = (() => {
   let csBase, csLim;
   let insns, ticks, yields, sends, recvs, timerCnt, lastException, insnStart, segOverride;
   const TIMER_PERIOD = 45000;
+  const MAX_INSNS = 2000000;
   const EAX=0, ECX=1, ESP=4, ES=0, CS=1, SS=2, DS=3;
   const GPFETCH = {};                        // sentinel: #GP raised during fetch
 
@@ -1078,9 +1105,11 @@ const CPU = (() => {
       case 0xB4: case 0xB5: case 0xB6: case 0xB7: set8(op-0xB0,F()); break;
       case 0x0C: set8(0,get8(0)|F()); break;                   // or al,imm8
       case 0x0D: R[EAX]=(R[EAX]|F32())>>>0; break;             // or eax,imm32
-      case 0xC7: { const m=F(), a=rmAddr(m);
-                   if (a<0) break;              // #GP already vectored; skip the immediate
-                   if(o16){ const v=F16(); w16(a,v); }
+      case 0xC7: { const m=F(), ext=(m>>>3)&7;
+                    if(ext!==0){ crash={op:'c7/'+ext,at:insnStart}; break; }
+                    const a=rmAddr(m,o16?2:4);
+                    if (a<0) break;              // #GP already vectored; skip the immediate
+                    if(o16){ const v=F16(); w16(a,v); }
                    else { const v=F32(); w32(a,v); } break; }
       case 0xA0: { const o=F32(); const a=segmentAddr(o,1); if(a>=0) set8(0,M[a]); break; }
       case 0xA1: { const o=F32(), a=segmentAddr(o,o16?2:4);
@@ -1149,7 +1178,8 @@ const CPU = (() => {
   }
 
   function run(budget){
-    for (let i=0; i<budget && !crash; i++){
+    const count=Math.min(Math.max(0,budget),MAX_INSNS-insns);
+    for (let i=0; i<count && !crash; i++){
       /* Virtual PIT: time advances every instruction; the tick is delivered at
        * the first IF=1 window — the same physics bEMU/KVM use, so a CPU-bound
        * task is preempted mid-computation, not only at hlt. */
@@ -1168,7 +1198,7 @@ const CPU = (() => {
     domains: () => ({task0:M[0x800],task1:M[0x900]}),
     state: () => ({eip,esp:R[ESP],ds:S[DS].selector,halted,lastException,
       frame:[r32(S[SS].base+R[ESP]),r32(S[SS].base+R[ESP]+4),r32(S[SS].base+R[ESP]+8)]}),
-    stats: () => ({insns, ticks, yields, sends, recvs, crash, halted, lastException}) };
+    stats: () => ({insns, ticks, yields, sends, recvs, crash, halted, lastException, maxInsns:MAX_INSNS}) };
 })();
 
 /* VGA text renderer */
@@ -1188,11 +1218,15 @@ function render(){
   }
   $('vscreen').innerHTML = html;
 }
-const fmt = n => n>1e6 ? (n/1e6).toFixed(1)+'M' : n>1e3 ? (n/1e3).toFixed(0)+'k' : ''+n;
+const fmt = n => n.toLocaleString('en-US');
+const EXPECTED_TELEMETRY = {insns:2000000,ticks:44,yields:0,sends:126144,recvs:22,heartbeat:44};
+const telemetryExact = s => Object.entries(EXPECTED_TELEMETRY).every(([key,value]) =>
+  (key==='heartbeat' ? CPU.heartbeat() : s[key]) === value);
 
 let running=false, raf=0;
 function frame(){
-  CPU.run(15000);
+  const before = CPU.stats();
+  CPU.run(Math.min(15000, before.maxInsns-before.insns));
   render();
   const s = CPU.stats();
   $('telemetry').innerHTML =
@@ -1203,11 +1237,23 @@ function frame(){
     $('emustatus').innerHTML = `<span style="color:#f55">halted: unimplemented opcode 0x${s.crash.op} @ 0x${s.crash.at.toString(16)}</span>`;
     running=false; return;
   }
+  if (s.insns === s.maxInsns){
+    const exact=telemetryExact(s);
+    $('emustatus').innerHTML = exact
+      ? '<b>verified</b>: exact 2,000,000-instruction telemetry and VGA evidence reached.'
+      : '<span style="color:#f55">verification failed: final telemetry differs from the published contract.</span>';
+    running=false; return;
+  }
   if (running) raf = requestAnimationFrame(frame);
 }
+function stopEmulator(){
+  running=false;
+  cancelAnimationFrame(raf);
+}
 function boot(){
+  if (document.body.dataset.route !== 'basmos') return;
   $('emu').classList.add('on');
-  $('emu').scrollIntoView({behavior:'smooth', block:'center'});
+  $('emu').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth', block:'center'});
   cancelAnimationFrame(raf);
   CPU.reset();
   running = true;
@@ -1218,27 +1264,64 @@ function boot(){
 }
 $('btnboot').addEventListener('click', boot);
 $('btnreboot').addEventListener('click', boot);
-addEventListener('keydown', e => {
-  if (e.key==='b' && !e.metaKey && !e.ctrlKey
+function onBootShortcut(e){
+  const active=document.activeElement;
+  const editing=active && active.closest('a,button,input,textarea,select,[contenteditable="true"]');
+  if (e.key.toLowerCase()==='b' && !e.repeat && !e.metaKey && !e.ctrlKey && !e.altKey
       && document.body.dataset.route==='basmos'
-      && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) boot();
-});
+      && !editing) boot();
+}
+addEventListener('keydown', onBootShortcut);
 
-/* ── router (#/ → home, #/basmos, #/paper; plain #anchors stay in-page) ── */
+/* ── router: deep links plus legacy plain section anchors ── */
 const PAGES  = {home:'pg-home', basmos:'pg-basmos', paper:'pg-paper'};
-const TITLES = {
-  home:  'Nanokernel.org — nanokernels: proof, not promise',
-  basmos:'BasmOS — a complete nanokernel in 512 bytes · Nanokernel.org',
-  paper: 'NK-TR-001 — BasmOS technical report · Nanokernel.org',
+const ROUTE_META = {
+  home:  {title:'Nanokernel.org — nanokernels: proof, not promise',
+    description:'Nanokernels small enough to read and honest enough to prove. Inspect and boot BasmOS in this page.'},
+  basmos:{title:'BasmOS — a complete nanokernel in 512 bytes · Nanokernel.org',
+    description:'Inspect every byte of BasmOS, boot its exact 512-byte image, and review its QEMU, KVM and browser evidence.'},
+  paper: {title:'NK-TR-001 — BasmOS technical report · Nanokernel.org',
+    description:'Current August 2026 technical report for the 512-byte BasmOS IA-32 nanokernel.'},
 };
+const BASMOS_SECTIONS = new Set(['proof','anatomy','engineering','ring3','jash','bootless','determinism','memory','vs','record','run']);
+const HOME_SECTIONS = new Set(['projects','documentation','ethos']);
+const LEGACY_PAGES = {'pg-home':'home', 'pg-basmos':'basmos', 'pg-paper':'paper'};
+function resolveRoute(hash,currentRoute){
+  const deep = hash.match(/^#\/(home|basmos|paper)?(?:\/([a-z0-9-]+))?$/);
+  const legacy = !deep && hash.match(/^#([a-z0-9-]+)$/);
+  let page='home', section='';
+  if(deep){ page=deep[1]||'home'; section=deep[2]||''; }
+  else if(legacy && LEGACY_PAGES[legacy[1]]){ page=LEGACY_PAGES[legacy[1]]; }
+  else if(legacy && BASMOS_SECTIONS.has(legacy[1])){ page='basmos'; section=legacy[1]; }
+  else if(legacy && HOME_SECTIONS.has(legacy[1])){ page='home'; section=legacy[1]; }
+  else if(legacy && currentRoute){ return null; }
+  if(section && (page!=='basmos' || !BASMOS_SECTIONS.has(section))) section='';
+  return {page,section};
+}
+function setMeta(selector,attr,value){ const node=document.querySelector(selector); if(node) node.setAttribute(attr,value); }
 function route(){
-  const m = location.hash.match(/^#\/([a-z]*)/);
-  if (!m && document.body.dataset.route) return;   // plain anchor: keep current page
-  const page = (m && PAGES[m[1]]) ? m[1] : 'home';
+  const resolved=resolveRoute(location.hash,document.body.dataset.route);
+  if(!resolved) return;
+  const {page,section}=resolved;
   for (const k in PAGES) $(PAGES[k]).hidden = (k !== page);
   document.body.dataset.route = page;
-  document.title = TITLES[page];
-  scrollTo(0, 0);
+  if(page!=='basmos') stopEmulator();
+  const meta=ROUTE_META[page];
+  document.title=meta.title;
+  setMeta('meta[name="description"]','content',meta.description);
+  setMeta('meta[property="og:title"]','content',meta.title);
+  setMeta('meta[property="og:description"]','content',meta.description);
+  setMeta('meta[property="og:url"]','content','https://nanokernel.org/'+(page==='home'?'':'#/'+page));
+  setMeta('meta[name="twitter:title"]','content',meta.title);
+  setMeta('meta[name="twitter:description"]','content',meta.description);
+  document.querySelector('.skip').href='#'+PAGES[page];
+  $('route-status').textContent=meta.title+(section?' — '+section:'');
+  requestAnimationFrame(() => {
+    const target=section ? $(section) : $(PAGES[page]);
+    if(!target.hasAttribute('tabindex')) target.tabIndex=-1;
+    target.focus({preventScroll:true});
+    if(section) target.scrollIntoView({behavior:'instant',block:'start'}); else scrollTo(0,0);
+  });
 }
 addEventListener('hashchange', route);
 route();

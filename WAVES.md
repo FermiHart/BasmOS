@@ -16,7 +16,7 @@ or as complete x86 equivalence.
 ## 2. Native Structural Contracts
 
 `proofctl` checks sizes, boot signatures, JASH boundaries, EVM1 shape, Surface
-and Deck manifests, word/cell pointers and fixed aliases. These are structural
+and Deck manifests, exact vocabulary and command targets. These are structural
 contracts, not cryptographic provenance by themselves.
 
 ## 3. QEMU Behavior

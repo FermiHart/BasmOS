@@ -3,11 +3,12 @@ BASMOS-ARTIFACT-MANIFEST-V1
 artifact=basmos.bin bytes=512 sha256=9337019fef355f0598981adbf30a2f806dd591c0ee3606411f0857b6d7686561
 artifact=basmos-vm.bin bytes=232 sha256=d37945a20c188ecedc7102b62a2a0e21743c9eedab8be7f4ede5979d9d433fef
 artifact=basmos-sh.bin bytes=512 sha256=4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7
-artifact=jash/jash.bin bytes=256 sha256=5cceb51d8037f790943b4ddc5df42e70025188daa1ca1da23c3d931a398ba309
-artifact=jash/jash-pack.bin bytes=3055 sha256=235bc35f88437ad8582514190d946b4f0e6641d8f762385c2e99de50ae6c8f08
-jash.native=253 jash.reserve=3 jash.cs_limit=256
-epistemic.words=27 capability.cells=15 vm=total-select proof.format=PRF1
+artifact=jash/jash.bin bytes=256 sha256=3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d
+artifact=jash/jash-pack.bin bytes=3584 sha256=97789cb32d65251f9f748bd4efbb4e3c6a8c2a0aff6bc71abd31a9d72d61f3f0
+jash.native=255 jash.reserve=1 jash.cs_limit=255 pack.max=3584
+commands.exact=14 capability.cells=15 vm=total-select proof.format=PRF1
 vm.magic=EVM1 vm.version=1 vm.opcodes=4
 surface.magic=SFC1 surface.count=6
 deck.magic=DCK1 deck.count=2 zero.mask=0x1f lab.mask=0x17
+sigil.magic=SIG1 sigil.version=1 sigil.bytes=16 derivation=sha256(shell||jash)
 toolchain=BASM proof=artifact-hashes+runtime-contracts

@@ -23,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sensitivity verify-qemu verify-domains verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -36,7 +36,11 @@ help: ## display this menu
 	@printf '  \033[1mmake verify\033[0m   verify the record with QEMU, the JS interpreter and KVM\n'
 	@printf '  \033[1mmake verify-shell\033[0m\n               verify TSS, IRQ0, CPL3 module load, execution and return\n'
 	@printf '  \033[1mmake verify-jash\033[0m\n               verify ANSI, commands, Deck switching and CPL3 selectors\n'
+	@printf '  \033[1mmake verify-jash-capture\033[0m\n               recapture JASH in KVM and compare transcript/SVG evidence\n'
 	@printf '  \033[1mmake verify-sensitivity\033[0m\n               flip every byte, boot in QEMU, classify the effect (~6 min)\n'
+	@printf '  \033[1mmake verify-sacred\033[0m\n               compile the Metatron C edition and compare all five artifacts\n'
+	@printf '  \033[1mmake verify-site\033[0m\n               stage the exact Pages allowlist and verify every local link\n'
+	@printf '  \033[1mmake verify-ipc\033[0m\n               model-check all SPSC states and execute the full-ring probe\n'
 	@printf '  \033[1mmake proof\033[0m    run the full artifact, QEMU, KVM, PTY and browser gate\n'
 	@printf '  \033[1mmake verify-bear\033[0m\n               optional cc-vs-Bear byte identity; set BEAR=/path/to/bear\n'
 	@printf '  \033[1mmake run\033[0m      boot the record artifact interactively in QEMU\n'
@@ -95,9 +99,9 @@ bemu-contract: $(VMKERN) $(BEMU_RUNNER) ## run the 232-byte machine-contract var
 	$(TIMEOUT) 30s bemu/bemu-nano $(VMKERN) --contract --show
 
 # Automated verification: QEMU, the independent site interpreter and bEMU-NANO/KVM.
-verify: verify-qemu verify-domains verify-browser verify-bemu ## verify the record across execution engines
+verify: verify-qemu verify-domains verify-ipc verify-browser verify-bemu verify-sacred ## verify the record across execution engines
 
-verify-ci: all $(PROOFCTL) verify-qemu verify-browser verify-shell-qemu verify-jash-qemu ## hosted-CI gate without KVM
+verify-ci: all $(PROOFCTL) verify-qemu verify-ipc-model verify-browser verify-shell-qemu verify-jash-qemu ## hosted-CI gate without KVM
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
 	@python3 verify_mutations.py
@@ -115,7 +119,13 @@ verify-nasm: all ## independently assemble all five artifacts with NASM
 	cmp "$$tmp/basmos-sh.bin" $(SHKERN) && \
 	cmp "$$tmp/jash.bin" $(JASH) && \
 	cmp "$$tmp/jash-pack.bin" $(JPACK) && \
-	echo "NASM: 5/5 artifacts are byte-identical"
+		echo "NASM: 5/5 artifacts are byte-identical"
+
+verify-sacred: all ## compile the executable Metatron source art and prove byte identity
+	$(MAKE) -C basm-nano test-sacred
+
+verify-site: all ## stage and verify the complete nanokernel.org Pages artifact
+	@tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT INT TERM; scripts/stage_site.sh "$$tmp/site"
 
 # Sovereign-compiler diversity gate. It assembles the five guest artifacts with
 # a Bear-built basm-nano and requires byte identity with the committed images.
@@ -145,6 +155,12 @@ verify-qemu: $(KERNEL)
 verify-domains: $(KERNEL) $(VMKERN) $(BASM) $(BEMU_RUNNER) ## prove private DS windows and a cross-domain #GP
 	python3 verify_domains.py $(KERNEL) $(VMKERN) $(BASM) bemu/bemu-nano
 
+verify-ipc-model: $(KERNEL) $(BASM) ## check every SPSC state and the exact handler encoding without KVM
+	python3 verify_ipc_model.py --model-only $(KERNEL) $(BASM)
+
+verify-ipc: $(KERNEL) $(BASM) ## check the SPSC model, exact encoding and KVM full-ring execution
+	python3 verify_ipc_model.py $(KERNEL) $(BASM)
+
 verify-browser: $(KERNEL)
 	node website/test_interpreter.js
 
@@ -163,13 +179,16 @@ verify-shell-bemu: $(SHKERN) $(BEMU_RUNNER)
 	$(TIMEOUT) 15s bemu/bemu-nano $(SHKERN) --serial-hex $(SHELL_INPUT) --serial-expect 'Z>'
 	python3 verify_shell_faults.py bemu/bemu-nano $(SHKERN)
 
-verify-jash: verify-jash-qemu verify-jash-bemu ## end-to-end JASH contract in QEMU and KVM
+verify-jash: verify-jash-qemu verify-jash-bemu verify-jash-capture ## end-to-end JASH contract and evidence
 
 verify-jash-qemu: $(SHKERN) $(JASH) $(JPACK)
 	python3 verify_jash_qemu.py $(SHKERN) $(JASH) $(JPACK)
 
 verify-jash-bemu: $(SHKERN) $(JASH) $(JPACK) $(BEMU_RUNNER)
 	python3 verify_jash.py bemu/bemu-nano $(SHKERN) $(JASH) $(JPACK)
+
+verify-jash-capture: $(SHKERN) $(JASH) $(JPACK) $(BEMU_RUNNER)
+	python3 scripts/capture_jash.py
 
 verify-hardening: all $(PROOFCTL) ## command fuzzing and mutation gate
 	python3 verify_jash_fuzz.py bemu/bemu-nano $(SHKERN) $(JASH) $(JPACK)
@@ -197,7 +216,8 @@ proof: all $(PROOFCTL) ## run the full reproducible gate
 	@$(MAKE) verify-shell
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
-	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, browser, KVM, shell, JASH, fuzz, mutations'
+	@$(MAKE) verify-site
+	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, sacred C, shell, JASH, capture, staged site, fuzz, mutations'
 	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \
@@ -225,7 +245,7 @@ size: $(KERNEL) $(VMKERN) $(SHKERN) $(JASH) $(JPACK) ## print artifact sizes
 	@wc -c < $(VMKERN) | xargs -I{} echo "basmos-vm.bin: {} total bytes = direct PM32+paging machine-contract guest"
 	@wc -c < $(SHKERN) | xargs -I{} echo "basmos-sh.bin: {} total bytes = ring-0 kernel, CPL3 monitor and module boundary"
 	@wc -c < $(JASH) | xargs -I{} echo "jash.bin: {} bytes = native CPL3 nucleus"
-	@wc -c < $(JPACK) | xargs -I{} echo "jash-pack.bin: {} bytes = Decks, colors and Surfaces in NX data"
+	@wc -c < $(JPACK) | xargs -I{} echo "jash-pack.bin: {} bytes = data outside module CS"
 
 clean: ## remove generated outputs
 	rm -f $(KERNEL) $(VMKERN) $(SHKERN) $(JASH) $(JPACK) $(PROOFCTL)

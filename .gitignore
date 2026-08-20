@@ -2,6 +2,7 @@
 
 # Host build products
 /basm-nano/basm-nano
+/basm-nano/basm-sacred
 /bemu/bemu-nano
 /tools/proofctl
 

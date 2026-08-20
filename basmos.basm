@@ -25,7 +25,7 @@
 ;   H2  PIC remapped to 0x20 and PIT initialized; IRQ0 does not collide with #DF
 ;   H3  CR4 preserved; no push uses the stack inherited from the BIOS
 ;   H4  scheduler = xchg esp,[other_sp] + popad + iretd
-;   H5  IPC cursors reside in each endpoint's saved ECX
+;   H5  IPC cursors reside in each endpoint's saved ECX (frame slot +24)
 ;   H6  a full ring discards the new byte without corrupting empty/full state
 ;   H7  tasks use hlt: 3/6/9 now proves physical preemption by the PIT
 ;   H8  IDT/ring/page directory/stack in low RAM, away from the EBDA
@@ -228,6 +228,15 @@ task1:
 domain_task1_fault:
     mov al, [0x100]         ; first byte beyond task1's 0xFF limit: #GP
 %endif
+%ifdef IPC_FULL_PROBE
+    ; Consume once, then freeze the head at 1. With a correct +24 saved-ECX
+    ; lookup, the flooded producer must stop at tail 0 after the wrap.
+    int 34
+.probe_wait:
+    hlt
+    jmp .probe_wait
+    times 33 - ($ - task1) db 0x90 ; preserve service-handler page/layout
+%else
     db 0x65
     mov word [2], 0x0F36    ; white '6' through the VGA-only GS capability
 .loop:
@@ -241,6 +250,7 @@ domain_task1_fault:
 .empty:
     hlt
     jmp .loop
+%endif
 
 ; --------------------------------------------------------- Interrupt handlers
 exception_handler:

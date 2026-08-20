@@ -111,7 +111,7 @@ static const char *skipsp(const char *p) { while (*p==' '||*p=='\t') p++; return
 
 static long p_prim(const char **pp) {
     const char *p = skipsp(*pp);
-    long v;
+    long v = 0;
     if (*p == '(') { p++; v = p_expr(&p); p = skipsp(p);
         if (*p != ')') die("missing )");
         p++; }

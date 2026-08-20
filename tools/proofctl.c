@@ -152,6 +152,12 @@ static int contains(const Image *image, const char *text) {
     return 0;
 }
 
+static int contains_bytes(const Image *image, const uint8_t *bytes, size_t length) {
+    for (size_t i = 0; i + length <= image->size; i++)
+        if (!memcmp(image->bytes + i, bytes, length)) return 1;
+    return 0;
+}
+
 static uint16_t le16(const uint8_t *p) {
     return (uint16_t)(p[0] | ((uint16_t)p[1] << 8));
 }
@@ -165,7 +171,7 @@ static void check_surfaces(const Image *pack) {
     size_t at = last_magic(pack, "SFC1");
     if (at + 5 > pack->size || pack->bytes[at + 4] != 6 || at + 5 + 6 * 6 > pack->size)
         fail("SFC1 shape", pack->path);
-    const uint8_t expected[6][2] = {{1,3},{2,2},{3,3},{3,5},{4,1},{5,0}};
+    const uint8_t expected[6][2] = {{1,3},{2,2},{3,3},{3,7},{4,3},{5,0}};
     const uint16_t extents[6] = {1,1,4096,256,1,0};
     for (size_t i = 0; i < 6; i++) {
         const uint8_t *entry = pack->bytes + at + 5 + i * 6;
@@ -173,7 +179,7 @@ static void check_surfaces(const Image *pack) {
             || le16(entry + 2) != 0 || le16(entry + 4) != extents[i])
             fail("SFC1 entry", pack->path);
     }
-    printf("  [PASS] SFC1 6 typed Surfaces, rights/base/extent exact\n");
+    printf("  [PASS] SFC1 6 honest Surfaces, including code RW alias\n");
 }
 
 static void check_decks(const Image *pack) {
@@ -182,7 +188,7 @@ static void check_decks(const Image *pack) {
     if (at + 13 > pack->size || pack->bytes[at + 4] != 2
         || memcmp(pack->bytes + at + 5, expected, 8))
         fail("DCK1 entries", pack->path);
-    printf("  [PASS] DCK1 zero=0x1f lab=0x17 (code.read attenuated)\n");
+    printf("  [PASS] DCK1 zero=visible lab=masked (live view composition)\n");
 }
 
 static void check_evidence_vm(const Image *pack) {
@@ -197,18 +203,17 @@ static void check_identity(const Image *pack) {
     const char *records[] = {
         "[RUNTIME] cpu.vendor ????????????",
         "[RUNTIME] privilege cpl=3 cs=002b",
-        "[ARTIFACT] iopl=0 limits cs=000000ff ds=00000fff",
-        "[ARTIFACT] kernel basmos-sh.bin 512B SEALED",
-        "[PROOF] shell.sha256 ", "[PROOF] jash.sha256 ",
-        "[PROOF] required BASM+QEMU+KVM+PTY+browser",
-        "PRF1|POLICY|MAP|08|1F|ALLOW", "PRF1|POLICY|MAP|08|17|DENY",
-        "PRF1|MODEL|MAP|08|1F|ALLOW", "PRF1|MODEL|MAP|08|17|DENY",
-        "PRF1|MODEL|DECKDIFF|1F|17|08", "PRF1|EXTERNAL|OUT|3|0|GP13",
-        "PRF1|ARTIFACT|JASH|253|3|FF",
+        "[ARTIFACT] segments cs=000000ff ds=00000fff iopl=0",
+        "[ROOT] sha256(shell||nucleus) ",
+        "[HASH] shell ", "[HASH] jash ",
+        "[PROOF] expected identities checked externally by proofctl and KVM",
+        "PRF1|VIEW|MAP|ZERO|VISIBLE", "PRF1|VIEW|MAP|LAB|MASKED",
+        "PRF1|ATTEST|NKROOT|123D1B5B871ACE15",
+        "PRF1|ARTIFACT|JASH|255|1|FF",
     };
-    for (size_t i = 0; i < 14; i++)
+    for (size_t i = 0; i < sizeof(records) / sizeof(records[0]); i++)
         if (!contains(pack, records[i])) fail("identity provenance", pack->path);
-    printf("  [PASS] epistemic runtime/policy/model/artifact/proof records\n");
+    printf("  [PASS] runtime, artifact, view and external-proof records are scoped\n");
 }
 
 static int exact_word(const Image *pack, uint32_t address, const char *word) {
@@ -221,34 +226,34 @@ static int exact_word(const Image *pack, uint32_t address, const char *word) {
 
 static void check_capabilities(const Image *pack) {
     const size_t cells = 44, table = 104;
-    if (pack->size < table + 28 * 8) fail("capability table shape", pack->path);
+    static const char *words[] = {
+        "map", "help", "uname -a", "sigil", "layout", "surfaces", "decks",
+        "attest", "palette", "anatomy", "clear", "limits", "jack", "bye"
+    };
+    static const uint32_t targets[] = {
+        44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 88, 92, 96, 100
+    };
+    if (pack->size < table + 15 * 8) fail("capability table shape", pack->path);
     for (size_t i = 1; i < 13; i++) {
         uint32_t output = le32(pack->bytes + cells + i * 4);
         if (output < 0x200 || output - 0x200 >= pack->size)
             fail("capability output range", pack->path);
+        if (!memchr(pack->bytes + output - 0x200, 0,
+                    pack->size - (output - 0x200)))
+            fail("unterminated capability output", pack->path);
     }
-    for (size_t i = 0; i < 27; i++) {
+    for (size_t i = 0; i < 14; i++) {
         uint32_t name = le32(pack->bytes + table + i * 8);
         uint32_t target = le32(pack->bytes + table + i * 8 + 4);
         if (name < 0x200 || name - 0x200 >= pack->size)
             fail("word pointer range", pack->path);
-        if (target < 0x200 + cells || target >= 0x200 + table
-            || ((target - 0x200 - cells) & 3))
+        if (target != 0x200 + targets[i])
             fail("word capability range", pack->path);
+        if (!exact_word(pack, name, words[i])) fail("exact command vocabulary", pack->path);
     }
-    if (le32(pack->bytes + table + 27 * 8)
-        || le32(pack->bytes + table + 27 * 8 + 4))
+    if (le32(pack->bytes + table + 14 * 8)
+        || le32(pack->bytes + table + 14 * 8 + 4))
         fail("word table terminator", pack->path);
-    if (!exact_word(pack, le32(pack->bytes + table), "uname -a")
-        || !exact_word(pack, le32(pack->bytes + table + 8), "probe")
-        || !exact_word(pack, le32(pack->bytes + table + 16), "map")
-        || !exact_word(pack, le32(pack->bytes + table + 24), "why map"))
-        fail("epistemic word order", pack->path);
-    if (le32(pack->bytes + table + 4) != 0x200 + 72
-        || le32(pack->bytes + table + 12) != 0x200 + 72
-        || le32(pack->bytes + table + 20) != 0x200 + cells
-        || le32(pack->bytes + table + 28) != 0x200 + cells)
-        fail("shared capability alias", pack->path);
     if (le32(pack->bytes + cells) != 3
         || le32(pack->bytes + 96) != 1 || le32(pack->bytes + 100) != 2)
         fail("Evidence VM opcode", pack->path);
@@ -257,7 +262,37 @@ static void check_capabilities(const Image *pack) {
         if (output < 0x200 || output - 0x200 >= pack->size)
             fail("SELECT output range", pack->path);
     }
-    printf("  [PASS] 27 words -> 15 immutable cells; total EMIT/JACK/BYE/SELECT VM\n");
+    printf("  [PASS] 14 exact words; no aliases; EMIT/JACK/BYE/SELECT total\n");
+}
+
+static void check_sigil(const Image *pack, const Image *shell, const Image *jash) {
+    uint8_t joined[768], digest[32], braille[24];
+    char hex[65], visible[128];
+    if (shell->size != 512 || jash->size != 256) fail("SIG1 input shape", pack->path);
+    memcpy(joined, shell->bytes, shell->size);
+    memcpy(joined + shell->size, jash->bytes, jash->size);
+    sha256(joined, sizeof(joined), digest);
+    hexdigest(digest, hex);
+
+    size_t at = last_magic(pack, "SIG1");
+    if (at + 22 > pack->size || pack->bytes[at + 4] != 1
+        || pack->bytes[at + 5] != 16
+        || memcmp(pack->bytes + at + 6, digest, 16))
+        fail("SIG1 artifact root", pack->path);
+    snprintf(visible, sizeof visible, "[ROOT] sha256(shell||nucleus) %s", hex);
+    if (!contains(pack, visible)) fail("visible NK root", pack->path);
+
+    for (int row = 0; row < 2; row++) {
+        for (int i = 0; i < 8; i++) {
+            uint32_t cp = 0x2800u + digest[row * 8 + i];
+            braille[3*i] = (uint8_t)(0xE0 | (cp >> 12));
+            braille[3*i + 1] = (uint8_t)(0x80 | ((cp >> 6) & 0x3F));
+            braille[3*i + 2] = (uint8_t)(0x80 | (cp & 0x3F));
+        }
+        if (!contains_bytes(pack, braille, sizeof(braille)))
+            fail("visible NK braille root", pack->path);
+    }
+    printf("  [PASS] SIG1 braille is SHA256(shell||nucleus), dot for bit\n");
 }
 
 int main(int argc, char **argv) {
@@ -275,15 +310,15 @@ int main(int argc, char **argv) {
     exact_size(&direct, 232);
     exact_size(&shell, 512); boot_signature(&shell);
     exact_size(&jash, 256);
-    if (jash.bytes[253] || jash.bytes[254] || jash.bytes[255])
-        fail("JASH 253+3 boundary", jash.path);
-    if (pack.size > 3072) fail("J-Pack exceeds arena budget", pack.path);
-    printf("  [PASS] %-22s %4zu bytes (<=3072)\n", pack.path, pack.size);
+    if (jash.bytes[255]) fail("JASH 255+1 boundary", jash.path);
+    if (pack.size > 3584) fail("J-Pack exceeds relocated-stack arena", pack.path);
+    printf("  [PASS] %-22s %4zu bytes (<=3584)\n", pack.path, pack.size);
     check_surfaces(&pack);
     check_decks(&pack);
     check_evidence_vm(&pack);
     check_identity(&pack);
     check_capabilities(&pack);
+    check_sigil(&pack, &shell, &jash);
     printf("RESULT: PASS - manifest SHA-256 and native contracts are consistent\n");
     free(metal.bytes); free(direct.bytes); free(shell.bytes);
     free(jash.bytes); free(pack.bytes);

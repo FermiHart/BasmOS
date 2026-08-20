@@ -1,0 +1,53 @@
+                        ╱╲
+                 ╱──────◈──────╲
+             ⠒⠽⠛⡛⢇⠚⣎⠕   ∞
+          ◇─────── NK-SIGIL/1 ───────◇
+             ⡉⡉⡃⡕⣛⢦⡒⡧   3·6·9
+                 ╲──────◈──────╱
+                        ╲╱
+          N A N O K E R N E L // JASH
+  root 123d1b5b871ace15 · artifact-bound · CPL3/002b
+
+[READY] 14 exact words · type help
+
+jash@nanokernel.org:/zero# uname -a
+JASH/2030 i686 BasmOS capsule cpl3 cs=002b ds=0023
+nucleus=256 pack=DATA-outside-CS kernel=512
+jash@nanokernel.org:/zero# attest
+[RUNTIME] cpu.vendor <CPUID-VENDOR>
+[RUNTIME] privilege cpl=3 cs=002b
+[ARTIFACT] segments cs=000000ff ds=00000fff iopl=0
+[ARTIFACT] shell basmos-sh.bin 512B
+[ARTIFACT] nucleus jash.bin 256B; Pack outside module CS
+[ROOT] sha256(shell||nucleus) 123d1b5b871ace1549494355dba65267a28d1ba53d6fa860e42f317c894f3da0
+[HASH] shell 4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7
+[HASH] jash 3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d
+[PROOF] expected identities checked externally by proofctl and KVM
+PRF1|ATTEST|NKROOT|123D1B5B871ACE15
+jash@nanokernel.org:/zero# map
+LIVE MAP / zero
+000..0ff nucleus via CS:RX; same arena bytes writable via DS
+100..14f line  180 deck  1fc stack  200..fff J-Pack
+PRF1|VIEW|MAP|ZERO|VISIBLE
+jash@nanokernel.org:/zero# jack
+JACKED lab  composition=lab map.view=masked
+jash@nanokernel.org:/lab# map
+MASKED map.view by active lab composition
+use jack to restore zero; bytes and hardware permissions unchanged
+PRF1|VIEW|MAP|LAB|MASKED
+jash@nanokernel.org:/lab# surfaces
+SURFACES / SFC1
+wire0    Duplex<Byte>       rights=RW
+glyph0   TextOverWire       rights=W
+arena    Region<4096>       rights=RW
+code     CS:RX / DS:RW-alias extent=256
+facts    ConventionStable  physical=RW
+kernel   OutsideUserSegments
+jash@nanokernel.org:/lab# anatomy
+[ARTIFACT] nucleus=255 reserve=1 CS.limit=FF
+00-42 init 43-47 out 48-88 read 89-8F sel 90-91 late
+92-D3 find D4-E0 jack E1-EC bye ED-F1 rx F2-FE tx
+PRF1|ARTIFACT|JASH|255|1|FF
+jash@nanokernel.org:/lab# bye
+JASH:EOT
+>

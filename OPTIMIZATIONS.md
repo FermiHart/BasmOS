@@ -85,9 +85,16 @@ model and supplies the same five-entry GDT as machine state.
 ### Context-owned IPC cursors
 
 Producer and consumer cursors live in each endpoint's saved ECX. The opposite
-task frame exposes the peer cursor, removing global head/tail cells. Eight-bit
-cursor increments provide modulo-256 wrapping. The queue has 255 usable slots;
-a full queue drops the new byte without corrupting state.
+task frame exposes the peer cursor at offset `+24` in the `pushad` image,
+removing global head/tail cells. Eight-bit cursor increments provide modulo-256
+wrapping. The queue has 255 usable slots; a full queue drops the new byte
+without corrupting state.
+
+`make verify-ipc` explores both transitions from all 65,536 cursor pairs with
+symbolic queue contents, checks the complete emitted handler bodies that bind
+the model to the artifact, then boots a temporary layout-preserving KVM probe. The
+probe consumes one byte and freezes the consumer; the flooded producer must
+stabilize at `head=1, tail=0`, exercising the full check across the wrap.
 
 ### Reused initialization storage
 
@@ -106,8 +113,8 @@ assembles the same five artifacts with NASM and requires byte identity.
 `make verify-sensitivity` flips every byte of the record sector (XOR 0xFF),
 boots the mutant in QEMU and classifies the observable effect on the
 demonstrated contract (3/6/9, liveness, heartbeat). Current result over the
-399-byte payload: 280 payload bytes are DEAD when flipped, 34 visibly ALTER
-the contract, 2 freeze only the timer evidence, and 83 are observably intact
+399-byte payload: 278 payload bytes are DEAD when flipped, 34 visibly ALTER
+the contract, 2 freeze only the timer evidence, and 85 are observably intact
 under normal operation. The committed map is one run; two additional complete
 runs agreed on 510 of 512 bytes. The two exceptions (offsets 108-109, the
 ModRM of `mov eax,cr0` and the opcode of `bts eax,31` — the paging-enable

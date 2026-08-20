@@ -99,6 +99,19 @@ arena at data offset `0x200` (linear address `0x8200`). The Pack is outside the
 module code-segment limit, so it cannot be fetched as native code through
 `CS=0x2b`.
 
+The nucleus uses 255 bytes and reserves byte `0xff`. It relocates ESP to `0x200`,
+so calls grow below the Pack while the Pack may occupy the complete
+`0x200..0xfff` remainder: exactly 3,584 bytes. The current Pack fills that bound.
+It provides 14 exact commands without one-letter aliases. After CR processing,
+all other C0 control bytes are no-op input, including BS (`0x08`); DEL (`0x7f`)
+is the sole destructive edit. Embedded NUL therefore cannot turn a longer word
+into a valid prefix, and CRLF does not dispatch an empty command.
+
+At startup, `NK-SIGIL/1` renders the first 16 bytes of
+`SHA256(basmos-sh.bin || jash.bin)` as Unicode braille, one visible dot per bit.
+The binary `SIG1` manifest and `proofctl` independently bind the same root. This
+is an artifact identity, not a measured-boot or runtime-attestation claim.
+
 This is a segmentation property, not an NX page-table property. The arena is
 writable, JASH updates the Pack's CPUID vendor field, and arbitrary CPL3 module
 code can modify arena data. JASH Decks, Surfaces, command tables, and PRF1 text
@@ -121,7 +134,9 @@ hardware protection domain.
 
 `make verify-jash` separately checks the JASH serial contract, selector
 observations, loaded module and Pack bytes, command parsing, and return to the
-parent monitor under QEMU and KVM. These tests cover specific paths and inputs;
+parent monitor under QEMU and KVM. `make verify-jash-capture` recaptures the
+published ANSI session and requires its normalized transcript and SVG rendering
+to agree with the current artifacts. These tests cover specific paths and inputs;
 they are not exhaustive validation of IA-32 behavior or a security proof.
 
 ## Limitations

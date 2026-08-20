@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1136" viewBox="0 0 1320 1136" role="img" aria-labelledby="title desc">
+<title id="title">Verified JASH live session</title>
+<desc id="desc">A KVM transcript showing the artifact-bound sigil, attestation, Deck transition, surfaces and return to the monitor.</desc>
+<rect width="100%" height="100%" rx="12" fill="#020402"/>
+<rect x="1" y="1" width="1318" height="34" rx="11" fill="#0b100b" stroke="#263426"/>
+<circle cx="20" cy="18" r="5" fill="#46ff7d"/>
+<text x="34" y="23" fill="#789578">JASH LIVE / KVM / CPL3 / VERIFIED TRANSCRIPT</text>
+<g font-family="ui-monospace,SFMono-Regular,Consolas,Liberation Mono,monospace" font-size="14" xml:space="preserve">
+<text x="34" y="58" fill="#b8d8b8">                        ╱╲</text>
+<text x="34" y="78" fill="#cf7dff">                 ╱──────◈──────╲</text>
+<text x="34" y="98" fill="#cf7dff">             ⠒⠽⠛⡛⢇⠚⣎⠕   ∞</text>
+<text x="34" y="118" fill="#cf7dff">          ◇─────── NK-SIGIL/1 ───────◇</text>
+<text x="34" y="138" fill="#cf7dff">             ⡉⡉⡃⡕⣛⢦⡒⡧   3·6·9</text>
+<text x="34" y="158" fill="#cf7dff">                 ╲──────◈──────╱</text>
+<text x="34" y="178" fill="#b8d8b8">                        ╲╱</text>
+<text x="34" y="198" fill="#b8d8b8">          N A N O K E R N E L // JASH</text>
+<text x="34" y="218" fill="#b8d8b8">  root 123d1b5b871ace15 · artifact-bound · CPL3/002b</text>
+<text x="34" y="238" fill="#b8d8b8"></text>
+<text x="34" y="258" fill="#46ff7d">[READY] 14 exact words · type help</text>
+<text x="34" y="278" fill="#b8d8b8"></text>
+<text x="34" y="298" fill="#46ff7d">jash@nanokernel.org:/zero# uname -a</text>
+<text x="34" y="318" fill="#b8d8b8">JASH/2030 i686 BasmOS capsule cpl3 cs=002b ds=0023</text>
+<text x="34" y="338" fill="#b8d8b8">nucleus=256 pack=DATA-outside-CS kernel=512</text>
+<text x="34" y="358" fill="#46ff7d">jash@nanokernel.org:/zero# attest</text>
+<text x="34" y="378" fill="#38d9ff">[RUNTIME] cpu.vendor &lt;CPUID-VENDOR&gt;</text>
+<text x="34" y="398" fill="#38d9ff">[RUNTIME] privilege cpl=3 cs=002b</text>
+<text x="34" y="418" fill="#ffe45c">[ARTIFACT] segments cs=000000ff ds=00000fff iopl=0</text>
+<text x="34" y="438" fill="#ffe45c">[ARTIFACT] shell basmos-sh.bin 512B</text>
+<text x="34" y="458" fill="#ffe45c">[ARTIFACT] nucleus jash.bin 256B; Pack outside module CS</text>
+<text x="34" y="478" fill="#38d9ff">[ROOT] sha256(shell||nucleus) 123d1b5b871ace1549494355dba65267a28d1ba53d6fa860e42f317c894f3da0</text>
+<text x="34" y="498" fill="#ffe45c">[HASH] shell 4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7</text>
+<text x="34" y="518" fill="#ffe45c">[HASH] jash 3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d</text>
+<text x="34" y="538" fill="#b8d8b8">[PROOF] expected identities checked externally by proofctl and KVM</text>
+<text x="34" y="558" fill="#ffe45c">PRF1|ATTEST|NKROOT|123D1B5B871ACE15</text>
+<text x="34" y="578" fill="#46ff7d">jash@nanokernel.org:/zero# map</text>
+<text x="34" y="598" fill="#b8d8b8">LIVE MAP / zero</text>
+<text x="34" y="618" fill="#b8d8b8">000..0ff nucleus via CS:RX; same arena bytes writable via DS</text>
+<text x="34" y="638" fill="#b8d8b8">100..14f line  180 deck  1fc stack  200..fff J-Pack</text>
+<text x="34" y="658" fill="#ffe45c">PRF1|VIEW|MAP|ZERO|VISIBLE</text>
+<text x="34" y="678" fill="#46ff7d">jash@nanokernel.org:/zero# jack</text>
+<text x="34" y="698" fill="#b8d8b8">JACKED lab  composition=lab map.view=masked</text>
+<text x="34" y="718" fill="#46ff7d">jash@nanokernel.org:/lab# map</text>
+<text x="34" y="738" fill="#ff6262">MASKED map.view by active lab composition</text>
+<text x="34" y="758" fill="#b8d8b8">use jack to restore zero; bytes and hardware permissions unchanged</text>
+<text x="34" y="778" fill="#ffe45c">PRF1|VIEW|MAP|LAB|MASKED</text>
+<text x="34" y="798" fill="#46ff7d">jash@nanokernel.org:/lab# surfaces</text>
+<text x="34" y="818" fill="#b8d8b8">SURFACES / SFC1</text>
+<text x="34" y="838" fill="#b8d8b8">wire0    Duplex&lt;Byte&gt;       rights=RW</text>
+<text x="34" y="858" fill="#b8d8b8">glyph0   TextOverWire       rights=W</text>
+<text x="34" y="878" fill="#b8d8b8">arena    Region&lt;4096&gt;       rights=RW</text>
+<text x="34" y="898" fill="#b8d8b8">code     CS:RX / DS:RW-alias extent=256</text>
+<text x="34" y="918" fill="#b8d8b8">facts    ConventionStable  physical=RW</text>
+<text x="34" y="938" fill="#b8d8b8">kernel   OutsideUserSegments</text>
+<text x="34" y="958" fill="#46ff7d">jash@nanokernel.org:/lab# anatomy</text>
+<text x="34" y="978" fill="#ffe45c">[ARTIFACT] nucleus=255 reserve=1 CS.limit=FF</text>
+<text x="34" y="998" fill="#b8d8b8">00-42 init 43-47 out 48-88 read 89-8F sel 90-91 late</text>
+<text x="34" y="1018" fill="#b8d8b8">92-D3 find D4-E0 jack E1-EC bye ED-F1 rx F2-FE tx</text>
+<text x="34" y="1038" fill="#ffe45c">PRF1|ARTIFACT|JASH|255|1|FF</text>
+<text x="34" y="1058" fill="#46ff7d">jash@nanokernel.org:/lab# bye</text>
+<text x="34" y="1078" fill="#b8d8b8">JASH:EOT</text>
+<text x="34" y="1098" fill="#b8d8b8">&gt;</text>
+</g>
+</svg>

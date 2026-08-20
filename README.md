@@ -39,11 +39,30 @@ external record authority. See [`RESEARCH.md`](RESEARCH.md).
 | `basmos-vm.bin` | 232-byte guest for the documented bEMU machine contract |
 | `basmos-sh.bin` | 512-byte kernel with a separate CPL3 monitor/module boundary |
 | `jash/jash.bin` | 256-byte CPL3 JASH nucleus |
-| `jash/jash-pack.bin` | JASH presentation, tables and manifests |
+| `jash/jash-pack.bin` | 3,584-byte JASH presentation, tables and manifests |
 
 Expected sizes and hashes are committed in `ARTIFACTS.manifest` and
 `SHA256SUMS`. The five guest binaries are intentionally versioned because exact
 bytes are the subject of the project. Host executables are never versioned.
+
+The record artifact `basmos.bin` is independent of the ring-3/JASH siblings.
+JASH uses a fixed 256-byte executable nucleus (255 bytes plus one reserved byte)
+and a 3,584-byte Pack outside module CS. Its stack is deliberately relocated
+below Pack base `0x200`, making the remainder of the 4 KiB arena available to
+data without changing either 512-byte kernel sector.
+
+### Sacred Source Edition
+
+[`basm-nano/basm_sacred.c`](basm-nano/basm_sacred.c) is a compilable Metatron's
+Cube edition of the project assembler. The geometry is generated
+deterministically from the canonical [`basm_nano.c`](basm-nano/basm_nano.c),
+whose SHA-256 is sealed into the artwork. The readable source remains canonical;
+the artistic translation unit includes it rather than hiding the implementation.
+
+`make verify-sacred` regenerates the expected geometry, compiles both editions
+with warnings as errors, and requires them to emit all five guest artifacts
+byte-for-byte identically. The source art is therefore executable presentation,
+not an unaudited replacement.
 
 ## Build
 
@@ -74,9 +93,11 @@ make proof
 ```
 
 The gate checks committed SHA-256 values, native structural contracts, an
-independent NASM re-assembly when NASM is installed, QEMU, the sandboxed
-JavaScript interpreter, KVM, CPL3 behavior, parser fuzzing and artifact
-mutations. At the end it reports exactly which gates ran. The optional
+independent NASM re-assembly when NASM is installed, a model check of all
+65,536 SPSC cursor states bound to the exact handler bytes plus a KVM full-ring
+execution, QEMU, the sandboxed JavaScript
+interpreter, KVM, CPL3 behavior, parser fuzzing and artifact mutations. At the
+end it reports exactly which gates ran. The optional
 sovereign-compiler gate (`make verify-bear BEAR=...`) never claims to have run
 when the Bear compiler is not supplied.
 
@@ -85,10 +106,13 @@ Useful focused commands:
 ```sh
 make verify-qemu
 make verify-domains
+make verify-ipc
 make verify-browser
 make verify-shell
 make verify-jash
+make verify-jash-capture
 make verify-nasm
+make verify-sacred
 make verify-bear BEAR=/path/to/bear
 make verify-sensitivity
 make map

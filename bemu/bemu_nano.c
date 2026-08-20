@@ -213,8 +213,8 @@ int main(int argc, char **argv)
         }
         module_len = read_path(jash_module, module, 257);
         pack_len = read_path(jash_pack, pack, SERIAL_MAX);
-        if (module_len != 256 || pack_len < 1 || pack_len > 3072) {
-            fprintf(stderr, "[bemu-nano] --jash requires a 256B nucleus and a 1..3072B J-Pack\n");
+        if (module_len != 256 || pack_len < 1 || pack_len > 3584) {
+            fprintf(stderr, "[bemu-nano] --jash requires a 256B nucleus and a 1..3584B J-Pack\n");
             return 2;
         }
         serial_rx[serial_len++] = 'r';

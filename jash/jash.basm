@@ -4,7 +4,7 @@
 ; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
 ;
 ; Native code owns no presentation strings. It receives a J-Pack into the
-; non-executable arena, then provides line editing, table dispatch, two logical
+; non-executable arena, then provides DEL editing, table dispatch, two logical
 ; Decks and the int 0x80 console boundary. CS can execute only these 256 bytes.
 ; ============================================================================
 
@@ -16,6 +16,7 @@ start:
     cld
     xor eax, eax
     mov ebp, 0x200         ; capability base: every J-Pack derives from this register
+    mov esp, ebp           ; keep the call stack below the Pack: 3584B are now safe
     mov [ebp - 128], al
 
     ; Bootstrap packet: uint16 length followed by the non-executable J-Pack.
@@ -59,8 +60,8 @@ prompt:
     call getc
     cmp al, 13
     je enter
-    cmp al, 8
-    je .back
+    cmp al, 32             ; CR handled above; all other C0 controls are no-op
+    jb .read
     cmp al, 127
     je .back
     cmp ecx, 79

@@ -26,7 +26,7 @@ ranking metric is total artifact size; payload size is a secondary measurement.
 
 ## Result
 
-No eligible public artifact of 512 bytes or less was found. BasmOS occupies one
+No other eligible public artifact of 512 bytes or less was found. BasmOS occupies one
 512-byte boot sector and has a 399-byte payload.
 
 > In the public survey completed on 2026-08-19, BasmOS is the smallest publicly

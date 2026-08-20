@@ -17,7 +17,7 @@ image, module, pack = IMAGE.read_bytes(), MODULE.read_bytes(), PACK.read_bytes()
 if len(image) != 512 or image[510:] != b"\x55\xaa" or len(module) != 256:
     raise SystemExit("FAIL: invalid shell sector or JASH nucleus")
 
-commands = b"uname -a\rwhy map\rwhatif lab map\rinfo\rsurfaces\rjack\rwhy map\rbye\r"
+commands = b"uname -a\rattest\rsurfaces\rmap\rjack\rmap\ranatomy\rbye\r"
 wire = b"r\x00" + module + b"x" + len(pack).to_bytes(2, "little") + pack + commands
 
 
@@ -101,7 +101,7 @@ try:
     expected_pack = bytearray(pack)
     clean = transcript.replace(b".", b"")
     clean = re.sub(rb"\x1b\[[0-9;]* ?[mJHq]", b"", clean)
-    text = clean.decode("ascii", "replace")
+    text = clean.decode("utf-8", "replace")
     # IRQ0 writes literal dots asynchronously; normalization removes them from
     # both timer noise and dotted field names such as cpu.vendor.
     vendor = re.search(rb"\[RUNTIME\] cpuvendor ([ -~]{12})", clean)
@@ -111,18 +111,17 @@ try:
 
     checks = [
         (b"." in transcript, "IRQ0 crossed the CPL3 execution"),
-        ("JASH/2030" in text and "cpl 3" in text, "JASH booted and reported CPL3"),
-        (vendor is not None and "[PROOF] jashsha256" in text,
-         "uname -a measured CPUID and rendered its proof ledger"),
-        ("PRF1|POLICY|MAP|08|1F|ALLOW" in text
-         and "PRF1|POLICY|MAP|08|17|DENY" in text
-         and "PRF1|MODEL|MAP|08|17|DENY" in text,
-         "live policy and counterfactual PRF1 records survived IRQ noise"),
+        ("NK-SIGIL/1" in text and "cpl3" in text, "JASH sigil booted and reported CPL3"),
+        (vendor is not None and "[HASH] jash" in text,
+          "attest measured CPUID and rendered its artifact ledger"),
+        ("PRF1|VIEW|MAP|ZERO|VISIBLE" in text
+          and "PRF1|VIEW|MAP|LAB|MASKED" in text,
+          "live Deck-selected map views survived IRQ noise"),
         ("SURFACES" in text and "JACKED lab" in text, "Surfaces and Deck transition ran"),
         ("JASH:EOT" in text and "\r\n>" in text, "bye returned to the parent monitor"),
         (loaded_module == module, "QMP read back the exact 256-byte RX nucleus"),
         (loaded_pack == expected_pack,
-         "QMP read back an immutable Pack except for its CPUID evidence field"),
+          "QMP read back the exact Pack except for its CPUID evidence field"),
         (qemu.poll() is None and status == "running", "QEMU remained live"),
     ]
     ok = True
