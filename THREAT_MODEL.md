@@ -72,11 +72,14 @@ memory boundary. There is no separate user address space and no page-level NX
 boundary between the JASH nucleus and Pack.
 
 The record artifact additionally gives task 0 and task 1 distinct 256-byte DS
-windows. SS remains flat for stack switching, handlers use flat ES for kernel
-state, and GS is limited to VGA. `verify_domains.py` proves the descriptors,
-positive private writes and a cross-domain `#GP13` on KVM-backed QEMU. This
-contains accidental ordinary accesses only: ring-0 instructions such as `mov
-ds,0x10` or `lgdt` can intentionally escape it.
+windows and label-computed CS windows bounding their instruction fetches. SS
+remains flat for stack switching, handlers use flat ES for kernel state, and GS
+is limited to VGA. `verify_domains.py` proves the descriptors, positive private
+writes and cross-domain data/code `#GP13` denials on KVM-backed QEMU. This
+contains accidental ordinary accesses and runaway execution only: ring-0
+instructions such as addressing through flat SS, loading selector `0x10`,
+far-transferring to the peer's DPL0 code selector, or `lgdt` can intentionally
+escape it.
 
 ### Guest To QEMU Host
 
@@ -122,7 +125,8 @@ Per-frame instruction budgets limit ordinary browser work.
 
 The interpreter is not a complete x86 model and does not model the CPL3 shell,
 paging, or general hardware. It models the record artifact's segment bases and
-limits, including its negative `#GP13` probe. A defect can produce incorrect results
+limits, including code-segment fetch checks and the negative `#GP13` probes.
+A defect can produce incorrect results
 or consume browser resources. Compromised site JavaScript executes with the
 site's browser origin and is outside the guest model; browser and distribution
 security remain external dependencies.

@@ -28,6 +28,14 @@ jobs:
       - name: Verify QEMU and browser contracts
         run: make verify-ci
 
+      - name: Verify KVM contracts (domains and both personalities)
+        run: |
+          if [ -e /dev/kvm ] && [ -w /dev/kvm ]; then
+            make verify-domains verify-bemu
+          else
+            echo "SKIP: /dev/kvm unavailable; the domain and KVM gates did not run"
+          fi
+
       - name: Check independent NASM assembly
         run: make verify-nasm
 

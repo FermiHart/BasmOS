@@ -48,6 +48,15 @@
 ;   J3  handlers use flat ES for kernel data; tasks use a VGA-only GS descriptor
 ;   J4  EBP carries each task's DS selector through pushad/popad
 ;
+; Round K (bounded task code windows, metal personality):
+;   K1  task0 CS (0x30) covers only task0's own bytes; task1 CS (0x38) covers
+;       only task1's; handlers keep entering through the flat 0x08 gate selector
+;   K2  a 5-byte retf prologue enters task0 through its own code window
+;   K3  t1frame ships task1's CS directly, so the first iretd loads it
+;   K4  runaway execution beyond a task's window raises #GP13 at the fetch;
+;       the bEMU contract keeps flat code (machine-supplied identity) and
+;       basmos-vm.bin stays byte-identical
+;
 ; Memory map (all accesses remain within the 4 MB identity-mapped PDE):
 ;   0x00500  IDT (35 gates)              0x00620  GDT (contract: written by VMM)
 ;   0x006FC  heartbeat tick counter      0x00700  ring IPC (256 bytes)
@@ -166,8 +175,13 @@ pm:
 ; task1's initial popad consumes 32 bytes of dead initialization data above;
 ; iretd consumes this frame. Its stack then cycles within the same 44-byte range.
 t1frame:
-    dd task1
-    dd 8
+%ifdef BEMU_CONTRACT
+    dd task1                ; flat code: EIP is the absolute entry
+    dd 8                    ; contract: machine-supplied flat code identity
+%else
+    dd 0                    ; offset zero inside the 0x38 code window
+    dd 0x38                 ; task1's own code window
+%endif
     dd 0x202                ; IF=1
 
 ; ---------------------------------------------------------------------- Tasks
@@ -178,6 +192,12 @@ t1frame:
 ; mid-computation. That is asynchronous preemption, the strongest claim a
 ; timer-preempted 512-byte artifact can make.
 task0:
+%ifndef BEMU_CONTRACT
+    push 0x30              ; task0's code selector
+    push 5                 ; offset of task0_flat inside the 0x30 window
+    db 0xCB                ; retf: CS=0x30, EIP=5 -- task0 owns its fetches
+task0_flat:
+%endif
     mov bp, 0x18
     mov ds, bp              ; task0 enters with its own 256-byte data window
     mov ax, 0x0F33          ; white '3'
@@ -187,6 +207,10 @@ task0:
 %ifdef DOMAIN_FAULT_PROBE
 domain_fault:
     mov al, [0x100]         ; task1's byte without IPC: #GP (DS limit is 0xFF)
+%endif
+%ifdef DOMAIN_CODE_FAULT_PROBE
+domain_code_fault:
+    jmp task1               ; fetch lands beyond task0's CS limit: #GP13
 %endif
     sti
     mov al, 0x39            ; AL='9': the IPC byte, displayed in green by task1
@@ -298,6 +322,10 @@ gdt:
     db 0x00, 0x92, 0x40, 0x00 ; 0x20: task1 data, base 0x900, limit 0xFF
     dw 0x0FFF, 0x8000
     db 0x0B, 0x92, 0x40, 0x00 ; 0x28: VGA data, base 0xB8000, limit 0xFFF
+    dw task1 - task0 - 1, task0
+    db 0x00, 0x9A, 0x40, 0x00 ; 0x30: task0 code, 32-bit, byte granular, DPL0
+    dw exception_handler - task1 - 1, task1
+    db 0x00, 0x9A, 0x40, 0x00 ; 0x38: task1 code, 32-bit, byte granular, DPL0
 gdt_end:
 %endif
 

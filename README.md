@@ -6,7 +6,7 @@
 BasmOS is a 512-byte IA-32 nanokernel engineering artifact. The complete
 bare-metal image includes the BIOS entry path, 32-bit protected mode, active PSE
 paging, IDT, PIC/PIT timer handling, two timer-preempted tasks (one CPU-bound,
-one sleeping), bounded per-task data segments, an SPSC IPC queue, a per-tick
+one sleeping), bounded per-task data and code segments, an SPSC IPC queue, a per-tick
 heartbeat and VGA evidence output.
 
 The project is open source under the BSD-3-Clause license.
@@ -27,7 +27,7 @@ bytes required from BIOS entry to the demonstrated behavior, including every
 boot stage.
 
 In the documented public survey completed on 2026-08-19, BasmOS is the smallest
-verified artifact found in this category: 512 bytes total, with a 378-byte
+verified artifact found in this category: 512 bytes total, with a 399-byte
 payload. This is a reproducible research result, not certification by an
 external record authority. See [`RESEARCH.md`](RESEARCH.md).
 
@@ -98,10 +98,11 @@ make size
 ## Architecture Notes
 
 `basmos.bin` runs both record tasks in CPL0 and one shared paged address space.
-Ordinary DS accesses are bounded to separate 256-byte windows; handlers use a
-flat ES capability, stacks use flat SS, and task VGA writes use a VGA-only GS.
-This contains accidental ordinary data accesses, but it is not a hostile-code
-boundary: CPL0 code can load another selector or replace the GDT. The separate
+Ordinary DS accesses are bounded to separate 256-byte windows and each task's
+instruction fetch is bounded to its own code bytes; handlers use a flat ES
+capability, stacks use flat SS, and task VGA writes use a VGA-only GS. This
+contains accidental data accesses and runaway execution, but it is not a
+hostile-code boundary: CPL0 code can load another selector or replace the GDT. The separate
 `basmos-sh.bin` artifact demonstrates the CPL3/TSS boundary for hostile modules.
 
 This is an engineering proof and research artifact, not a production operating

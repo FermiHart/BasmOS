@@ -27,12 +27,12 @@ ranking metric is total artifact size; payload size is a secondary measurement.
 ## Result
 
 No eligible public artifact of 512 bytes or less was found. BasmOS occupies one
-512-byte boot sector and has a 378-byte payload.
+512-byte boot sector and has a 399-byte payload.
 
 > In the public survey completed on 2026-08-19, BasmOS is the smallest publicly
 > verifiable IA-32 nanokernel found in the category requiring protected mode,
 > active paging, IDT and timer, at least two timer-preempted tasks and functional
-> IPC. The complete bare-metal artifact is 512 bytes; its payload is 378 bytes.
+> IPC. The complete bare-metal artifact is 512 bytes; its payload is 399 bytes.
 
 This wording reports the result and scope of a search. It is not certification
 by an external record authority and cannot prove that unpublished or lost code
@@ -49,8 +49,9 @@ does not exist.
 - two CPL0 tasks switched by IRQ0: one CPU-bound (its loop never sleeps) and
   one sleeping, so the demonstrated schedule requires asynchronous preemption;
 - an SPSC byte queue reached through interrupt gates;
-- separate 256-byte DS windows for ordinary task data accesses, with an exact
-  cross-domain `#GP13` negative probe;
+- separate 256-byte DS windows for ordinary task data accesses and label-computed
+  CS windows bounding each task's instruction fetch, with exact cross-domain
+  `#GP13` negative probes for both;
 - a heartbeat byte at 0x6FC incremented by every serviced tick;
 - VGA output `3/6/9` demonstrating both tasks and data transfer;
 - boot signature `55 aa`.
@@ -63,7 +64,7 @@ communication and the data windows are not a hostile process boundary.
 
 | Project | Complete artifact | PM32 | Paging | Timer-preempted tasks | IPC | Eligible? |
 |---|---:|---:|---:|---:|---:|---|
-| **BasmOS** | **512 B; 378 B payload** | yes | yes, PSE | yes, 2 | SPSC queue | **yes; smallest found** |
+| **BasmOS** | **512 B; 399 B payload** | yes | yes, PSE | yes, 2 | SPSC queue | **yes; smallest found** |
 | L4/x86 and complete IA-32 microkernels | many KiB or more | yes | yes | yes | yes | yes; functional supersets, larger |
 | NanoOS 2.1 | 512 B | no | no | yes, up to 8 | blocking copy | no; lacks PM32 and paging |
 | VirtualBox `bootsector-pae` | 512 B | yes | yes, PAE | no | no | no; lacks scheduler and IPC |

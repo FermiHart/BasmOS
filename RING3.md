@@ -7,7 +7,7 @@
 
 BasmOS has two separate 512-byte boot-sector artifacts:
 
-- `basmos.bin` is the CPL0 record artifact. Its 378-byte payload contains the
+- `basmos.bin` is the CPL0 record artifact. Its 399-byte payload contains the
   protected-mode and paging setup, two preempted tasks with bounded private DS
   windows (see `DOMAINS.md`), and SPSC IPC. Both tasks run in CPL0; segment
   limits contain ordinary DS-default accesses, but flat SS and shared CR3 mean

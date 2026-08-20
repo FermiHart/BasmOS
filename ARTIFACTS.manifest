@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-3-Clause
 BASMOS-ARTIFACT-MANIFEST-V1
-artifact=basmos.bin bytes=512 sha256=375c0708ed2fd800b2d03d6b1bdf88d4ec2bb6a475158177f973008e9a993f4c
+artifact=basmos.bin bytes=512 sha256=9337019fef355f0598981adbf30a2f806dd591c0ee3606411f0857b6d7686561
 artifact=basmos-vm.bin bytes=232 sha256=d37945a20c188ecedc7102b62a2a0e21743c9eedab8be7f4ede5979d9d433fef
 artifact=basmos-sh.bin bytes=512 sha256=4b92dfeebc951d718378b6b11ff97f6577be5d08a4239d1a5064297e638b76a7
 artifact=jash/jash.bin bytes=256 sha256=5cceb51d8037f790943b4ddc5df42e70025188daa1ca1da23c3d931a398ba309

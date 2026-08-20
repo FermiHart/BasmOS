@@ -10,11 +10,11 @@ release.
 
 | Artifact | Total | Payload | Free before signature |
 |---|---:|---:|---:|
-| `basmos.bin` | 512 B | 378 B | 132 B |
+| `basmos.bin` | 512 B | 399 B | 111 B |
 
 The payload contains boot entry, PM32 transition, PSE paging, IDT, PIC/PIT,
-timer-driven switching of a CPU-bound and a sleeping task, bounded data
-segments, SPSC IPC, a tick heartbeat and VGA output.
+timer-driven switching of a CPU-bound and a sleeping task, bounded data and
+code segments, SPSC IPC, a tick heartbeat and VGA output.
 
 The expected VGA evidence is:
 
@@ -45,16 +45,20 @@ domain probe can prove `#GP` specifically.
 The six-byte GDTR overlaps the null descriptor. A base adjustment makes selectors
 `0x08` and `0x10` address the code and data descriptors without storing a full
 eight-byte null entry. Additional selectors bound task 0 to `0x800..0x8FF`,
-task 1 to `0x900..0x9FF`, and GS to the VGA page.
+task 1 to `0x900..0x9FF`, and GS to the VGA page. Two label-computed code
+descriptors (0x30/0x38, 32-bit, byte granular) bound each task's fetch to its
+own bytes; their limits track the layout automatically, including probe builds.
 
 ### Segment-capability context
 
 SS remains flat so interrupt frames and overlapping task stacks retain their
 absolute offsets. EBP carries each task's DS selector through `pushad`/`popad`.
 Kernel handlers use explicit ES overrides for the ring, heartbeat and scheduler
-cell; task display writes use the VGA-only GS descriptor. The positive proof
-reads each private byte, while a separately assembled `DS:[0x100]` probe must
-enter the dedicated `#GP13` gate before task 1 can start.
+cell; task display writes use the VGA-only GS descriptor. Task 0 enters its code
+window through a five-byte `push 0x30 / push 5 / retf` prologue and task 1's
+baked frame ships `CS=0x38`. The positive proof reads each private byte and the
+live descriptors; separately assembled `DS:[0x100]` and `jmp task1` probes must
+enter the dedicated `#GP13` gate before task 1 can start or execute.
 
 ### Single PSE mapping
 
@@ -102,9 +106,13 @@ assembles the same five artifacts with NASM and requires byte identity.
 `make verify-sensitivity` flips every byte of the record sector (XOR 0xFF),
 boots the mutant in QEMU and classifies the observable effect on the
 demonstrated contract (3/6/9, liveness, heartbeat). Current result over the
-378-byte payload: 261 payload bytes are DEAD when flipped, 33 visibly ALTER
-the contract, 3 freeze only the timer evidence, and 81 are observably intact
-under normal operation. The full map is committed in
+399-byte payload: 280 payload bytes are DEAD when flipped, 34 visibly ALTER
+the contract, 2 freeze only the timer evidence, and 83 are observably intact
+under normal operation. The committed map is one run; two additional complete
+runs agreed on 510 of 512 bytes. The two exceptions (offsets 108-109, the
+ModRM of `mov eax,cr0` and the opcode of `bts eax,31` — the paging-enable
+pair) oscillate between DEAD and ALTERED-VISIBLE depending on whether the
+mutated decode still paints before failing. The full map is committed in
 `evidence/byte-sensitivity.md`.
 
 ## Measured Symbol Map

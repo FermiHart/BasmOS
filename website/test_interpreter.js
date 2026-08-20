@@ -60,26 +60,48 @@ pass = pass && !s.crash && identical && s.ticks > 0 && s.yields === 0
 
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'basmos-js-domain-'));
 try {
-  const faultPath = path.join(tmp, 'fault.bin');
-  const mapPath = path.join(tmp, 'fault.map');
-  childProcess.execFileSync(__dirname + '/../basm-nano/basm-nano',
-    ['-f', 'bin', '-DDOMAIN_FAULT_PROBE', '--map', mapPath,
-     '-o', faultPath, 'basmos.basm'],
-    {cwd: __dirname + '/..'});
-  const gpOffset = Number(fs.readFileSync(mapPath, 'utf8').match(/^\s*(\d+)\s+\d+\s+gp_handler$/m)[1]);
-  const faultOffset = Number(fs.readFileSync(mapPath, 'utf8').match(/^\s*(\d+)\s+\d+\s+domain_fault$/m)[1]);
-  CPU.reset(Uint8Array.from(fs.readFileSync(faultPath)));
+  const build = (define, name) => {
+    const binPath = path.join(tmp, name + '.bin');
+    const mapPath = path.join(tmp, name + '.map');
+    childProcess.execFileSync(__dirname + '/../basm-nano/basm-nano',
+      ['-f', 'bin', '-D' + define, '--map', mapPath, '-o', binPath, 'basmos.basm'],
+      {cwd: __dirname + '/..'});
+    const map = fs.readFileSync(mapPath, 'utf8');
+    const sym = s => Number(map.match(new RegExp('^\\s*(\\d+)\\s+\\d+\\s+' + s + '$', 'm'))[1]);
+    return {bin: Uint8Array.from(fs.readFileSync(binPath)), sym};
+  };
+
+  const data = build('DOMAIN_FAULT_PROBE', 'fault');
+  CPU.reset(data.bin);
   CPU.run(10000);
   const fault = CPU.stats(), denied = CPU.domains(), state = CPU.state();
   const gp = !fault.crash && fault.halted && fault.lastException === 13
-             && state.eip === 0x7C00 + gpOffset + 1
-             && state.frame[0] === 0 && state.frame[1] === 0x7C00 + faultOffset
-             && state.frame[2] === 8
+             && state.eip === 0x7C00 + data.sym('gp_handler') + 1
+             && state.frame[0] === 0
+             && state.frame[1] === data.sym('domain_fault') - data.sym('task0')
+             && state.frame[2] === 0x30
              && fault.ticks === 0 && denied.task0 === 0x33 && denied.task1 === 0;
   pass = pass && gp;
-  console.log('  [' + (gp ? 'PASS' : 'FAIL') + '] browser segment limit: ' +
-              'DS:[0x100] -> #GP' + fault.lastException + ', peer=' +
+  console.log('  [' + (gp ? 'PASS' : 'FAIL') + '] browser data window: ' +
+              'DS:[0x100] -> #GP' + fault.lastException + ' at CS:0x' +
+              state.frame[2].toString(16) + ', peer=' +
               denied.task1.toString(16).padStart(2, '0'));
+
+  const code = build('DOMAIN_CODE_FAULT_PROBE', 'codefault');
+  CPU.reset(code.bin);
+  CPU.run(10000);
+  const cfault = CPU.stats(), cstate = CPU.state();
+  const cgp = !cfault.crash && cfault.halted && cfault.lastException === 13
+              && cstate.eip === 0x7C00 + code.sym('gp_handler') + 1
+              && cstate.frame[0] === 0
+              && cstate.frame[1] === code.sym('domain_code_fault') - code.sym('task0')
+              && cstate.frame[2] === 0x30
+              && cfault.ticks === 0
+              && CPU.vram()[0] === 0x33 && CPU.vram()[2] !== 0x36;
+  pass = pass && cgp;
+  console.log('  [' + (cgp ? 'PASS' : 'FAIL') + '] browser code window: ' +
+              'jmp task1 -> #GP' + cfault.lastException + ' at CS:0x' +
+              cstate.frame[2].toString(16) + ', task1 code never ran');
 } finally {
   fs.rmSync(tmp, {recursive: true, force: true});
 }

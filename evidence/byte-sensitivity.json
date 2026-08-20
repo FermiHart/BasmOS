@@ -1,13 +1,13 @@
 {
  "artifact": "basmos.bin",
- "sha256": "375c0708ed2fd800b2d03d6b1bdf88d4ec2bb6a475158177f973008e9a993f4c",
+ "sha256": "9337019fef355f0598981adbf30a2f806dd591c0ee3606411f0857b6d7686561",
  "method": "single-byte XOR 0xFF, QEMU boot, observable contract (3/6/9 + running + heartbeat), single run",
- "payload_bytes": 378,
+ "payload_bytes": 399,
  "counts": {
-  "INTACT": 213,
-  "ALTERED-VISIBLE": 33,
-  "ALTERED-TIMER": 3,
-  "DEAD": 263
+  "INTACT": 196,
+  "ALTERED-VISIBLE": 34,
+  "ALTERED-TIMER": 2,
+  "DEAD": 280
  },
  "payload_by_symbol": {
   "start": {
@@ -16,13 +16,18 @@
   },
   "pm": {
    "DEAD": 120,
-   "INTACT": 33
+   "INTACT": 32,
+   "ALTERED-VISIBLE": 1
   },
   "t1frame": {
    "DEAD": 8,
    "INTACT": 4
   },
   "task0": {
+   "DEAD": 4,
+   "INTACT": 1
+  },
+  "task0_flat": {
    "INTACT": 5,
    "DEAD": 14,
    "ALTERED-VISIBLE": 10
@@ -53,18 +58,17 @@
    "ALTERED-VISIBLE": 5
   },
   "sys_recv": {
-   "ALTERED-VISIBLE": 5,
-   "DEAD": 15,
-   "ALTERED-TIMER": 1
+   "ALTERED-VISIBLE": 4,
+   "DEAD": 17
   },
   "idtr": {
    "INTACT": 2,
    "DEAD": 4
   },
   "gdt": {
-   "INTACT": 21,
-   "DEAD": 23,
-   "ALTERED-VISIBLE": 2
+   "INTACT": 25,
+   "DEAD": 34,
+   "ALTERED-VISIBLE": 3
   },
   "other_sp": {
    "DEAD": 4
@@ -358,7 +362,7 @@
   },
   {
    "offset": 57,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "pm"
   },
   {
@@ -618,7 +622,7 @@
   },
   {
    "offset": 109,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "pm"
   },
   {
@@ -1008,7 +1012,7 @@
   },
   {
    "offset": 187,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "task0"
   },
   {
@@ -1028,162 +1032,162 @@
   },
   {
    "offset": 191,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "task0"
   },
   {
    "offset": 192,
    "class": "INTACT",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 193,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 194,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 195,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 196,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 197,
-   "class": "DEAD",
-   "symbol": "task0"
+   "class": "INTACT",
+   "symbol": "task0_flat"
   },
   {
    "offset": 198,
    "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 199,
-   "class": "DEAD",
-   "symbol": "task0"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 200,
    "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 201,
    "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 202,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 203,
-   "class": "DEAD",
-   "symbol": "task0"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 204,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 205,
-   "class": "INTACT",
-   "symbol": "task0"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 206,
-   "class": "INTACT",
-   "symbol": "task0"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 207,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 208,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 209,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 210,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "INTACT",
+   "symbol": "task0_flat"
   },
   {
    "offset": 211,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "INTACT",
+   "symbol": "task0_flat"
   },
   {
    "offset": 212,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 213,
    "class": "DEAD",
-   "symbol": "task0"
+   "symbol": "task0_flat"
   },
   {
    "offset": 214,
-   "class": "INTACT",
-   "symbol": "task0"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 215,
-   "class": "DEAD",
-   "symbol": "task0"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 216,
-   "class": "DEAD",
-   "symbol": "task1"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task0_flat"
   },
   {
    "offset": 217,
    "class": "ALTERED-VISIBLE",
-   "symbol": "task1"
+   "symbol": "task0_flat"
   },
   {
    "offset": 218,
    "class": "DEAD",
-   "symbol": "task1"
+   "symbol": "task0_flat"
   },
   {
    "offset": 219,
-   "class": "DEAD",
-   "symbol": "task1"
+   "class": "INTACT",
+   "symbol": "task0_flat"
   },
   {
    "offset": 220,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "task1"
+   "class": "DEAD",
+   "symbol": "task0_flat"
   },
   {
    "offset": 221,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
    "offset": 222,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
@@ -1193,7 +1197,7 @@
   },
   {
    "offset": 224,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
@@ -1218,17 +1222,17 @@
   },
   {
    "offset": 229,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
    "offset": 230,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
    "offset": 231,
-   "class": "INTACT",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
@@ -1238,12 +1242,12 @@
   },
   {
    "offset": 233,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
    "offset": 234,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
@@ -1253,7 +1257,7 @@
   },
   {
    "offset": 236,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "task1"
   },
   {
@@ -1263,17 +1267,17 @@
   },
   {
    "offset": 238,
-   "class": "ALTERED-VISIBLE",
+   "class": "INTACT",
    "symbol": "task1"
   },
   {
    "offset": 239,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "task1"
   },
   {
    "offset": 240,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
@@ -1283,7 +1287,7 @@
   },
   {
    "offset": 242,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "task1"
   },
   {
@@ -1298,7 +1302,7 @@
   },
   {
    "offset": 245,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
@@ -1313,72 +1317,72 @@
   },
   {
    "offset": 248,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "task1"
   },
   {
    "offset": 249,
-   "class": "INTACT",
-   "symbol": "exception_handler"
+   "class": "DEAD",
+   "symbol": "task1"
   },
   {
    "offset": 250,
-   "class": "INTACT",
-   "symbol": "exception_handler"
+   "class": "DEAD",
+   "symbol": "task1"
   },
   {
    "offset": 251,
-   "class": "INTACT",
-   "symbol": "exception_handler"
+   "class": "DEAD",
+   "symbol": "task1"
   },
   {
    "offset": 252,
-   "class": "INTACT",
-   "symbol": "gp_handler"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "task1"
   },
   {
    "offset": 253,
-   "class": "INTACT",
-   "symbol": "gp_handler"
+   "class": "DEAD",
+   "symbol": "task1"
   },
   {
    "offset": 254,
    "class": "INTACT",
-   "symbol": "gp_handler"
+   "symbol": "exception_handler"
   },
   {
    "offset": 255,
-   "class": "DEAD",
-   "symbol": "timer_handler"
+   "class": "INTACT",
+   "symbol": "exception_handler"
   },
   {
    "offset": 256,
-   "class": "DEAD",
-   "symbol": "timer_handler"
+   "class": "INTACT",
+   "symbol": "exception_handler"
   },
   {
    "offset": 257,
-   "class": "DEAD",
-   "symbol": "timer_handler"
+   "class": "INTACT",
+   "symbol": "gp_handler"
   },
   {
    "offset": 258,
-   "class": "DEAD",
-   "symbol": "timer_handler"
+   "class": "INTACT",
+   "symbol": "gp_handler"
   },
   {
    "offset": 259,
-   "class": "DEAD",
-   "symbol": "timer_handler"
+   "class": "INTACT",
+   "symbol": "gp_handler"
   },
   {
    "offset": 260,
-   "class": "ALTERED-TIMER",
+   "class": "DEAD",
    "symbol": "timer_handler"
   },
   {
    "offset": 261,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "timer_handler"
   },
   {
@@ -1393,43 +1397,43 @@
   },
   {
    "offset": 264,
-   "class": "ALTERED-TIMER",
+   "class": "DEAD",
    "symbol": "timer_handler"
   },
   {
    "offset": 265,
-   "class": "DEAD",
+   "class": "ALTERED-TIMER",
    "symbol": "timer_handler"
   },
   {
    "offset": 266,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "timer_handler"
   },
   {
    "offset": 267,
    "class": "DEAD",
-   "symbol": "do_switch"
+   "symbol": "timer_handler"
   },
   {
    "offset": 268,
    "class": "DEAD",
-   "symbol": "do_switch"
+   "symbol": "timer_handler"
   },
   {
    "offset": 269,
-   "class": "DEAD",
-   "symbol": "do_switch"
+   "class": "ALTERED-TIMER",
+   "symbol": "timer_handler"
   },
   {
    "offset": 270,
    "class": "DEAD",
-   "symbol": "do_switch"
+   "symbol": "timer_handler"
   },
   {
    "offset": 271,
    "class": "DEAD",
-   "symbol": "do_switch"
+   "symbol": "timer_handler"
   },
   {
    "offset": 272,
@@ -1453,7 +1457,7 @@
   },
   {
    "offset": 276,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "do_switch"
   },
   {
@@ -1464,27 +1468,27 @@
   {
    "offset": 278,
    "class": "DEAD",
-   "symbol": "sys_send"
+   "symbol": "do_switch"
   },
   {
    "offset": 279,
    "class": "DEAD",
-   "symbol": "sys_send"
+   "symbol": "do_switch"
   },
   {
    "offset": 280,
    "class": "DEAD",
-   "symbol": "sys_send"
+   "symbol": "do_switch"
   },
   {
    "offset": 281,
-   "class": "DEAD",
-   "symbol": "sys_send"
+   "class": "INTACT",
+   "symbol": "do_switch"
   },
   {
    "offset": 282,
    "class": "DEAD",
-   "symbol": "sys_send"
+   "symbol": "do_switch"
   },
   {
    "offset": 283,
@@ -1498,12 +1502,12 @@
   },
   {
    "offset": 285,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
    "offset": 286,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
@@ -1513,7 +1517,7 @@
   },
   {
    "offset": 288,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "sys_send"
   },
   {
@@ -1523,17 +1527,17 @@
   },
   {
    "offset": 290,
-   "class": "ALTERED-VISIBLE",
-   "symbol": "sys_send"
-  },
-  {
-   "offset": 291,
    "class": "DEAD",
    "symbol": "sys_send"
   },
   {
-   "offset": 292,
+   "offset": 291,
    "class": "INTACT",
+   "symbol": "sys_send"
+  },
+  {
+   "offset": 292,
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
@@ -1548,27 +1552,27 @@
   },
   {
    "offset": 295,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "sys_send"
   },
   {
    "offset": 296,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
    "offset": 297,
-   "class": "ALTERED-VISIBLE",
+   "class": "INTACT",
    "symbol": "sys_send"
   },
   {
    "offset": 298,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
    "offset": 299,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "sys_send"
   },
   {
@@ -1579,27 +1583,27 @@
   {
    "offset": 301,
    "class": "ALTERED-VISIBLE",
-   "symbol": "sys_recv"
+   "symbol": "sys_send"
   },
   {
    "offset": 302,
-   "class": "DEAD",
-   "symbol": "sys_recv"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "sys_send"
   },
   {
    "offset": 303,
-   "class": "DEAD",
-   "symbol": "sys_recv"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "sys_send"
   },
   {
    "offset": 304,
-   "class": "DEAD",
-   "symbol": "sys_recv"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "sys_send"
   },
   {
    "offset": 305,
    "class": "DEAD",
-   "symbol": "sys_recv"
+   "symbol": "sys_send"
   },
   {
    "offset": 306,
@@ -1608,7 +1612,7 @@
   },
   {
    "offset": 307,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "sys_recv"
   },
   {
@@ -1633,12 +1637,12 @@
   },
   {
    "offset": 312,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "sys_recv"
   },
   {
    "offset": 313,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "sys_recv"
   },
   {
@@ -1668,7 +1672,7 @@
   },
   {
    "offset": 319,
-   "class": "ALTERED-TIMER",
+   "class": "DEAD",
    "symbol": "sys_recv"
   },
   {
@@ -1683,58 +1687,58 @@
   },
   {
    "offset": 322,
-   "class": "INTACT",
-   "symbol": "idtr"
+   "class": "DEAD",
+   "symbol": "sys_recv"
   },
   {
    "offset": 323,
-   "class": "INTACT",
-   "symbol": "idtr"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "sys_recv"
   },
   {
    "offset": 324,
    "class": "DEAD",
-   "symbol": "idtr"
+   "symbol": "sys_recv"
   },
   {
    "offset": 325,
    "class": "DEAD",
-   "symbol": "idtr"
+   "symbol": "sys_recv"
   },
   {
    "offset": 326,
    "class": "DEAD",
-   "symbol": "idtr"
+   "symbol": "sys_recv"
   },
   {
    "offset": 327,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "idtr"
   },
   {
    "offset": 328,
    "class": "INTACT",
-   "symbol": "gdt"
+   "symbol": "idtr"
   },
   {
    "offset": 329,
-   "class": "INTACT",
-   "symbol": "gdt"
+   "class": "DEAD",
+   "symbol": "idtr"
   },
   {
    "offset": 330,
    "class": "DEAD",
-   "symbol": "gdt"
+   "symbol": "idtr"
   },
   {
    "offset": 331,
    "class": "DEAD",
-   "symbol": "gdt"
+   "symbol": "idtr"
   },
   {
    "offset": 332,
    "class": "DEAD",
-   "symbol": "gdt"
+   "symbol": "idtr"
   },
   {
    "offset": 333,
@@ -1748,7 +1752,7 @@
   },
   {
    "offset": 335,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
@@ -1763,17 +1767,17 @@
   },
   {
    "offset": 338,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
    "offset": 339,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
    "offset": 340,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1783,12 +1787,12 @@
   },
   {
    "offset": 342,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 343,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
@@ -1808,7 +1812,7 @@
   },
   {
    "offset": 347,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1823,17 +1827,17 @@
   },
   {
    "offset": 350,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 351,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 352,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
@@ -1848,7 +1852,7 @@
   },
   {
    "offset": 355,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1858,7 +1862,7 @@
   },
   {
    "offset": 357,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1868,12 +1872,12 @@
   },
   {
    "offset": 359,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 360,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
@@ -1888,7 +1892,7 @@
   },
   {
    "offset": 363,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1898,7 +1902,7 @@
   },
   {
    "offset": 365,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1908,17 +1912,17 @@
   },
   {
    "offset": 367,
-   "class": "INTACT",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 368,
-   "class": "ALTERED-VISIBLE",
+   "class": "DEAD",
    "symbol": "gdt"
   },
   {
    "offset": 369,
-   "class": "ALTERED-VISIBLE",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1928,7 +1932,7 @@
   },
   {
    "offset": 371,
-   "class": "DEAD",
+   "class": "INTACT",
    "symbol": "gdt"
   },
   {
@@ -1938,133 +1942,133 @@
   },
   {
    "offset": 373,
-   "class": "DEAD",
+   "class": "ALTERED-VISIBLE",
    "symbol": "gdt"
   },
   {
    "offset": 374,
-   "class": "DEAD",
-   "symbol": "other_sp"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "gdt"
   },
   {
    "offset": 375,
    "class": "DEAD",
-   "symbol": "other_sp"
+   "symbol": "gdt"
   },
   {
    "offset": 376,
    "class": "DEAD",
-   "symbol": "other_sp"
+   "symbol": "gdt"
   },
   {
    "offset": 377,
-   "class": "DEAD",
-   "symbol": "other_sp"
+   "class": "INTACT",
+   "symbol": "gdt"
   },
   {
    "offset": 378,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 379,
    "class": "INTACT",
-   "symbol": "payload_end"
+   "symbol": "gdt"
   },
   {
    "offset": 380,
    "class": "INTACT",
-   "symbol": "payload_end"
+   "symbol": "gdt"
   },
   {
    "offset": 381,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 382,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 383,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 384,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 385,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "ALTERED-VISIBLE",
+   "symbol": "gdt"
   },
   {
    "offset": 386,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 387,
    "class": "INTACT",
-   "symbol": "payload_end"
+   "symbol": "gdt"
   },
   {
    "offset": 388,
    "class": "INTACT",
-   "symbol": "payload_end"
+   "symbol": "gdt"
   },
   {
    "offset": 389,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 390,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 391,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 392,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 393,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 394,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "gdt"
   },
   {
    "offset": 395,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "other_sp"
   },
   {
    "offset": 396,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "other_sp"
   },
   {
    "offset": 397,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "other_sp"
   },
   {
    "offset": 398,
-   "class": "INTACT",
-   "symbol": "payload_end"
+   "class": "DEAD",
+   "symbol": "other_sp"
   },
   {
    "offset": 399,

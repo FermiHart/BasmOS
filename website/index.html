@@ -267,7 +267,7 @@ footer .joke{margin-top:.8rem;color:#41553f}
       preemptive scheduling, two tasks, IPC. Its sibling sector adds a real ring-3 monitor,
       TSS and user-module loader. No second stage; assembled 100% with BASM.</p>
       <div class="pj-stats">
-        <span>512 B sector</span><span>378 B payload</span><span>232 B machine-contract</span><span>256 B JASH/CPL3</span><span>source-built tools</span>
+        <span>512 B sector</span><span>399 B payload</span><span>232 B machine-contract</span><span>256 B JASH/CPL3</span><span>source-built tools</span>
         <span>QEMU · browser · KVM</span><span>boots in your browser</span>
       </div>
       <span class="cta">ENTER THE SECTOR →</span>
@@ -323,10 +323,10 @@ footer .joke{margin-top:.8rem;color:#41553f}
       No second stage. No bootloader. Assembled 100% with <b>BASM</b>.
     </p>
     <div class="stats">
-      <div class="stat"><b>378</b><span>PAYLOAD (B)</span></div>
-      <div class="stat"><b>310</b><span>CODE (B)</span></div>
-      <div class="stat"><b>68</b><span>DATA (B)</span></div>
-      <div class="stat"><b>132</b><span>HEADROOM (B)</span></div>
+      <div class="stat"><b>399</b><span>PAYLOAD (B)</span></div>
+      <div class="stat"><b>315</b><span>CODE (B)</span></div>
+      <div class="stat"><b>84</b><span>DATA (B)</span></div>
+      <div class="stat"><b>111</b><span>HEADROOM (B)</span></div>
       <div class="stat"><b>0</b><span>SECOND STAGES</span></div>
       <div class="stat"><b>256</b><span>IPC RING (B)</span></div>
     </div>
@@ -368,7 +368,7 @@ footer .joke{margin-top:.8rem;color:#41553f}
       <aside class="inspector" id="inspector">
         <div class="iaddr" id="iaddr">0x7C00 … 0x7DFF</div>
         <div class="iname" id="iname">the whole sector</div>
-        <div class="idesc" id="idesc">378 bytes of payload, 132 bytes of headroom, and the 0xAA55 signature. Hover a byte to see which symbol owns it and what it does. Byte sensitivity: 261 payload bytes are DEAD when flipped, 33 visibly alter the contract, 3 freeze timer evidence, and 81 are observably intact. The domain gate separately requires a cross-domain access to enter #GP13.</div>
+        <div class="idesc" id="idesc">399 bytes of payload, 111 bytes of headroom, and the 0xAA55 signature. Hover a byte to see which symbol owns it and what it does. The domain gate separately requires cross-domain data and code accesses to enter #GP13 — each task owns its data window <em>and</em> its fetch window.</div>
         <div class="ibytes" id="ibytes"></div>
       </aside>
     </div>
@@ -549,11 +549,11 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
         NanoOS 2.1 and pczero are partial prior art, not competitors: each lacks required features.</p></div>
       <div class="feat"><span class="n">232 B</span><h3 style="color:#38d9ff">THE CLAIM (MACHINE CONTRACT)</h3>
         <p>Under the bemu-nano contract the same source ships as 232 bytes — always labeled as such,
-        never as bare metal. On bare metal the answer stays 512&nbsp;B / 378&nbsp;B, full stop.</p></div>
-      <div class="feat"><span class="n">159×</span><h3 style="color:#ff9432">SMALLER THAN THE PAPER THAT NAMED THE CATEGORY</h3>
+        never as bare metal. On bare metal the answer stays 512&nbsp;B / 399&nbsp;B, full stop.</p></div>
+      <div class="feat"><span class="n">150×</span><h3 style="color:#ff9432">SMALLER THAN THE PAPER THAT NAMED THE CATEGORY</h3>
         <p>KeyKOS (USENIX 1992) coined “nanokernel” at ~60&nbsp;KB of executable code.
          BasmOS implements a compact kernel core — preemption, trap services and logical IPC between shared-CPL0 tasks —
-        in 378 bytes. With the machine contract: 259× smaller.</p></div>
+        in 399 bytes. With the machine contract: 259× smaller.</p></div>
       <div class="feat"><span class="n">3</span><h3 style="color:#cf7dff">EXECUTORS THAT MUST AGREE</h3>
         <p>QEMU and the interpreter execute the 512-byte sector; bare KVM (bemu-nano) checks its BIOS personality
         and the separate 232-byte machine-contract build. Their specified observables must agree or verification fails.</p></div>
@@ -594,13 +594,13 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     <div class="meta"><b style="color:var(--green);letter-spacing:.18em">F E R M I ∞ H A R T</b> ·
       <a href="mailto:contact@fermihart.com">contact@fermihart.com</a> · Nanokernel.org<br>
       License: BSD 3-Clause ·
-      Artifact: <code>basmos.bin</code> (512 B, payload 378 B) — embedded in <a href="#/basmos">the project page</a>, bootable there.</div>
+      Artifact: <code>basmos.bin</code> (512 B, payload 399 B) — embedded in <a href="#/basmos">the project page</a>, bootable there.</div>
 
     <div class="abstract">
       <b>Abstract.</b> BasmOS is a <b>nanokernel</b>: an operating system whose entire
       implementation — bootstrap, protected-mode transition, paged memory, preemptive
       scheduling, system calls and inter-task communication — fits in the one 512-byte
-      sector the PC BIOS loads. The payload is 378 bytes (310 code, 68 data); the rest is
+      sector the PC BIOS loads. The payload is 399 bytes (315 code, 84 data); the rest is
       padding ahead of the mandatory <code>0xAA55</code> signature. The kernel is assembled
       entirely with BASM and requires no second-stage loader: the kernel <em>is</em> the boot
       record. Behavior is verified deterministically by reading VGA text memory back from
@@ -616,7 +616,7 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     protected mode, enables paging, preempts two tasks on the timer interrupt, and passes
     bytes between them through a ring buffer — all inside the sector that is also its own
     boot record.</p>
-    <p>Contributions: (i) a full protected-mode OS in 378 payload bytes; (ii) a set of
+    <p>Contributions: (i) a full protected-mode OS in 399 payload bytes; (ii) a set of
     reusable size-engineering techniques (§4); (iii) a deterministic, externally observable
     verification method (§6.1); (iv) a second, independent executor — an x86 interpreter
     embedded in the project page — providing dual-implementation agreement (§6.2).</p>
@@ -636,12 +636,16 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
     0x800/0x900, stack/page directory at 0x1000, and VGA at 0xB8000 — lies below 1&nbsp;MB,
     making the A20 line irrelevant by construction.</p>
     <p>SS remains flat for interrupt frames. Task DS selectors are limited to 256 bytes;
-    handlers reach kernel state only through flat ES, and GS is limited to the VGA page.</p>
+    handlers reach kernel state only through flat ES, and GS is limited to the VGA page.
+    Task CS selectors (0x30, 0x38) bound each task's instruction fetch to its own bytes:
+    a five-byte <code>push/push/retf</code> prologue enters task0 through its window, task1's
+    frame ships CS directly, and runaway execution beyond a window raises #GP13 at the fetch.</p>
 
     <h3>4 · Concurrency</h3>
     <p>The scheduler state is one cell, <code>other_sp</code>. The complete switch is
     <code>xchg esp,[es:other_sp] · popad · mov ds,bp · iretd</code>: 11 bytes, no current-task
-    index and no branch. EBP carries the incoming task's bounded DS selector.</p>
+    index and no branch. EBP carries the incoming task's bounded DS selector, and the
+    interrupted task's code selector returns through the iretd frame itself.</p>
     <p>task1 is born from a 12-byte frame (EIP, CS, EFLAGS=0x202) assembled as <em>data</em>;
     its stack has no allocation of its own, cycling within a 44-byte window of
     initialization bytes that are never needed again. IRQ0 is remapped to vector 32,
@@ -688,17 +692,17 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
       <tr><td>start</td><td class="num">22</td><td>real-mode entry, PE enable, far jmp</td></tr>
       <tr><td>pm</td><td class="num">153</td><td>IDT construction, segments, paging, PIC/PIT, stack</td></tr>
       <tr><td>t1frame</td><td class="num">12</td><td>task1 bootstrap frame (data)</td></tr>
-      <tr><td>task0</td><td class="num">29</td><td>private-domain producer: send loop, no hlt, no yield</td></tr>
+      <tr><td>task0</td><td class="num">34</td><td>5-byte retf prologue + private-domain producer: send loop, no hlt, no yield</td></tr>
       <tr><td>task1</td><td class="num">33</td><td>private-domain consumer, including HLT loop</td></tr>
       <tr><td>exception / #GP / timer</td><td class="num">18</td><td>fail-stop entries; IRQ0 + EOI + heartbeat</td></tr>
       <tr><td>do_switch</td><td class="num">11</td><td>atomic stack and DS-context switch</td></tr>
       <tr><td>sys_send</td><td class="num">23</td><td>ES-scoped ring write plus full detection</td></tr>
       <tr><td>sys_recv</td><td class="num">21</td><td>ES-scoped ring read plus empty detection</td></tr>
       <tr><td>idtr</td><td class="num">6</td><td>IDTR image</td></tr>
-      <tr><td>gdt</td><td class="num">46</td><td>flat kernel, two task domains and VGA descriptor</td></tr>
+      <tr><td>gdt</td><td class="num">62</td><td>flat kernel, task data domains, VGA and task code-window descriptors</td></tr>
       <tr><td>other_sp</td><td class="num">4</td><td>all persistent scheduler state</td></tr>
-      <tr><th>payload</th><th>378</th><th>310 code + 68 data</th></tr>
-      <tr><td>padding + 0xAA55</td><td class="num">134</td><td>132 headroom + 2-byte signature</td></tr>
+      <tr><th>payload</th><th>399</th><th>315 code + 84 data</th></tr>
+      <tr><td>padding + 0xAA55</td><td class="num">113</td><td>111 headroom + 2-byte signature</td></tr>
     </table>
 
     <h3>8 · Related magnitude</h3>
@@ -710,9 +714,9 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
 
     <h3>9 · Limitations</h3>
     <p>Scope decisions, not accidents: a single privilege level (ring 0); no interactive
-    input; trusted CPL0 task code; a static two-task set; a 4&nbsp;MB identity map; PSE-capable IA-32 hardware; and no
+    input; trusted CPL0 task code (windows contain runaway fetches, not deliberate far transfers); a static two-task set; a 4&nbsp;MB identity map; PSE-capable IA-32 hardware; and no
     recovery policy beyond fail-stop for CPU exceptions. The PIC and PIT are initialized,
-    every architectural exception has a valid gate, and 132 payload bytes remain available.</p>
+    every architectural exception has a valid gate, and 111 payload bytes remain available.</p>
 
     <h3>10 · Reproducibility</h3>
     <p><code>make</code> assembles the sector with BASM; <code>make verify</code> performs the
@@ -757,37 +761,38 @@ map 00-40 id 41-45 emit 46-86 prompt 87-8F VM 90-D1 dispatch
 </footer>
 
 <script>
-/* ═══ THE PRODUCT ═══ real payload (378 B) of basmos.bin, hex verbatim */
+/* ═══ THE PRODUCT ═══ real payload (399 B) of basmos.bin, hex verbatim */
 const PAYLOAD_HEX =
-  "fa31c08ed80f0116487d0f20c0400f22c0ea167c0800b8100000008ed88ed0bc1806000031d2b68eb82d7d08005250b016525066b8ff7c5250b0f96a"+
-  "20595250e2fc66c70568050000fc7c0f011d427d00000f20e00c100f22e0b800100000c700830000000f22d889c40f20c00fbae81f0f22c0b011e620"+
-  "b020e621b004e621b001e621b0fee621b036e64330c0e640e64066b810008ec0b0288ee8b50766c705977c00002000890da77c0000eb0cd87c000008"+
-  "0000000202000066bd18008edd66b8330f6566a300000000a200000000fbb039cd21ebfc6566c70502000000360fcd2284c0740ea200000000b40a65"+
-  "66a304000000f4ebe9f4ebfdf4ebfd60b020e62026fe05fc060000268725767d0000618eddcf89cafec2268b1d767d0000263b5318740526880189d1"+
-  "cf30c0268b15767d0000263b4a187405268a01fec1cf1701000500002f00467d0000ffff0000009acf00ffff00000092cf00ff00000800924000ff00"+
-  "000900924000ff0f00800b9240008f7c0000";
+  "fa31c08ed80f01164d7d0f20c0400f22c0ea167c0800b8100000008ed88ed0bc1806000031d2b68eb8327d08005250b01b525066b8047d5250b0fe6a"+
+  "20595250e2fc66c70568050000017d0f011d477d00000f20e00c100f22e0b800100000c700830000000f22d889c40f20c00fbae81f0f22c0b011e620"+
+  "b020e621b004e621b001e621b0fee621b036e64330c0e640e64066b810008ec0b0288ee8b50766c705977c00002000890da77c0000eb0c0000000038"+
+  "000000020200006a306a05cb66bd18008edd66b8330f6566a300000000a200000000fbb039cd21ebfc6566c70502000000360fcd2284c0740ea20000"+
+  "0000b40a6566a304000000f4ebe9f4ebfdf4ebfd60b020e62026fe05fc0600002687258b7d0000618eddcf89cafec2268b1d8b7d0000263b53187405"+
+  "26880189d1cf30c0268b158b7d0000263b4a187405268a01fec1cf1701000500003f004b7d0000ffff0000009acf00ffff00000092cf00ff00000800"+
+  "924000ff00000900924000ff0f00800b9240002100bb7c009a40002000dd7c009a40008f7c0000";
 
 const BIN = new Uint8Array(512);
-for (let i = 0; i < 378; i++) BIN[i] = parseInt(PAYLOAD_HEX.substr(i*2, 2), 16);
+for (let i = 0; i < 399; i++) BIN[i] = parseInt(PAYLOAD_HEX.substr(i*2, 2), 16);
 BIN[510] = 0x55; BIN[511] = 0xAA;
 
 /* symbol map (offset, size, id, name, description, color) */
 const REG = [
  [0,22,'start','start · BITS 16','wake-up: cli · DS=0 · lgdt · PE set by a single-byte inc ax · far jmp 0x08:pm','#38d9ff'],
  [22,153,'pm','pm · hardened 32-bit init','ESP builds 35 IDT gates · #GP gate · paging · PIC/PIT · segment capabilities','#4a86ff'],
-  [175,12,'t1frame','t1frame · baked frame','task1’s EIP/CS/EFLAGS shipped as data; its stack reuses dead initialization bytes','#ff5fd0'],
-   [187,29,'task0','task0 · bounded producer','DS base 0x800/limit 0xFF; GS writes white 3; CPU-bound send loop','#46ff7d'],
-   [216,33,'task1','task1 · bounded consumer','DS base 0x900/limit 0xFF; GS writes white 6 and received green 9','#b9ff4f'],
-   [249,3,'fault','exception_handler','generic architectural exceptions enter stable fail-stop','#ff3158'],
-   [252,3,'gp','gp_handler · vector 13','distinct #GP fail-stop makes the negative domain probe exact','#ff3158'],
-   [255,12,'timer','timer_handler · vector 32','pushad + EOI + ES-scoped heartbeat','#ff5252'],
-   [267,11,'sw','do_switch · bounded scheduler','ES swaps stack; EBP restores the incoming task DS selector','#ff9432'],
-   [278,23,'send','sys_send · int 33','flat ES is required to reach the kernel-owned ring and peer frame','#cf7dff'],
-   [301,21,'recv','sys_recv · int 34','flat ES reads the ring; inc cl wraps modulo 256','#a44dff'],
-   [322,6,'idtr','idtr','limit covers exceptions 0..31 plus timer/yield, send and receive','#ffe45c'],
-   [328,46,'gdt','gdt','flat kernel plus bounded task0, task1 and VGA descriptors','#e0a41f'],
-   [374,4,'other','other_sp','the only persistent scheduler cell; also exposes the opposite endpoint cursor','#2ef0c0'],
-   [378,132,'pad','headroom','132 bytes remain before the boot signature','#20301f'],
+  [175,12,'t1frame','t1frame · baked frame','task1’s EIP/CS/EFLAGS shipped as data; CS=0x38, its own code window','#ff5fd0'],
+   [187,5,'retf','task0 · code-window entry','push 0x30 · push 5 · retf: task0 begins executing inside its own CS','#46ff7d'],
+   [192,29,'task0','task0 · bounded producer','DS base 0x800/limit 0xFF; GS writes white 3; CPU-bound send loop','#46ff7d'],
+   [221,33,'task1','task1 · bounded consumer','DS base 0x900/limit 0xFF; GS writes white 6 and received green 9','#b9ff4f'],
+   [254,3,'fault','exception_handler','generic architectural exceptions enter stable fail-stop','#ff3158'],
+   [257,3,'gp','gp_handler · vector 13','distinct #GP fail-stop makes the negative domain probes exact','#ff3158'],
+   [260,12,'timer','timer_handler · vector 32','pushad + EOI + ES-scoped heartbeat','#ff5252'],
+   [272,11,'sw','do_switch · bounded scheduler','ES swaps stack; EBP restores the incoming task DS selector','#ff9432'],
+   [283,23,'send','sys_send · int 33','flat ES is required to reach the kernel-owned ring and peer frame','#cf7dff'],
+   [306,21,'recv','sys_recv · int 34','flat ES reads the ring; inc cl wraps modulo 256','#a44dff'],
+   [327,6,'idtr','idtr','limit covers exceptions 0..31 plus timer/yield, send and receive','#ffe45c'],
+   [333,62,'gdt','gdt','flat kernel + task0/task1 data + VGA + task0/task1 code descriptors','#e0a41f'],
+   [395,4,'other','other_sp','the only persistent scheduler cell; also exposes the opposite endpoint cursor','#2ef0c0'],
+   [399,111,'pad','headroom','111 bytes remain before the boot signature','#20301f'],
  [510,2,'sig','0xAA55','the BIOS’s permission slip: “this boots”','#ffffff'],
 ];
 const regOf = i => REG.find(r => i >= r[0] && i < r[0]+r[1]);
@@ -938,9 +943,11 @@ $('btnhex').addEventListener('click', async e => {
    uses, and it executes the page's own 512 bytes, IDT, IPC ring and all. */
 const CPU = (() => {
   let M, R, CR, S, gdtr, gdtLimit, eip, IF, ZF, mode16, idt, halted, crash, tickPending;
+  let csBase, csLim;
   let insns, ticks, yields, sends, recvs, timerCnt, lastException, insnStart, segOverride;
   const TIMER_PERIOD = 45000;
   const EAX=0, ECX=1, ESP=4, ES=0, CS=1, SS=2, DS=3;
+  const GPFETCH = {};                        // sentinel: #GP raised during fetch
 
   const r16 = a => M[a] | M[a+1]<<8;
   const r32 = a => (M[a] | M[a+1]<<8 | M[a+2]<<16 | M[a+3]<<24) >>> 0;
@@ -954,6 +961,17 @@ const CPU = (() => {
     R[r]=((R[r]&~mask)|((v&255)<<sh))>>>0; };
   const flags  = () => (IF?0x200:0)|(ZF?0x40:0)|2;
 
+  /* Instruction fetch goes through the code segment: base and limit are
+   * cached and a fetch beyond the limit raises #GP13 exactly like the metal
+   * artifact's task code windows. */
+  const F = () => { if (eip > csLim) { intN(13,false,insnStart); throw GPFETCH; }
+                    const v=M[(csBase+eip)>>>0]; eip=(eip+1)>>>0; return v; };
+  const F16 = () => { if ((eip+1) > csLim) { intN(13,false,insnStart); throw GPFETCH; }
+                      const v=r16((csBase+eip)>>>0); eip=(eip+2)>>>0; return v; };
+  const F32 = () => { if ((eip+3) > csLim) { intN(13,false,insnStart); throw GPFETCH; }
+                      const v=r32((csBase+eip)>>>0); eip=(eip+4)>>>0; return v; };
+  const flatCS = () => { S[CS]={selector:8,base:0,limit:0xFFFFFFFF}; csBase=0; csLim=0xFFFFFFFF; };
+
   function reset(image=BIN){
     M = new Uint8Array(0x100000);       // 1 MB, flat (identity paging)
     M.set(image, 0x7C00);               // BIOS puts the sector at 0x7C00
@@ -962,6 +980,7 @@ const CPU = (() => {
     S = Array.from({length:6}, () => ({selector:0,base:0,limit:0xFFFF}));
     gdtr = 0; gdtLimit = 0;
     eip = 0x7C00; IF = 0; ZF = 0; mode16 = true; idt = 0; halted = false; crash = null;
+    csBase = 0; csLim = 0xFFFF;         // real-mode code window
     tickPending = false;
     insns = 0; ticks = 0; yields = 0; sends = 0; recvs = 0; timerCnt = TIMER_PERIOD;
     lastException = null; insnStart = eip; segOverride = -1;
@@ -972,14 +991,16 @@ const CPU = (() => {
     if (n < 32) lastException = n;
     const gate = idt + n*8;
     const off = r16(gate) | r16(gate+6)<<16;   // offset_hi is 0 in this kernel
-    push32(flags()); push32(8); push32(returnEip);
+    push32(flags()); push32(S[CS].selector); push32(returnEip);
     if (n===13) push32(0);
     IF = 0;                                     // interrupt gate clears IF
+    flatCS();                                   // handlers enter on the flat gate code
     eip = off;
   }
 
   function loadSegment(index, selector){
-    if (!(CR[0]&1)) { S[index]={selector,base:selector<<4,limit:0xFFFF}; return; }
+    if (!(CR[0]&1)) { S[index]={selector,base:selector<<4,limit:0xFFFF};
+                      if (index===CS){ csBase=S[CS].base; csLim=0xFFFF; } return; }
     const at = gdtr + (selector&0xFFF8);
     if (!selector || at+7 > gdtr+gdtLimit) { crash={op:'invalid segment',at:insnStart}; return; }
     const base = (r16(at+2) | M[at+4]<<16 | M[at+7]<<24)>>>0;
@@ -987,6 +1008,7 @@ const CPU = (() => {
     if (M[at+6]&0x80) limit=(limit<<12|0xFFF)>>>0;
     if (!(M[at+5]&0x80)) { crash={op:'segment not present',at:insnStart}; return; }
     S[index]={selector,base,limit};
+    if (index===CS){ csBase=base; csLim=limit; }
   }
 
   function segmentAddr(offset, width, defaultSegment=DS, allowOverride=true){
@@ -999,10 +1021,10 @@ const CPU = (() => {
   function rmAddr(m, width=1){                  // 32-bit ModR/M subset
     const mod = m>>>6, rm = m&7;
     let offset, defaultSegment=DS;
-    if (mod===0 && rm===5){ offset=r32(eip); eip+=4; }
+    if (mod===0 && rm===5){ offset=F32(); }
     else if (mod===0) offset=R[rm];
-    else if (mod===1){ const d=M[eip++]<<24>>24; offset=(R[rm]+d)>>>0; }
-    else if (mod===2){ offset=(R[rm]+r32(eip))>>>0; eip+=4; }
+    else if (mod===1){ const d=F()<<24>>24; offset=(R[rm]+d)>>>0; }
+    else if (mod===2){ offset=(R[rm]+F32())>>>0; }
     else { crash = {op:'modrm '+m.toString(16), at:eip}; return -1; }
     if (rm===4 || (rm===5 && mod!==0)) defaultSegment=SS;
     return segmentAddr(offset,width,defaultSegment);
@@ -1012,7 +1034,7 @@ const CPU = (() => {
     insnStart=eip; segOverride=-1;
     let op, o16 = mode16;
     for (;;) {
-      op=M[eip++];
+      op=F();
       if (op===0x66) o16=!o16;
       else if (op===0x26) segOverride=ES;
       else if (op===0x2E) segOverride=CS;
@@ -1025,22 +1047,22 @@ const CPU = (() => {
     switch(op){
       case 0xFA: IF=0; break;                                  // cli
       case 0xFB: IF=1; break;                                  // sti
-      case 0x31: { const m=M[eip++], reg=(m>>>3)&7, rm=m&7;
+      case 0x31: { const m=F(), reg=(m>>>3)&7, rm=m&7;
                    if((m>>>6)!==3){ crash={op:'xor mem',at:eip-2}; break; }
                    if(o16){ const v=((R[rm]&0xFFFF)^(R[reg]&0xFFFF))&0xFFFF;
                      R[rm]=(R[rm]&0xFFFF0000)|v; ZF=v===0; }
                    else { R[rm]=(R[rm]^R[reg])>>>0; ZF=R[rm]===0; } break; }
-      case 0x8E: { const m=M[eip++];
+      case 0x8E: { const m=F();
                    if((m>>>6)!==3){ crash={op:'mov sreg,mem',at:insnStart}; break; }
                    loadSegment((m>>>3)&7,R[m&7]&0xFFFF); break; }
       case 0x40: R[EAX]=o16 ? (R[EAX]&0xFFFF0000)|((R[EAX]+1)&0xFFFF) : (R[EAX]+1)>>>0; break; // inc ax
       case 0xEA: {                                             // far jmp
-        const off = mode16 ? r16(eip) : r32(eip), n=mode16?2:4;
-        const selector=r16(eip+n); eip += n+2;
+        const off = mode16 ? F16() : F32();
+        const selector=F16();
         loadSegment(CS,selector);
         eip = off; mode16 = !(CR[0]&1); break;                 // CS reload completes the switch
       }
-      case 0x6A: push32(M[eip++]); break;                      // push imm8
+      case 0x6A: push32(F()); break;                           // push imm8
       case 0x50: case 0x51: case 0x52: case 0x53:
       case 0x54: case 0x55: case 0x56: case 0x57: push32(R[op-0x50]); break;
       case 0x58: case 0x59: case 0x5A: case 0x5B:
@@ -1048,68 +1070,75 @@ const CPU = (() => {
       case 0xB8: case 0xB9: case 0xBA: case 0xBB:
       case 0xBC: case 0xBD: case 0xBE: case 0xBF: {             // mov r16/r32,imm
         const reg=op-0xB8;
-        if(o16){ R[reg]=(R[reg]&0xFFFF0000)|r16(eip); eip+=2; }
-        else { R[reg]=r32(eip); eip+=4; }
+        if(o16){ R[reg]=(R[reg]&0xFFFF0000)|F16(); }
+        else { R[reg]=F32(); }
         break;
       }
       case 0xB0: case 0xB1: case 0xB2: case 0xB3:
-      case 0xB4: case 0xB5: case 0xB6: case 0xB7: set8(op-0xB0,M[eip++]); break;
-      case 0x0C: set8(0,get8(0)|M[eip++]); break;              // or al,imm8
-      case 0x0D: R[EAX]=(R[EAX]|r32(eip))>>>0; eip+=4; break;  // or eax,imm32
-      case 0xC7: { const m=M[eip++], a=rmAddr(m);
-                   if(o16){ const v=r16(eip); eip+=2; if(a>=0) w16(a,v); }
-                   else { const v=r32(eip); eip+=4; if(a>=0) w32(a,v); } break; }
-      case 0xA0: { const o=r32(eip); eip+=4; const a=segmentAddr(o,1); if(a>=0) set8(0,M[a]); break; }
-      case 0xA1: { const o=r32(eip); eip+=4, a=segmentAddr(o,o16?2:4);
+      case 0xB4: case 0xB5: case 0xB6: case 0xB7: set8(op-0xB0,F()); break;
+      case 0x0C: set8(0,get8(0)|F()); break;                   // or al,imm8
+      case 0x0D: R[EAX]=(R[EAX]|F32())>>>0; break;             // or eax,imm32
+      case 0xC7: { const m=F(), a=rmAddr(m);
+                   if (a<0) break;              // #GP already vectored; skip the immediate
+                   if(o16){ const v=F16(); w16(a,v); }
+                   else { const v=F32(); w32(a,v); } break; }
+      case 0xA0: { const o=F32(); const a=segmentAddr(o,1); if(a>=0) set8(0,M[a]); break; }
+      case 0xA1: { const o=F32(), a=segmentAddr(o,o16?2:4);
                    if(a>=0) R[EAX]=o16?(R[EAX]&0xFFFF0000)|r16(a):r32(a); break; }
-      case 0xA2: { const o=r32(eip); eip+=4, a=segmentAddr(o,1); if(a>=0) M[a]=get8(0); break; }
-      case 0xA3: { const o=r32(eip); eip+=4, a=segmentAddr(o,o16?2:4);
+      case 0xA2: { const o=F32(), a=segmentAddr(o,1); if(a>=0) M[a]=get8(0); break; }
+      case 0xA3: { const o=F32(), a=segmentAddr(o,o16?2:4);
                    if(a>=0) { if(o16) w16(a,R[EAX]&0xFFFF); else w32(a,R[EAX]); } break; }
-      case 0x89: { const m=M[eip++], reg=(m>>>3)&7, rm=m&7;
+      case 0x89: { const m=F(), reg=(m>>>3)&7, rm=m&7;
                    if((m>>>6)===3) R[rm]=R[reg]; else { const a=rmAddr(m,4); if(a>=0) w32(a,R[reg]); } break; }
-      case 0x8B: { const m=M[eip++], reg=(m>>>3)&7, rm=m&7;
+      case 0x8B: { const m=F(), reg=(m>>>3)&7, rm=m&7;
                    if((m>>>6)===3) R[reg]=R[rm]; else { const a=rmAddr(m,4); if(a>=0) R[reg]=r32(a); } break; }
-      case 0x87: { const m=M[eip++], reg=(m>>>3)&7, rm=m&7;
+      case 0x87: { const m=F(), reg=(m>>>3)&7, rm=m&7;
                    if((m>>>6)===3){ const v=R[rm]; R[rm]=R[reg]; R[reg]=v; }
                    else { const a=rmAddr(m,4); if(a>=0){ const v=r32(a); w32(a,R[reg]); R[reg]=v; } } break; }
-      case 0x88: { const m=M[eip++], a=rmAddr(m,1); if(a>=0) M[a]=get8((m>>>3)&7); break; }
-      case 0x8A: { const m=M[eip++], a=rmAddr(m,1); if(a>=0) set8((m>>>3)&7,M[a]); break; }
-      case 0x3B: { const m=M[eip++], reg=(m>>>3)&7, a=rmAddr(m,4); if(a>=0) ZF=(R[reg]===r32(a)); break; }
-      case 0x83: { const m=M[eip++], imm=M[eip++]<<24>>24;     // grp1 imm8: only XOR (/6) occurs
+      case 0x88: { const m=F(), a=rmAddr(m,1); if(a>=0) M[a]=get8((m>>>3)&7); break; }
+      case 0x8A: { const m=F(), a=rmAddr(m,1); if(a>=0) set8((m>>>3)&7,M[a]); break; }
+      case 0x3B: { const m=F(), reg=(m>>>3)&7, a=rmAddr(m,4); if(a>=0) ZF=(R[reg]===r32(a)); break; }
+      case 0x83: { const m=F(), imm=F()<<24>>24;              // grp1 imm8: only XOR (/6) occurs
                    if(((m>>>3)&7)===6) R[m&7]=(R[m&7]^imm)>>>0; else crash={op:'83/'+((m>>>3)&7),at:eip};
                    break; }
-      case 0x30: eip++; R[EAX]&=~0xFF; ZF=1; break;            // xor al,al
-      case 0x84: eip++; ZF=((R[EAX]&0xFF)===0); break;         // test al,al
-      case 0xFE: { const m=M[eip++];
+      case 0x30: F(); R[EAX]&=~0xFF; ZF=1; break;             // xor al,al
+      case 0x84: F(); ZF=((R[EAX]&0xFF)===0); break;          // test al,al
+      case 0xFE: { const m=F();
                     if(((m>>>3)&7)!==0){ crash={op:'fe/'+m.toString(16),at:eip-2}; break; }
                     if((m>>>6)===3){ const v=(get8(m&7)+1)&255; set8(m&7,v); ZF=v===0; }
                      else { const a=rmAddr(m,1); if(a>=0){ M[a]=(M[a]+1)&255; ZF=M[a]===0; } } // inc r/m8
                     break; }
-      case 0x74: { const d=M[eip++]<<24>>24; if(ZF) eip=(eip+d)>>>0; break; } // jz rel8
-      case 0xEB: { const d=M[eip++]<<24>>24; eip=(eip+d)>>>0; break; }        // jmp rel8
-      case 0xE2: { const d=M[eip++]<<24>>24; R[ECX]=(R[ECX]-1)>>>0;
-                   if(R[ECX]) eip=(eip+d)>>>0; break; }        // loop rel8
+      case 0x74: { const d=F()<<24>>24; if(ZF){ const t=(eip+d)>>>0;   // jz rel8
+                    if (t > csLim){ intN(13,false,insnStart); break; } eip=t; } break; }
+      case 0xEB: { const d=F()<<24>>24; const t=(eip+d)>>>0;          // jmp rel8
+                   if (t > csLim){ intN(13,false,insnStart); break; } eip=t; break; }
+      case 0xE2: { const d=F()<<24>>24; R[ECX]=(R[ECX]-1)>>>0;
+                   if(R[ECX]){ const t=(eip+d)>>>0;                  // loop rel8
+                     if (t > csLim){ intN(13,false,insnStart); break; } eip=t; } break; }
       case 0xF4: halted=true; break;                           // hlt
-      case 0xE6: eip++; break;                                 // out imm8,al — PIC: nothing to do
-      case 0xCD: intN(M[eip++], false); break;                 // int imm8
+      case 0xE6: F(); break;                                   // out imm8,al — PIC: nothing to do
+      case 0xCD: intN(F(), false); break;                      // int imm8
       case 0x60: { const t=R[ESP];                             // pushad
                    push32(R[0]);push32(R[1]);push32(R[2]);push32(R[3]);
                    push32(t);push32(R[5]);push32(R[6]);push32(R[7]); break; }
       case 0x61: { R[7]=pop32();R[6]=pop32();R[5]=pop32();pop32();
                    R[3]=pop32();R[2]=pop32();R[1]=pop32();R[0]=pop32(); break; } // popad
-      case 0xCF: { eip=pop32(); pop32(); const f=pop32();      // iretd
+      case 0xCB: { eip=pop32(); const csel=pop32()&0xFFFF;     // retf: far return
+                   loadSegment(CS,csel); break; }
+      case 0xCF: { eip=pop32(); const csel=pop32()&0xFFFF;     // iretd
+                   loadSegment(CS,csel); const f=pop32();
                    IF=!!(f&0x200); ZF=!!(f&0x40); break; }
       case 0x0F: {
-        const op2=M[eip++];
-        if (op2===0x01){ const m=M[eip++];                      // lgdt/lidt
-          let a; if(mode16){ a=r16(eip); eip+=2; } else { a=r32(eip); eip+=4; }
+        const op2=F();
+        if (op2===0x01){ const m=F();                          // lgdt/lidt
+          let a; if(mode16){ a=F16(); } else { a=F32(); }
           a=segmentAddr(a,6);
           if(a>=0 && ((m>>>3)&7)===3) idt = r32(a+2);           // lidt: base dword
           else if(a>=0 && ((m>>>3)&7)===2){ gdtLimit=r16(a); gdtr=r32(a+2); }
         }
-        else if (op2===0x20){ const m=M[eip++]; R[m&7]=CR[(m>>>3)&7]>>>0; }  // mov r32,crN
-         else if (op2===0x22){ const m=M[eip++]; CR[(m>>>3)&7]=R[m&7]>>>0; }  // mov crN,r32
-         else if (op2===0xBA){ const m=M[eip++], imm=M[eip++];
+        else if (op2===0x20){ const m=F(); R[m&7]=CR[(m>>>3)&7]>>>0; }  // mov r32,crN
+         else if (op2===0x22){ const m=F(); CR[(m>>>3)&7]=R[m&7]>>>0; }  // mov crN,r32
+         else if (op2===0xBA){ const m=F(), imm=F();
            if(((m>>>3)&7)!==5 || (m>>>6)!==3) crash={op:'0fba/'+m.toString(16),at:eip-2};
            else R[m&7]=(R[m&7]|(1<<(imm&31)))>>>0; }            // bts r32,imm8
         else crash={op:'0f'+op2.toString(16), at:eip-2};
@@ -1129,7 +1158,8 @@ const CPU = (() => {
         tickPending=false; if (halted) halted=false; intN(32, true);
       }
       if (halted){ insns++; continue; }
-      step(); insns++;
+      try { step(); } catch(e) { if (e !== GPFETCH) throw e; } // #GF during fetch: handler is next
+      insns++;
     }
   }
   return { reset, run,

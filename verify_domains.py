@@ -114,6 +114,13 @@ def assemble(output, map_path, *defines):
     subprocess.run(command, check=True)
 
 
+def code_descriptor(limit, base):
+    """Byte-granular 32-bit task code descriptor, accessed at runtime."""
+    return bytes([limit & 0xFF, (limit >> 8) & 0xFF,
+                  base & 0xFF, (base >> 8) & 0xFF,
+                  (base >> 16) & 0xFF, 0x9B, 0x40, (base >> 24) & 0xFF])
+
+
 def positive_probe(image, symbols, directory):
     qemu = Qemu(image, directory)
     try:
@@ -126,22 +133,34 @@ def positive_probe(image, symbols, directory):
             time.sleep(0.1)
 
         gdt_base = ORG + symbols["gdt"] - 2
-        gdt = qemu.read(gdt_base, 48)
-        expected = bytes.fromhex(
+        gdt = qemu.read(gdt_base, 64)
+        fixed = bytes.fromhex(
             "ffff0000009bcf00"  # 0x08: flat code (accessed)
             "ffff00000093cf00"  # 0x10: flat kernel data / stacks (accessed)
             "ff00000800934000"  # 0x18: task0, base 0x800, limit 0xff
             "ff00000900934000"  # 0x20: task1, base 0x900, limit 0xff
             "ff0f00800b934000"  # 0x28: VGA, base 0xb8000, limit 0xfff
         )
-        ok = private == b"39" and len(gdt) == 48 and gdt[8:] == expected
+        task0 = ORG + symbols["task0"]
+        task1 = ORG + symbols["task1"]
+        exception = ORG + symbols["exception_handler"]
+        expected_code = (
+            code_descriptor(symbols["task1"] - symbols["task0"] - 1, task0)
+            + code_descriptor(symbols["exception_handler"] - symbols["task1"] - 1,
+                              task1)
+        )
+        data_ok = private == b"39" and len(gdt) == 64 and gdt[8:48] == fixed
+        code_ok = len(gdt) == 64 and gdt[48:64] == expected_code
         print(f"  [{'PASS' if private == b'39' else 'FAIL'}] own-domain writes: "
               f"task0={private[:1].hex() or 'missing'} task1={private[1:].hex() or 'missing'}")
-        print(f"  [{'PASS' if len(gdt) == 48 and gdt[8:] == expected else 'FAIL'}] "
+        print(f"  [{'PASS' if data_ok else 'FAIL'}] "
               "GDT: flat kernel + task0[0x800,0x8ff] + task1[0x900,0x9ff] + VGA")
-        if len(gdt) != 48 or gdt[8:] != expected:
+        print(f"  [{'PASS' if code_ok else 'FAIL'}] "
+              f"code windows: task0[{task0:#x},{task1 - 1:#x}] "
+              f"task1[{task1:#x},{exception - 1:#x}]")
+        if not data_ok or not code_ok:
             print(f"    observed GDT bytes: {gdt.hex() or 'missing'}")
-        return ok
+        return data_ok and code_ok
     finally:
         qemu.close()
 
@@ -149,7 +168,7 @@ def positive_probe(image, symbols, directory):
 def negative_probe(image, symbols, directory):
     qemu = Qemu(image, directory)
     gp_halt = ORG + symbols["gp_handler"] + 1
-    fault_eip = ORG + symbols["domain_fault"]
+    fault_eip = symbols["domain_fault"] - symbols["task0"]  # offset in CS 0x30
     try:
         deadline = time.time() + 5
         regs = {}
@@ -162,7 +181,7 @@ def negative_probe(image, symbols, directory):
         frame = [int.from_bytes(frame_bytes[i:i + 4], "little")
                  for i in range(0, len(frame_bytes), 4)]
         exact = (regs.get("eip") == gp_halt and len(frame) == 4
-                 and frame[0] == 0 and frame[1] == fault_eip and frame[2] == 8)
+                 and frame[0] == 0 and frame[1] == fault_eip and frame[2] == 0x30)
         own = qemu.read(TASK0_BASE, 1)
         neighbor = qemu.read(TASK1_BASE, 1)
         untouched = own == b"3" and neighbor == b"\0"
@@ -173,6 +192,46 @@ def negative_probe(image, symbols, directory):
         if not exact:
             print(qemu.register_text().strip())
         return exact and untouched
+    finally:
+        qemu.close()
+
+
+def code_negative_probe(image, symbols, directory):
+    """task0 jumps to task1's first byte; the fetch must raise #GP13."""
+    qemu = Qemu(image, directory)
+    gp_halt = ORG + symbols["gp_handler"] + 1
+    jmp_eip = symbols["domain_code_fault"] - symbols["task0"]
+    target_offset = symbols["task1"] - symbols["task0"]
+    try:
+        deadline = time.time() + 5
+        regs = {}
+        while time.time() < deadline:
+            regs = qemu.registers()
+            if regs.get("eip") == gp_halt:
+                break
+            time.sleep(0.05)
+        frame_bytes = qemu.read(regs.get("esp", 0), 16) if "esp" in regs else b""
+        frame = [int.from_bytes(frame_bytes[i:i + 4], "little")
+                 for i in range(0, len(frame_bytes), 4)]
+        gdt_base = ORG + symbols["gdt"] - 2
+        gdt = qemu.read(gdt_base, 64)
+        limit = gdt[48] | (gdt[49] << 8) if len(gdt) == 64 else -1
+        beyond = target_offset > limit
+        exact = (regs.get("eip") == gp_halt and len(frame) == 4
+                 and frame[0] == 0 and frame[1] == jmp_eip and frame[2] == 0x30)
+        vga = qemu.read(0xB8000, 4)
+        peer_silent = vga[:2] == b"3\x0f" and vga[2:4] != b"6\x0f"
+        print(f"  [{'PASS' if exact and beyond else 'FAIL'}] "
+              f"jmp task1's first byte -> #GP13 at the fetch: "
+              f"handler={regs.get('eip', 0):#x} saved-eip={frame[1] if len(frame) > 1 else 0:#x} "
+              f"cs={frame[2] if len(frame) > 2 else 0:#x}")
+        print(f"  [{'PASS' if beyond else 'FAIL'}] live CS window: "
+              f"limit={limit:#x} < fetch offset {target_offset:#x}")
+        print(f"  [{'PASS' if peer_silent else 'FAIL'}] target code never executed: "
+              f"VGA={vga.hex() or 'missing'}")
+        if not exact:
+            print(qemu.register_text().strip())
+        return exact and beyond and peer_silent
     finally:
         qemu.close()
 
@@ -222,6 +281,8 @@ def main():
         normal_map = Path(directory) / "normal.map"
         fault = Path(directory) / "fault.bin"
         fault_map = Path(directory) / "fault.map"
+        code_fault = Path(directory) / "code-fault.bin"
+        code_fault_map = Path(directory) / "code-fault.map"
         vm_normal = Path(directory) / "vm-normal.bin"
         vm_normal_map = Path(directory) / "vm-normal.map"
         vm_fault = Path(directory) / "vm-fault.bin"
@@ -232,6 +293,7 @@ def main():
         if normal.read_bytes() != KERNEL.read_bytes():
             raise SystemExit("FAIL: committed artifact differs from a fresh domain build")
         assemble(fault, fault_map, "DOMAIN_FAULT_PROBE")
+        assemble(code_fault, code_fault_map, "DOMAIN_CODE_FAULT_PROBE")
         assemble(vm_normal, vm_normal_map, "BEMU_CONTRACT")
         if vm_normal.read_bytes() != VM_KERNEL.read_bytes():
             raise SystemExit("FAIL: committed contract artifact differs from a fresh domain build")
@@ -240,12 +302,15 @@ def main():
                  "BEMU_CONTRACT", "DOMAIN_TASK1_FAULT_PROBE")
         positive = positive_probe(normal, parse_map(normal_map), directory)
         negative = negative_probe(fault, parse_map(fault_map), directory)
+        code_negative = code_negative_probe(
+            code_fault, parse_map(code_fault_map), directory)
         contract_positive = contract_positive_probe(vm_normal)
         contract_task0 = contract_negative_probe(
             vm_fault, parse_map(vm_fault_map), "domain_fault", 0)
         contract_task1 = contract_negative_probe(
             vm_task1_fault, parse_map(vm_task1_fault_map), "domain_task1_fault", 1)
-    ok = positive and negative and contract_positive and contract_task0 and contract_task1
+    ok = (positive and negative and code_negative and contract_positive
+          and contract_task0 and contract_task1)
     print("RESULT:", "PASS - bounded task domains and #GP denial are exact" if ok else "FAIL")
     return 0 if ok else 1
 
