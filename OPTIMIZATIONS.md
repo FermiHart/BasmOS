@@ -10,11 +10,11 @@ release.
 
 | Artifact | Total | Payload | Free before signature |
 |---|---:|---:|---:|
-| `basmos.bin` | 512 B | 292 B | 218 B |
+| `basmos.bin` | 512 B | 378 B | 132 B |
 
 The payload contains boot entry, PM32 transition, PSE paging, IDT, PIC/PIT,
-timer-driven switching of a CPU-bound and a sleeping task, SPSC IPC, a tick
-heartbeat and VGA output.
+timer-driven switching of a CPU-bound and a sleeping task, bounded data
+segments, SPSC IPC, a tick heartbeat and VGA output.
 
 The expected VGA evidence is:
 
@@ -37,13 +37,24 @@ timer preemption of a task that was mid-computation.
 
 ESP starts above the 35-entry IDT region. Three service gates and 32 fail-stop
 exception gates are pushed backwards into their final layout, avoiding a static
-280-byte table.
+280-byte table. Vector 13 is then pointed at a distinct handler so the negative
+domain probe can prove `#GP` specifically.
 
 ### GDT overlap
 
 The six-byte GDTR overlaps the null descriptor. A base adjustment makes selectors
 `0x08` and `0x10` address the code and data descriptors without storing a full
-eight-byte null entry.
+eight-byte null entry. Additional selectors bound task 0 to `0x800..0x8FF`,
+task 1 to `0x900..0x9FF`, and GS to the VGA page.
+
+### Segment-capability context
+
+SS remains flat so interrupt frames and overlapping task stacks retain their
+absolute offsets. EBP carries each task's DS selector through `pushad`/`popad`.
+Kernel handlers use explicit ES overrides for the ring, heartbeat and scheduler
+cell; task display writes use the VGA-only GS descriptor. The positive proof
+reads each private byte, while a separately assembled `DS:[0x100]` probe must
+enter the dedicated `#GP13` gate before task 1 can start.
 
 ### Single PSE mapping
 
@@ -53,8 +64,8 @@ page-table hierarchy.
 
 ### One-cell context switch
 
-`xchg esp,[other_sp]` atomically saves one task stack and restores the other.
-`popad` and `iretd` restore the complete integer/interrupt frame.
+`xchg esp,[es:other_sp]` atomically saves one task stack and restores the other.
+`popad`, `mov ds,bp` and `iretd` restore the integer, segment and interrupt state.
 
 ### CPU-bound producer and tick heartbeat
 
@@ -64,8 +75,8 @@ mid-computation, which is strictly stronger evidence than waking a sleeping
 task. The timer handler additionally executes `inc byte [0x6FC]` (6 bytes,
 emitted through `db`/`dd` because `basm-nano` has no `inc` with a memory
 operand yet), leaving a trace of every serviced tick; verifiers require the
-byte to keep advancing. The bEMU contract keeps the previous sleeping-task
-semantics, so `basmos-vm.bin` stays byte-identical at 171 bytes.
+byte to keep advancing. The bEMU contract keeps the sleeping-producer timing
+model and supplies the same five-entry GDT as machine state.
 
 ### Context-owned IPC cursors
 
@@ -91,12 +102,10 @@ assembles the same five artifacts with NASM and requires byte identity.
 `make verify-sensitivity` flips every byte of the record sector (XOR 0xFF),
 boots the mutant in QEMU and classifies the observable effect on the
 demonstrated contract (3/6/9, liveness, heartbeat). Current result over the
-292-byte payload: 214 payload bytes are DEAD when flipped, 27 visibly ALTER
-the contract, 2 freeze only the timer evidence, and 51 are observably dead
-under normal operation — including the entire fail-stop exception handler
-(never entered in a healthy boot), the architecturally ignored bits 31:16 of
-the pushed CS in `iretd`, and unused descriptor bytes. The full map and the
-per-symbol breakdown are committed in `evidence/byte-sensitivity.md`.
+378-byte payload: 261 payload bytes are DEAD when flipped, 33 visibly ALTER
+the contract, 3 freeze only the timer evidence, and 81 are observably intact
+under normal operation. The full map is committed in
+`evidence/byte-sensitivity.md`.
 
 ## Measured Symbol Map
 
@@ -112,7 +121,9 @@ change should report the old and new symbol budgets and regenerate
 
 ## Trade-Offs
 
-- Both record tasks run in CPL0 and share one address space.
+- Both record tasks run in CPL0. Segment limits contain ordinary DS-default
+  accesses, not EBP/ESP operands through flat SS or hostile CPL0 code capable
+  of loading selectors or replacing descriptor tables.
 - Only integer register state is switched; FPU/SIMD state is outside scope.
 - The system is fixed to two record tasks.
 - The identity map covers only the first 4 MiB.

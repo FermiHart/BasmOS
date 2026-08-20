@@ -31,8 +31,9 @@ or test harness.
 
 ## Trust Assumptions
 
-- In `basmos.bin`, both tasks and all guest code are trusted. They run in CPL0
-  with shared writable memory; there is no security boundary between them.
+- In `basmos.bin`, both tasks and all guest code are trusted. Their ordinary DS
+  accesses use separate bounded windows, but CPL0 can reload selectors or
+  replace descriptor tables; this is not a hostile-code security boundary.
 - In `basmos-sh.bin`, CPL0 code, descriptor tables, the syscall handler, and
   interrupt handlers form the guest trusted computing base. The CPL3 monitor is
   trusted to load modules correctly but is not isolated from those modules.
@@ -69,6 +70,13 @@ PDE0 maps `0x00000000` through `0x003fffff` as present, writable, and user
 accessible. Segment limits, rather than page permissions, provide the guest's
 memory boundary. There is no separate user address space and no page-level NX
 boundary between the JASH nucleus and Pack.
+
+The record artifact additionally gives task 0 and task 1 distinct 256-byte DS
+windows. SS remains flat for stack switching, handlers use flat ES for kernel
+state, and GS is limited to VGA. `verify_domains.py` proves the descriptors,
+positive private writes and a cross-domain `#GP13` on KVM-backed QEMU. This
+contains accidental ordinary accesses only: ring-0 instructions such as `mov
+ds,0x10` or `lgdt` can intentionally escape it.
 
 ### Guest To QEMU Host
 
@@ -113,7 +121,8 @@ arrays and has no designed interface to native execution, files, or devices.
 Per-frame instruction budgets limit ordinary browser work.
 
 The interpreter is not a complete x86 model and does not model the CPL3 shell,
-full segmentation, paging, or hardware. A defect can produce incorrect results
+paging, or general hardware. It models the record artifact's segment bases and
+limits, including its negative `#GP13` probe. A defect can produce incorrect results
 or consume browser resources. Compromised site JavaScript executes with the
 site's browser origin and is outside the guest model; browser and distribution
 security remain external dependencies.
@@ -140,6 +149,7 @@ checks at once.
   fault.
 - Negative tests for `cli`, `out dx,al`, and loading the CPL0 data selector from
   a module.
+- Positive and negative DS-domain tests for the trusted record tasks.
 - Read-only image execution, disabled networking, and QEMU sandbox options in
   QEMU verification.
 - Private guest RAM, no device passthrough, exit limits, and external timeouts
@@ -155,7 +165,7 @@ argument.
 ## Explicit Non-Goals
 
 - Protecting production data or safely hosting arbitrary untrusted guest images.
-- Isolation between the two CPL0 tasks in `basmos.bin`.
+- Treating bounded DS windows as hostile-code isolation between CPL0 tasks.
 - Confidentiality or integrity between the CPL3 monitor, modules, JASH, and the
   shared arena.
 - Treating JASH Decks, Surfaces, capability cells, manifests, or PRF1 records as

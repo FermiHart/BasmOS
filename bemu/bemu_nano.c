@@ -73,6 +73,8 @@
 #define GPA_VGA    0xB8000ULL       /* text page: the guest's only display    */
 #define GPA_GDT    0x0620ULL        /* contract mode: machine-owned GDT       */
 #define GPA_PD     0x1000ULL        /* contract mode: machine-owned page dir  */
+#define GPA_TASK0  0x0800ULL        /* bounded task-private marker             */
+#define GPA_TASK1  0x0900ULL        /* bounded task-private marker             */
 #define SECTOR     512
 #define IRQ0_VEC   0x20             /* the guest remaps the master PIC to 0x20 */
 #define COM1_RBR   0x03F8
@@ -82,14 +84,17 @@
 #define CPUID_MAX  128
 #define CPUID_BYTES (8 + CPUID_MAX * 40) /* header + kvm_cpuid_entry2[] */
 
-/* Contract-mode machine physics: a flat 3-entry GDT (null / code / data)
- * and one PSE PDE identity-mapping 0..4 MiB. The guest never wrote these
- * bytes — they exist because the machine exists. */
-#define GDT_SIZE 24      /* Size of machine_gdt in bytes. */
+/* Contract-mode machine physics: flat code/kernel-data descriptors, two
+ * bounded task-data domains, a VGA-only descriptor, and one PSE PDE
+ * identity-mapping 0..4 MiB. The guest never wrote these bytes. */
+#define GDT_SIZE 48      /* Size of machine_gdt in bytes. */
 static const uint8_t machine_gdt[GDT_SIZE] = {
     0x00,0x00,0x00,0x00, 0x00,0x00,0x00,0x00,   /* null                 */
     0xFF,0xFF,0x00,0x00, 0x00,0x9A,0xCF,0x00,   /* 0x08: code, 4G, 32b  */
     0xFF,0xFF,0x00,0x00, 0x00,0x92,0xCF,0x00,   /* 0x10: data, 4G, 32b  */
+    0xFF,0x00,0x00,0x08, 0x00,0x92,0x40,0x00,   /* 0x18: task0 0x800   */
+    0xFF,0x00,0x00,0x09, 0x00,0x92,0x40,0x00,   /* 0x20: task1 0x900   */
+    0xFF,0x0F,0x00,0x80, 0x0B,0x92,0x40,0x00,   /* 0x28: VGA 0xB8000  */
 };
 
 static void die(const char *msg) { perror(msg); exit(1); }
@@ -435,14 +440,16 @@ int main(int argc, char **argv)
             if (!run->if_flag) {
                 /* exception_handler: IF was cleared by the interrupt gate */
                 struct kvm_regs stopped;
-                uint32_t fault_cs = 0;
+                uint32_t frame[4] = {0, 0, 0, 0};
                 if (ioctl(vcpu, KVM_GET_REGS, &stopped) < 0) die("KVM_GET_REGS crash");
-                /* #GP pushes an error code before EIP, CS and EFLAGS. */
-                if (stopped.rsp + 12 < RAM_SIZE)
-                    fault_cs = *(uint32_t *)(ram + stopped.rsp + 8);
+                if (stopped.rsp + sizeof frame <= RAM_SIZE)
+                    memcpy(frame, ram + stopped.rsp, sizeof frame);
                 fprintf(stderr, "[bemu-nano] CRASH: guest halt with IF=0 "
-                                "(fail-stop gate) after %ld ticks; saved CS=%#x\n",
-                                irqs, fault_cs);
+                                "(fail-stop gate) after %ld ticks; "
+                                "eip=%#llx esp=%#llx frame=%08x/%08x/%08x/%08x\n",
+                                irqs, (unsigned long long)stopped.rip,
+                                (unsigned long long)stopped.rsp,
+                                frame[0], frame[1], frame[2], frame[3]);
                 goto fail;
             }
             if (pit) {
@@ -513,6 +520,13 @@ done:
         }
         return 0;
     }
+    if (contract && (ram[GPA_TASK0] != 0x33 || ram[GPA_TASK1] != 0x39)) {
+        fprintf(stderr, "[bemu-nano] domain markers: task0=%02x task1=%02x\n",
+                ram[GPA_TASK0], ram[GPA_TASK1]);
+        goto fail;
+    }
+    if (contract)
+        printf("[bemu-nano] domains: task0[0x800]=33 task1[0x900]=39\n");
     printf("[bemu-nano] VGA @0xB8000: %02x %02x %02x %02x %02x %02x"
            "  ('3' white, '6' white, IPC '9' green)\n",
            ram[GPA_VGA+0], ram[GPA_VGA+1], ram[GPA_VGA+2],

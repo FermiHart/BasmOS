@@ -25,6 +25,8 @@ contracts, not cryptographic provenance by themselves.
 - Task 0 is CPU-bound and never sleeps; the 6, the 9 and a heartbeat byte at
   `0x6FC` that must keep incrementing require asynchronous IRQ0 preemption.
 - IDT and PDE bytes are read through QMP.
+- KVM-backed QEMU verifies the bounded task descriptors and requires a direct
+  cross-domain access to enter the dedicated `#GP13` gate.
 - The CPL3 sector must demonstrate IRQ0, TSS state, module load, execution and
   return.
 - JASH nucleus and Pack bytes are read back from physical memory.
@@ -34,7 +36,7 @@ QEMU runs with a read-only image, networking disabled and sandboxing enabled.
 ## 4. KVM Behavior
 
 `bemu-nano` executes locally built guests through `/dev/kvm`. It checks the
-record sector, the documented 171-byte machine contract and the CPL3 serial
+record sector, the documented 232-byte machine contract and the CPL3 serial
 protocol. Host-side wall-clock timeouts bound automated runs.
 
 In plain record-boot mode the VMM is an 18.2 Hz periodic PIT: ticks are

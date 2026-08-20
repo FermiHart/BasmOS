@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
     check_manifest(&metal); check_manifest(&direct); check_manifest(&shell);
     check_manifest(&jash); check_manifest(&pack);
     exact_size(&metal, 512); boot_signature(&metal);
-    exact_size(&direct, 171);
+    exact_size(&direct, 232);
     exact_size(&shell, 512); boot_signature(&shell);
     exact_size(&jash, 256);
     if (jash.bytes[253] || jash.bytes[254] || jash.bytes[255])

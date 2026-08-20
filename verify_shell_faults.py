@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: BSD-3-Clause
 """Load hostile CPL3 modules and require a #GP fail-stop from module CS 0x2B."""
+import re
 import subprocess
 import sys
 
@@ -24,7 +25,7 @@ for name, module in CASES.items():
     passed = (
         result.returncode == 1
         and "CRASH: guest halt with IF=0" in result.stderr
-        and "saved CS=0x2b" in result.stderr
+        and re.search(r"frame=[0-9a-f]{8}/[0-9a-f]{8}/0000002b/", result.stderr)
         and ">rx" in result.stdout
         and "triple fault" not in result.stderr
     )

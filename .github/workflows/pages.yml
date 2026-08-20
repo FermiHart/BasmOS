@@ -30,7 +30,7 @@ jobs:
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b
 
       - name: Assemble site artifact
-        run: mkdir _site && cp website/index.html _site/index.html && cp LICENSE README.md AUTHORS.md RESEARCH.md RING3.md THREAT_MODEL.md SECURITY.md THIRD_PARTY_NOTICES.md TRADEMARKS.md RELEASING.md SHA256SUMS basmos.bin _site/
+        run: mkdir _site && cp website/index.html _site/index.html && cp LICENSE README.md AUTHORS.md DOMAINS.md RESEARCH.md RING3.md THREAT_MODEL.md SECURITY.md THIRD_PARTY_NOTICES.md TRADEMARKS.md RELEASING.md SHA256SUMS basmos.bin _site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa

@@ -27,12 +27,12 @@ ranking metric is total artifact size; payload size is a secondary measurement.
 ## Result
 
 No eligible public artifact of 512 bytes or less was found. BasmOS occupies one
-512-byte boot sector and has a 292-byte payload.
+512-byte boot sector and has a 378-byte payload.
 
 > In the public survey completed on 2026-08-19, BasmOS is the smallest publicly
 > verifiable IA-32 nanokernel found in the category requiring protected mode,
 > active paging, IDT and timer, at least two timer-preempted tasks and functional
-> IPC. The complete bare-metal artifact is 512 bytes; its payload is 292 bytes.
+> IPC. The complete bare-metal artifact is 512 bytes; its payload is 378 bytes.
 
 This wording reports the result and scope of a search. It is not certification
 by an external record authority and cannot prove that unpublished or lost code
@@ -43,25 +43,27 @@ does not exist.
 `basmos.bin` contains:
 
 - BIOS entry and real-mode to protected-mode transition;
-- flat IA-32 GDT;
+- flat kernel code/stack segments plus bounded task-data and VGA segments;
 - one 4 MiB PSE identity mapping with paging enabled;
 - 35 IDT gates, PIC remapping and PIT programming;
 - two CPL0 tasks switched by IRQ0: one CPU-bound (its loop never sleeps) and
   one sleeping, so the demonstrated schedule requires asynchronous preemption;
 - an SPSC byte queue reached through interrupt gates;
+- separate 256-byte DS windows for ordinary task data accesses, with an exact
+  cross-domain `#GP13` negative probe;
 - a heartbeat byte at 0x6FC incremented by every serviced tick;
 - VGA output `3/6/9` demonstrating both tasks and data transfer;
 - boot signature `55 aa`.
 
-The two tasks share CPL0, CR3 and memory. IPC is logical inter-task
-communication, not a protected process boundary. Isolation is not part of the
-record category because the record artifact does not claim it.
+The two tasks share CPL0 and CR3. Their ordinary DS accesses are bounded, but
+CPL0 code can reload descriptors; IPC is therefore logical inter-task
+communication and the data windows are not a hostile process boundary.
 
 ## Candidate Matrix
 
 | Project | Complete artifact | PM32 | Paging | Timer-preempted tasks | IPC | Eligible? |
 |---|---:|---:|---:|---:|---:|---|
-| **BasmOS** | **512 B; 292 B payload** | yes | yes, PSE | yes, 2 | SPSC queue | **yes; smallest found** |
+| **BasmOS** | **512 B; 378 B payload** | yes | yes, PSE | yes, 2 | SPSC queue | **yes; smallest found** |
 | L4/x86 and complete IA-32 microkernels | many KiB or more | yes | yes | yes | yes | yes; functional supersets, larger |
 | NanoOS 2.1 | 512 B | no | no | yes, up to 8 | blocking copy | no; lacks PM32 and paging |
 | VirtualBox `bootsector-pae` | 512 B | yes | yes, PAE | no | no | no; lacks scheduler and IPC |

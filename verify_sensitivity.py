@@ -240,7 +240,20 @@ def main():
     for row in range(0, 512, 32):
         md.append(f"{row:03d} " + "".join(glyphs[results[i]]
                                           for i in range(row, row + 32)))
-    md += ["```", ""]
+    md += ["```", "", "## Payload by symbol", "",
+           "| Symbol | INTACT | ALTERED-VISIBLE | ALTERED-TIMER | DEAD |",
+           "|---|---:|---:|---:|---:|"]
+    for symbol, per_class in payload_counts.items():
+        md.append(f"| {symbol} | {per_class.get('INTACT', 0)} | "
+                  f"{per_class.get('ALTERED-VISIBLE', 0)} | "
+                  f"{per_class.get('ALTERED-TIMER', 0)} | "
+                  f"{per_class.get('DEAD', 0)} |")
+    pad_intact = sum(1 for r in rows[payload_end:510] if r["class"] == "INTACT")
+    sig_dead = sum(1 for r in rows[510:] if r["class"] == "DEAD")
+    md += ["",
+           f"Padding ({payload_end}..509) and the two signature bytes are outside the",
+           f"payload table; {pad_intact} padding bytes classify as INTACT and the",
+           f"signature bytes classify as {sig_dead}/2 DEAD.", ""]
     md_path = os.path.join(OUT_DIR, "byte-sensitivity.md")
     with open(md_path, "w") as f:
         f.write("\n".join(md))

@@ -14,6 +14,7 @@ SHKERN = basmos-sh.bin
 JASH   = jash/jash.bin
 JPACK  = jash/jash-pack.bin
 PROOFCTL = tools/proofctl
+BEMU_RUNNER = bemu/bemu-nano
 SHELL_INPUT = 3f7210b35ab801000000cd80b804000000cd8078
 # Optional sovereign-compiler gate. Set BEAR to a non-interactive Bear compiler
 # binary to run it. When unset, the gate reports SKIP and no cc-vs-Bear
@@ -22,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sensitivity verify-qemu verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sensitivity verify-qemu verify-domains verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -31,7 +32,7 @@ help: ## display this menu
 	@printf '  \033[1mmake jash\033[0m     demonstrate the CPL3 shell, Decks and typed Surfaces\n'
 	@printf '  \033[1mmake jash-live\033[0m\n               enter interactive JASH; type help, finish with bye\n'
 	@printf '  \033[1mmake bemu\033[0m     boot the 512-byte sector in bEMU-NANO with terminal display\n'
-	@printf '  \033[1mmake bemu-contract\033[0m\n               enter the 171-byte guest directly in PM32 with paging\n'
+	@printf '  \033[1mmake bemu-contract\033[0m\n               enter the 232-byte guest directly in PM32 with paging\n'
 	@printf '  \033[1mmake verify\033[0m   verify the record with QEMU, the JS interpreter and KVM\n'
 	@printf '  \033[1mmake verify-shell\033[0m\n               verify TSS, IRQ0, CPL3 module load, execution and return\n'
 	@printf '  \033[1mmake verify-jash\033[0m\n               verify ANSI, commands, Deck switching and CPL3 selectors\n'
@@ -68,8 +69,10 @@ $(JPACK): jash/jash-pack.basm $(BASM)
 $(PROOFCTL): tools/proofctl.c
 	$(CC) -O2 -Wall -Wextra -Werror -o $@ $<
 
-shell: $(SHKERN) ## CPL3 monitor: receive, execute and return from a module
+$(BEMU_RUNNER): bemu/bemu_nano.c
 	$(MAKE) -C bemu bemu-nano
+
+shell: $(SHKERN) $(BEMU_RUNNER) ## CPL3 monitor: receive, execute and return from a module
 	$(TIMEOUT) 15s bemu/bemu-nano $(SHKERN) --serial-hex $(SHELL_INPUT) --serial-expect 'Z>'
 
 jash: verify-jash ## demonstrate and verify the complete JASH contract
@@ -84,17 +87,15 @@ run: $(KERNEL) ## boot interactively in QEMU
 
 # Boot the 512-byte record in the KVM runner without QEMU or firmware.
 # --show renders the VGA page, which is ordinary guest RAM, in the terminal.
-bemu: $(KERNEL) ## boot the 512-byte sector in bEMU-NANO with display
-	$(MAKE) -C bemu bemu-nano
+bemu: $(KERNEL) $(BEMU_RUNNER) ## boot the 512-byte sector in bEMU-NANO with display
 	$(TIMEOUT) 30s bemu/bemu-nano $(KERNEL) --show
 
-# Enter the 171-byte machine-contract guest directly in PM32 with paging.
-bemu-contract: $(VMKERN) ## run the 171-byte machine-contract variant
-	$(MAKE) -C bemu bemu-nano
+# Enter the 232-byte machine-contract guest directly in PM32 with paging.
+bemu-contract: $(VMKERN) $(BEMU_RUNNER) ## run the 232-byte machine-contract variant
 	$(TIMEOUT) 30s bemu/bemu-nano $(VMKERN) --contract --show
 
 # Automated verification: QEMU, the independent site interpreter and bEMU-NANO/KVM.
-verify: verify-qemu verify-browser verify-bemu ## verify the record across execution engines
+verify: verify-qemu verify-domains verify-browser verify-bemu ## verify the record across execution engines
 
 verify-ci: all $(PROOFCTL) verify-qemu verify-browser verify-shell-qemu verify-jash-qemu ## hosted-CI gate without KVM
 	@sha256sum -c SHA256SUMS
@@ -141,13 +142,15 @@ verify-bear: all ## optional cc-vs-Bear byte identity (BEAR=/path/to/bear)
 verify-qemu: $(KERNEL)
 	python3 verify_qemu.py $(KERNEL)
 
+verify-domains: $(KERNEL) $(VMKERN) $(BASM) $(BEMU_RUNNER) ## prove private DS windows and a cross-domain #GP
+	python3 verify_domains.py $(KERNEL) $(VMKERN) $(BASM) bemu/bemu-nano
+
 verify-browser: $(KERNEL)
 	node website/test_interpreter.js
 
 # KVM executor with no guest firmware. The same VMM supports a BIOS-style
 # real-mode entry contract and direct PM32+paging entry supplied by the machine.
-verify-bemu: $(KERNEL) $(VMKERN)
-	$(MAKE) -C bemu bemu-nano
+verify-bemu: $(KERNEL) $(VMKERN) $(BEMU_RUNNER)
 	$(TIMEOUT) 15s bemu/bemu-nano $(KERNEL)
 	$(TIMEOUT) 15s bemu/bemu-nano $(VMKERN) --contract
 
@@ -156,8 +159,7 @@ verify-shell: verify-shell-qemu verify-shell-bemu ## verify ring 3 in QEMU and K
 verify-shell-qemu: $(SHKERN)
 	python3 verify_shell_qemu.py $(SHKERN)
 
-verify-shell-bemu: $(SHKERN)
-	$(MAKE) -C bemu bemu-nano
+verify-shell-bemu: $(SHKERN) $(BEMU_RUNNER)
 	$(TIMEOUT) 15s bemu/bemu-nano $(SHKERN) --serial-hex $(SHELL_INPUT) --serial-expect 'Z>'
 	python3 verify_shell_faults.py bemu/bemu-nano $(SHKERN)
 
@@ -166,8 +168,7 @@ verify-jash: verify-jash-qemu verify-jash-bemu ## end-to-end JASH contract in QE
 verify-jash-qemu: $(SHKERN) $(JASH) $(JPACK)
 	python3 verify_jash_qemu.py $(SHKERN) $(JASH) $(JPACK)
 
-verify-jash-bemu: $(SHKERN) $(JASH) $(JPACK)
-	$(MAKE) -C bemu bemu-nano
+verify-jash-bemu: $(SHKERN) $(JASH) $(JPACK) $(BEMU_RUNNER)
 	python3 verify_jash.py bemu/bemu-nano $(SHKERN) $(JASH) $(JPACK)
 
 verify-hardening: all $(PROOFCTL) ## command fuzzing and mutation gate
@@ -196,7 +197,7 @@ proof: all $(PROOFCTL) ## run the full reproducible gate
 	@$(MAKE) verify-shell
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
-	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, browser, KVM, shell, JASH, fuzz, mutations'
+	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, browser, KVM, shell, JASH, fuzz, mutations'
 	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \

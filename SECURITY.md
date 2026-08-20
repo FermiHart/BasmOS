@@ -17,8 +17,10 @@ Security reports are welcome for:
 - unexpected CPL3-to-CPL0 escalation in `basmos-sh.bin`;
 - supply-chain, CI or release provenance issues.
 
-The documented absence of process isolation in `basmos.bin` is a design limit,
-not a vulnerability. See `THREAT_MODEL.md` for the explicit trust boundaries.
+`basmos.bin` provides bounded task-data segments (see `DOMAINS.md`) but no
+process-isolation boundary: both tasks run in CPL0 with a flat SS, and the
+documented absence of hostile-code isolation is a design limit, not a
+vulnerability. See `THREAT_MODEL.md` for the explicit trust boundaries.
 
 ## Reporting
 

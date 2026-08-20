@@ -7,7 +7,7 @@ Acceptance contract: physical memory must show
   0xB8002: '6' 0x0F   (task1 ran -> hardware timer preemption works)
   0xB8004: '9' 0x0A   (task1 received task0's IPC byte → both ends of IPC work)
 
-Both tasks wait in HLT, so software yield cannot satisfy this test. Uses QMP
+Task 0 is CPU-bound and never yields; task 1 waits in HLT. Uses QMP
 (human-monitor-command xp) with -display none (NOT -vga none, so the
 VGA device and 0xB8000 still exist). Physical read bypasses guest paging, which
 matches the identity map. Exit code 0 on pass, 1 on fail.
@@ -125,8 +125,8 @@ try:
     idt_ok = (
         len(gates) == 35
         and all(gate[2:8] == b"\x08\x00\x00\x8e\x00\x00" for gate in gates)
-        and all(gate == gates[0] for gate in gates[:32])
-        and len({gate[:2] for gate in gates[32:35]}) == 3
+        and all(gate == gates[0] for i, gate in enumerate(gates[:32]) if i != 13)
+        and len({gates[i][:2] for i in (0, 13, 32, 33, 34)}) == 5
     )
     pde_value = int.from_bytes(bytes(pde), "little") if len(pde) == 4 else 0
     paging_ok = (pde_value & 0x83) == 0x83 and (pde_value & 0xFFC00000) == 0
@@ -155,7 +155,7 @@ try:
           "the 6, the 9 and the heartbeat require asynchronous IRQ0 preemption")
     print(f"  [{'PASS' if heartbeat_ok else 'FAIL'}] heartbeat @0x6FC: "
           f"{b1} -> {b2} (+{delta} ticks in 0.5s); a frozen byte would betray a dead PIT")
-    print(f"  [{'PASS' if idt_ok else 'FAIL'}] IDT: 32 fail-stop + 3 service gates")
+    print(f"  [{'PASS' if idt_ok else 'FAIL'}] IDT: 31 generic fail-stop + #GP + 3 service gates")
     print(f"  [{'PASS' if paging_ok else 'FAIL'}] PDE0: present | rw | 4MB page "
           f"(runtime={pde_value:#010x})")
 

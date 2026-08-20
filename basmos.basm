@@ -41,9 +41,17 @@
 ;   I3  the bEMU contract keeps H7 semantics untouched: time there is a
 ;       machine service requested by hlt, so basmos-vm.bin stays byte-identical
 ;
+; Round J (bounded task data domains):
+;   J1  task0 DS covers only 0x800..0x8FF; task1 DS covers 0x900..0x9FF
+;   J2  SS remains flat, so interrupt frames and the overlapping task stacks do
+;       not acquire incorrect double-based addresses during a context switch
+;   J3  handlers use flat ES for kernel data; tasks use a VGA-only GS descriptor
+;   J4  EBP carries each task's DS selector through pushad/popad
+;
 ; Memory map (all accesses remain within the 4 MB identity-mapped PDE):
 ;   0x00500  IDT (35 gates)              0x00620  GDT (contract: written by VMM)
 ;   0x006FC  heartbeat tick counter      0x00700  ring IPC (256 bytes)
+;   0x00800  task0 data domain (256 B)   0x00900  task1 data domain (256 B)
 ;   0x01000  page directory + stack0     0x07C00  image (this sector)
 ;   0xB8000  VGA text
 ; ============================================================================
@@ -79,8 +87,8 @@ pm:
 
     ; H1: build the IDT backward using push. The three service gates are pushed
     ; first, followed by 32 identical exception gates.
-    ; CONSTRAINT: all four handlers remain within the same 256-byte page because
-    ; mov al below changes only offset_low[7:0]. make map verifies the layout.
+    ; The service handlers share page 0x7D; timer/exceptions share page 0x7C.
+    ; AX is reloaded at that one page crossing; AL handles the rest.
     mov esp, 0x00618        ; IDT_BASE + 35*8
     xor edx, edx
     mov dh, 0x8E            ; offset_hi=0, present interrupt gate, DPL0
@@ -90,7 +98,7 @@ pm:
     mov al, sys_send
     push edx
     push eax                ; vector 33: send
-    mov al, timer_handler
+    mov ax, timer_handler
     push edx
     push eax                ; vector 32: IRQ0 / yield
     mov al, exception_handler
@@ -100,6 +108,7 @@ pm:
     push edx
     push eax
     db 0xE2, 0xFC           ; loop -4 (BASM does not yet support loop)
+    mov word [0x00568], gp_handler ; vector 13 has an independently provable gate
     lidt [idtr]
 
 %ifndef BEMU_CONTRACT
@@ -140,9 +149,17 @@ pm:
     mov esp, 0x1000         ; stack0 below the machine's page directory
 %endif
 
-    ; The IDT loop left ECX=0. ECX=0x700 initializes both cursors: task0 retains
-    ; the value; task1 receives it in the ECX slot of the first popad.
+    ; ES is the flat kernel-data capability used only by handlers. GS can reach
+    ; the VGA page but nothing else. The IDT loop left ECX=0; ECX=0x700
+    ; initializes both ring cursors.
+    mov ax, 0x10
+    mov es, ax
+    mov al, 0x28
+    mov gs, ax
     mov ch, 7
+    mov word [t1frame - 24], 0x20 ; task1's saved EBP carries its DS selector
+    ; Keep this six-byte write plus the jump as the final eight bytes before
+    ; t1frame: the initial task1 register frame intentionally overlaps them.
     mov [t1frame - 8], ecx
     jmp task0
 
@@ -161,9 +178,17 @@ t1frame:
 ; mid-computation. That is asynchronous preemption, the strongest claim a
 ; timer-preempted 512-byte artifact can make.
 task0:
-    sti
+    mov bp, 0x18
+    mov ds, bp              ; task0 enters with its own 256-byte data window
     mov ax, 0x0F33          ; white '3'
-    mov [0xB8000], ax
+    db 0x65                 ; GS: VGA-only descriptor
+    mov [0], ax
+    mov [0], al             ; positive probe: task0 owns physical byte 0x800
+%ifdef DOMAIN_FAULT_PROBE
+domain_fault:
+    mov al, [0x100]         ; task1's byte without IPC: #GP (DS limit is 0xFF)
+%endif
+    sti
     mov al, 0x39            ; AL='9': the IPC byte, displayed in green by task1
 .loop:
     int 33                  ; send(AL)
@@ -175,13 +200,20 @@ task0:
 %endif
 
 task1:
-    mov word [0xB8002], 0x0F36 ; white '6'
+%ifdef DOMAIN_TASK1_FAULT_PROBE
+domain_task1_fault:
+    mov al, [0x100]         ; first byte beyond task1's 0xFF limit: #GP
+%endif
+    db 0x65
+    mov word [2], 0x0F36    ; white '6' through the VGA-only GS capability
 .loop:
     int 34                  ; recv() -> AL, zero if empty
     test al, al
     jz .empty
+    mov [0], al             ; positive probe: received byte is private task1 data
     mov ah, 0x0A
-    mov [0xB8004], ax       ; green '9' proves end-to-end IPC
+    db 0x65
+    mov [4], ax             ; green '9' proves end-to-end IPC
 .empty:
     hlt
     jmp .loop
@@ -191,11 +223,16 @@ exception_handler:
     hlt                     ; the interrupt gate has already cleared IF
     jmp exception_handler   ; NMI/SMI only returns execution to fail-stop
 
+gp_handler:
+    hlt                     ; vector 13 is distinct so the negative probe is exact
+    jmp gp_handler
+
 timer_handler:              ; IRQ0 or voluntary yield via int 32
     pushad
 %ifndef BEMU_CONTRACT
     mov al, 0x20
     out 0x20, al            ; the yield's spurious EOI is a no-op with an empty ISR
+    db 0x26                 ; ES: flat kernel data, never the interrupted task's DS
     db 0xFE, 0x05           ; inc byte [0x6FC] (BASM has no inc-with-memory yet)
     dd 0x6FC                ; heartbeat: every serviced tick leaves a trace
 %endif
@@ -203,17 +240,22 @@ timer_handler:              ; IRQ0 or voluntary yield via int 32
                             ; tick originates in the VMM and time is hlt-requested
 
 do_switch:
+    db 0x26
     db 0x87, 0x25           ; xchg esp,[other_sp] (BASM accepts only reg,reg)
     dd other_sp
     popad
+    mov ds, bp              ; EBP is part of each task's saved register frame
     iretd
 
 sys_send:                   ; AL=byte; ECX=producer's private cursor
     mov edx, ecx
     inc dl                  ; next tail, modulo 256
+    db 0x26
     mov ebx, [other_sp]
+    db 0x26
     cmp edx, [ebx + 24]     ; consumer's saved ECX = head
     je .out                 ; full: discard the new byte, leaving the queue intact
+    db 0x26
     mov [ecx], al
     mov ecx, edx
 .out:
@@ -221,9 +263,12 @@ sys_send:                   ; AL=byte; ECX=producer's private cursor
 
 sys_recv:                   ; ECX=consumer's private cursor
     xor al, al
+    db 0x26
     mov edx, [other_sp]
+    db 0x26
     cmp ecx, [edx + 24]     ; producer's saved ECX = tail
     je .out
+    db 0x26
     mov al, [ecx]
     inc cl
 .out:
@@ -247,6 +292,12 @@ gdt:
     db 0x00, 0x9A, 0xCF, 0x00
     dw 0xFFFF, 0x0000
     db 0x00, 0x92, 0xCF, 0x00
+    dw 0x00FF, 0x0800
+    db 0x00, 0x92, 0x40, 0x00 ; 0x18: task0 data, base 0x800, limit 0xFF
+    dw 0x00FF, 0x0900
+    db 0x00, 0x92, 0x40, 0x00 ; 0x20: task1 data, base 0x900, limit 0xFF
+    dw 0x0FFF, 0x8000
+    db 0x0B, 0x92, 0x40, 0x00 ; 0x28: VGA data, base 0xB8000, limit 0xFFF
 gdt_end:
 %endif
 
