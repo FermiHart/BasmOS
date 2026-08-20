@@ -18,6 +18,7 @@ make map
 make shell-map
 make jash-map
 make manifest
+make readme-art
 ```
 
 Then execute the release gates:

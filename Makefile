@@ -23,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help all shell jash jash-live bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -39,6 +39,8 @@ help: ## display this menu
 	@printf '  \033[1mmake verify-jash-capture\033[0m\n               recapture JASH in KVM and compare transcript/SVG evidence\n'
 	@printf '  \033[1mmake verify-sensitivity\033[0m\n               flip every byte, boot in QEMU, classify the effect (~6 min)\n'
 	@printf '  \033[1mmake verify-sacred\033[0m\n               compile the Metatron C edition and compare all five artifacts\n'
+	@printf '  \033[1mmake verify-readme\033[0m\n               prove README geometry matches the shipped artifacts\n'
+	@printf '  \033[1mmake readme-art\033[0m\n               regenerate artifact-bound GitHub README geometry\n'
 	@printf '  \033[1mmake verify-site\033[0m\n               stage the exact Pages allowlist and verify every local link\n'
 	@printf '  \033[1mmake verify-ipc\033[0m\n               model-check all SPSC states and execute the full-ring probe\n'
 	@printf '  \033[1mmake proof\033[0m    run the full artifact, QEMU, KVM, PTY and browser gate\n'
@@ -124,6 +126,12 @@ verify-nasm: all ## independently assemble all five artifacts with NASM
 verify-sacred: all ## compile the executable Metatron source art and prove byte identity
 	$(MAKE) -C basm-nano test-sacred
 
+readme-art: all ## regenerate artifact-bound GitHub README geometry
+	python3 tools/generate_readme_art.py
+
+verify-readme: all ## verify artifact-bound GitHub README geometry
+	python3 tools/generate_readme_art.py --check
+
 verify-site: all ## stage and verify the complete nanokernel.org Pages artifact
 	@tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT INT TERM; scripts/stage_site.sh "$$tmp/site"
 
@@ -206,7 +214,7 @@ manifest: all ## generate deterministic hashes and sizes
 	@cat ARTIFACTS.manifest
 	@cat SHA256SUMS
 
-proof: all $(PROOFCTL) ## run the full reproducible gate
+proof: all $(PROOFCTL) verify-readme ## run the full reproducible gate
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
 	@if command -v nasm >/dev/null 2>&1; then \
@@ -217,7 +225,7 @@ proof: all $(PROOFCTL) ## run the full reproducible gate
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
 	@$(MAKE) verify-site
-	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, sacred C, shell, JASH, capture, staged site, fuzz, mutations'
+	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, sacred C, README geometry, shell, JASH, capture, staged site, fuzz, mutations'
 	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \

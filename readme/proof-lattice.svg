@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">BasmOS proof lattice</title>
+<desc id="desc">Eight verification surfaces orbit the committed BasmOS artifact set.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#070a12"/><stop offset="0.52" stop-color="#111426"/><stop offset="1" stop-color="#071715"/>
+  </linearGradient>
+  <radialGradient id="jade"><stop stop-color="#c8fff0"/><stop offset="0.35" stop-color="#65fbd2"/><stop offset="1" stop-color="#158a78"/></radialGradient>
+  <radialGradient id="sun"><stop stop-color="#fff2c2"/><stop offset="0.4" stop-color="#ffcc66"/><stop offset="1" stop-color="#b56722"/></radialGradient>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#8ea1ff" stroke-opacity=".07"/></pattern>
+
+</defs>
+<rect width="1200" height="560" rx="24" fill="url(#bg)"/>
+<rect x="1" y="1" width="1198" height="558" rx="23" fill="none" stroke="#8ea1ff" stroke-opacity=".28"/>
+<rect x="1" y="1" width="1198" height="558" rx="23" fill="url(#grid)"/>
+<text x="52" y="60" fill="#f4f0dd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="800" text-anchor="start" letter-spacing="2">PROOF LATTICE</text>
+<text x="1148" y="60" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="14" font-weight="600" text-anchor="end" letter-spacing="1.2">NO SINGLE EXECUTOR OWNS THE RESULT</text>
+<circle cx="600" cy="292" r="142" fill="#11182c" stroke="#8ea1ff" stroke-opacity=".42"/>
+<circle cx="600" cy="292" r="94" fill="#102f2b" stroke="#65fbd2" stroke-opacity=".72"/>
+<line x1="600" y1="292" x2="600" y2="92" stroke="#65fbd2" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="600" cy="92" r="62" fill="#0a0f1d" stroke="#65fbd2" stroke-width="2"/>
+<circle cx="600" cy="92" r="70" fill="none" stroke="#65fbd2" stroke-opacity=".15"/>
+<text x="600" y="99" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">BASM / NASM</text>
+<line x1="600" y1="292" x2="870" y2="135" stroke="#ffcc66" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="870" cy="135" r="62" fill="#0a0f1d" stroke="#ffcc66" stroke-width="2"/>
+<circle cx="870" cy="135" r="70" fill="none" stroke="#ffcc66" stroke-opacity=".15"/>
+<text x="870" y="142" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">SHA-256</text>
+<line x1="600" y1="292" x2="1050" y2="292" stroke="#ff6b8a" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="1050" cy="292" r="62" fill="#0a0f1d" stroke="#ff6b8a" stroke-width="2"/>
+<circle cx="1050" cy="292" r="70" fill="none" stroke="#ff6b8a" stroke-opacity=".15"/>
+<text x="1050" y="299" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">proofctl</text>
+<line x1="600" y1="292" x2="870" y2="448" stroke="#8ea1ff" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="870" cy="448" r="62" fill="#0a0f1d" stroke="#8ea1ff" stroke-width="2"/>
+<circle cx="870" cy="448" r="70" fill="none" stroke="#8ea1ff" stroke-opacity=".15"/>
+<text x="870" y="455" fill="#8ea1ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">FUZZ / MUTATE</text>
+<line x1="600" y1="292" x2="600" y2="486" stroke="#d58cff" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="600" cy="486" r="62" fill="#0a0f1d" stroke="#d58cff" stroke-width="2"/>
+<circle cx="600" cy="486" r="70" fill="none" stroke="#d58cff" stroke-opacity=".15"/>
+<text x="600" y="493" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">65,536</text>
+<line x1="600" y1="292" x2="330" y2="448" stroke="#65fbd2" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="330" cy="448" r="62" fill="#0a0f1d" stroke="#65fbd2" stroke-width="2"/>
+<circle cx="330" cy="448" r="70" fill="none" stroke="#65fbd2" stroke-opacity=".15"/>
+<text x="330" y="455" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">JS MODEL</text>
+<line x1="600" y1="292" x2="150" y2="292" stroke="#ffcc66" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="150" cy="292" r="62" fill="#0a0f1d" stroke="#ffcc66" stroke-width="2"/>
+<circle cx="150" cy="292" r="70" fill="none" stroke="#ffcc66" stroke-opacity=".15"/>
+<text x="150" y="299" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">KVM</text>
+<line x1="600" y1="292" x2="330" y2="135" stroke="#ff6b8a" stroke-opacity=".28" stroke-width="2"/>
+<circle cx="330" cy="135" r="62" fill="#0a0f1d" stroke="#ff6b8a" stroke-width="2"/>
+<circle cx="330" cy="135" r="70" fill="none" stroke="#ff6b8a" stroke-opacity=".15"/>
+<text x="330" y="142" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="19" font-weight="800" text-anchor="middle" letter-spacing="0">QEMU</text>
+<text x="600" y="284" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="800" text-anchor="middle" letter-spacing="3">ONE</text>
+<text x="600" y="314" fill="#f4f0dd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="23" font-weight="800" text-anchor="middle" letter-spacing="1">ARTIFACT SET</text>
+<text x="600" y="342" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="10" font-weight="600" text-anchor="middle" letter-spacing="1.2">997C34A5602501E7</text>
+</svg>

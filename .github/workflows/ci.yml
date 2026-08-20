@@ -25,6 +25,9 @@ jobs:
       - name: Verify executable Metatron source art
         run: make verify-sacred
 
+      - name: Verify artifact-bound README geometry
+        run: make verify-readme
+
       - name: Verify committed hashes
         run: |
           sha256sum -c SHA256SUMS
@@ -32,6 +35,9 @@ jobs:
 
       - name: Verify QEMU and browser contracts
         run: make verify-ci
+
+      - name: Verify Pages staging and README links
+        run: make verify-site
 
       - name: Require KVM
         run: |

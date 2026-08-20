@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1240" viewBox="0 0 720 1240" role="img" aria-labelledby="title desc">
+<title id="title">BasmOS mobile artifact constellation</title>
+<desc id="desc">Mobile constellation of five committed BasmOS artifacts and their exact byte sizes.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#070a12"/><stop offset="0.52" stop-color="#111426"/><stop offset="1" stop-color="#071715"/>
+  </linearGradient>
+  <radialGradient id="jade"><stop stop-color="#c8fff0"/><stop offset="0.35" stop-color="#65fbd2"/><stop offset="1" stop-color="#158a78"/></radialGradient>
+  <radialGradient id="sun"><stop stop-color="#fff2c2"/><stop offset="0.4" stop-color="#ffcc66"/><stop offset="1" stop-color="#b56722"/></radialGradient>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#8ea1ff" stroke-opacity=".07"/></pattern>
+
+</defs>
+<rect width="720" height="1240" rx="24" fill="url(#bg)"/>
+<rect x="1" y="1" width="718" height="1238" rx="23" fill="none" stroke="#8ea1ff" stroke-opacity=".28"/>
+<rect x="1" y="1" width="718" height="1238" rx="23" fill="url(#grid)"/>
+<text x="360" y="54" fill="#f4f0dd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="1.5">ARTIFACT</text>
+<text x="360" y="96" fill="#f4f0dd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="1.5">CONSTELLATION</text>
+<text x="360" y="136" fill="#8ea1ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="middle" letter-spacing="0">FIVE COMMITTED IMAGES</text>
+<path d="M250 250 C360 320 360 370 470 440" fill="none" stroke="#8ea1ff" stroke-opacity=".46" stroke-width="3"/>
+<path d="M250 250 C360 320 360 570 250 640" fill="none" stroke="#8ea1ff" stroke-opacity=".46" stroke-width="3"/>
+<path d="M250 640 C360 710 360 770 470 840" fill="none" stroke="#8ea1ff" stroke-opacity=".46" stroke-width="3"/>
+<path d="M470 840 C360 910 360 980 250 1050" fill="none" stroke="#8ea1ff" stroke-opacity=".46" stroke-width="3"/>
+<circle cx="250" cy="250" r="88" fill="#0a0f1d" stroke="#65fbd2" stroke-opacity=".35"/>
+<circle cx="250" cy="250" r="78" fill="#11182c" stroke="#65fbd2" stroke-width="4"/>
+<text x="250" y="242" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="0">512 B</text>
+<text x="250" y="282" fill="#f1f4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="1">RECORD</text>
+<circle cx="470" cy="440" r="88" fill="#0a0f1d" stroke="#ffcc66" stroke-opacity=".35"/>
+<circle cx="470" cy="440" r="78" fill="#11182c" stroke="#ffcc66" stroke-width="4"/>
+<text x="470" y="432" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="0">232 B</text>
+<text x="470" y="472" fill="#f1f4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="1">VM</text>
+<circle cx="250" cy="640" r="88" fill="#0a0f1d" stroke="#ff6b8a" stroke-opacity=".35"/>
+<circle cx="250" cy="640" r="78" fill="#11182c" stroke="#ff6b8a" stroke-width="4"/>
+<text x="250" y="632" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="0">512 B</text>
+<text x="250" y="672" fill="#f1f4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="1">CPL3</text>
+<circle cx="470" cy="840" r="88" fill="#0a0f1d" stroke="#8ea1ff" stroke-opacity=".35"/>
+<circle cx="470" cy="840" r="78" fill="#11182c" stroke="#8ea1ff" stroke-width="4"/>
+<text x="470" y="832" fill="#8ea1ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="0">256 B</text>
+<text x="470" y="872" fill="#f1f4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="1">JASH</text>
+<circle cx="250" cy="1050" r="106" fill="#0a0f1d" stroke="#d58cff" stroke-opacity=".35"/>
+<circle cx="250" cy="1050" r="96" fill="#11182c" stroke="#d58cff" stroke-width="4"/>
+<text x="250" y="1042" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="0">3584 B</text>
+<text x="250" y="1082" fill="#f1f4ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="28" font-weight="700" text-anchor="middle" letter-spacing="1">J-PACK</text>
+</svg>

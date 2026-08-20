@@ -47,6 +47,7 @@ jobs:
       - name: Verify publishable contracts
         run: |
           make -C basm-nano test-sacred
+          make verify-readme
           sha256sum -c SHA256SUMS
           sha256sum -c evidence/jash-session.manifest
           node website/test_interpreter.js

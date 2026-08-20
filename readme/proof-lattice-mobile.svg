@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280" role="img" aria-labelledby="title desc">
+<title id="title">BasmOS mobile proof lattice</title>
+<desc id="desc">Mobile list of eight verification surfaces around the committed artifact set.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#070a12"/><stop offset="0.52" stop-color="#111426"/><stop offset="1" stop-color="#071715"/>
+  </linearGradient>
+  <radialGradient id="jade"><stop stop-color="#c8fff0"/><stop offset="0.35" stop-color="#65fbd2"/><stop offset="1" stop-color="#158a78"/></radialGradient>
+  <radialGradient id="sun"><stop stop-color="#fff2c2"/><stop offset="0.4" stop-color="#ffcc66"/><stop offset="1" stop-color="#b56722"/></radialGradient>
+  <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="9"/></filter>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#8ea1ff" stroke-opacity=".07"/></pattern>
+
+</defs>
+<rect width="720" height="1280" rx="24" fill="url(#bg)"/>
+<rect x="1" y="1" width="718" height="1278" rx="23" fill="none" stroke="#8ea1ff" stroke-opacity=".28"/>
+<rect x="1" y="1" width="718" height="1278" rx="23" fill="url(#grid)"/>
+<text x="360" y="60" fill="#f4f0dd" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="38" font-weight="800" text-anchor="middle" letter-spacing="2">PROOF LATTICE</text>
+<text x="360" y="100" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="middle" letter-spacing="1">NO SINGLE EXECUTOR</text>
+<text x="360" y="130" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="middle" letter-spacing="1">OWNS THE RESULT</text>
+<line x1="360" y1="130" x2="360" y2="1130" stroke="#8ea1ff" stroke-opacity=".42" stroke-width="3"/>
+<rect x="90" y="155" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#65fbd2" stroke-width="3"/>
+<circle cx="132" cy="204" r="12" fill="#65fbd2"/>
+<text x="174" y="198" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">BASM / NASM</text>
+<text x="174" y="230" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">ASSEMBLY IDENTITY</text>
+<rect x="90" y="281" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#ffcc66" stroke-width="3"/>
+<circle cx="132" cy="330" r="12" fill="#ffcc66"/>
+<text x="174" y="324" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">SHA-256</text>
+<text x="174" y="356" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">COMMITTED IMAGES</text>
+<rect x="90" y="407" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#ff6b8a" stroke-width="3"/>
+<circle cx="132" cy="456" r="12" fill="#ff6b8a"/>
+<text x="174" y="450" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">proofctl</text>
+<text x="174" y="482" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">NATIVE CONTRACTS</text>
+<rect x="90" y="533" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#8ea1ff" stroke-width="3"/>
+<circle cx="132" cy="582" r="12" fill="#8ea1ff"/>
+<text x="174" y="576" fill="#8ea1ff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">FUZZ / MUTATE</text>
+<text x="174" y="608" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">FAILS CLOSED</text>
+<rect x="90" y="659" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#d58cff" stroke-width="3"/>
+<circle cx="132" cy="708" r="12" fill="#d58cff"/>
+<text x="174" y="702" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">65,536 STATES</text>
+<text x="174" y="734" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">IPC CURSORS</text>
+<rect x="90" y="785" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#65fbd2" stroke-width="3"/>
+<circle cx="132" cy="834" r="12" fill="#65fbd2"/>
+<text x="174" y="828" fill="#65fbd2" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">JS MODEL</text>
+<text x="174" y="860" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">BOUNDED EXECUTION</text>
+<rect x="90" y="911" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#ffcc66" stroke-width="3"/>
+<circle cx="132" cy="960" r="12" fill="#ffcc66"/>
+<text x="174" y="954" fill="#ffcc66" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">KVM</text>
+<text x="174" y="986" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">HARDWARE EXECUTION</text>
+<rect x="90" y="1037" width="540" height="98" rx="49" fill="#0a0f1d" stroke="#ff6b8a" stroke-width="3"/>
+<circle cx="132" cy="1086" r="12" fill="#ff6b8a"/>
+<text x="174" y="1080" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">QEMU</text>
+<text x="174" y="1112" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">SYSTEM READBACK</text>
+<text x="360" y="1216" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="700" text-anchor="middle" letter-spacing="1.2">ARTIFACT SET / 997C34A5602501E7</text>
+</svg>

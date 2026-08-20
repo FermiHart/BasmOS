@@ -14,7 +14,7 @@ SITE = Path(sys.argv[1] if len(sys.argv) > 1 else "_site").resolve()
 EXPECTED = {
     ".nojekyll", "AUTHORS.md", "ARTIFACTS.manifest", "CNAME", "DOMAINS.md",
     "LICENSE", "Makefile", "OPTIMIZATIONS.md", "README.md", "RELEASING.md",
-    "RESEARCH.md", "RING3.md", "SECURITY.md", "SHA256SUMS",
+    "RESEARCH.md", "RING3.md", "SECURITY.md", "SHA256SUMS", "WAVES.md",
     "THIRD_PARTY_NOTICES.md", "THREAT_MODEL.md", "TRADEMARKS.md",
     "basmos-sh.basm", "basmos-sh.bin", "basmos-vm.bin", "basmos.basm",
     "basmos.bin", "index.html", "jash-live.svg", "test_interpreter.js",
@@ -25,7 +25,10 @@ EXPECTED = {
     "evidence/jash-session.manifest", "evidence/jash-session.txt",
     "jash/jash-pack.basm", "jash/jash-pack.bin", "jash/jash.basm",
     "jash/jash.bin", "scripts/capture_jash.py", "scripts/verify_site.py",
-    "website/jash-live.svg",
+    "website/jash-live.svg", "readme/hero-proof-geometry.svg",
+    "readme/hero-proof-geometry-mobile.svg", "readme/artifact-constellation.svg",
+    "readme/artifact-constellation-mobile.svg", "readme/proof-lattice.svg",
+    "readme/proof-lattice-mobile.svg",
 }
 
 
@@ -36,7 +39,7 @@ class Links(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         values = dict(attrs)
-        for name in ("href", "src"):
+        for name in ("href", "src", "srcset"):
             if name in values:
                 self.values.append(values[name])
 
@@ -48,9 +51,32 @@ def local_target(source, value):
     return (SITE / path.lstrip("/")) if path.startswith("/") else (source.parent / path)
 
 
+def without_fenced_code(markdown):
+    visible = []
+    fence = None
+    for line in markdown.splitlines():
+        marker = re.match(r"^( {0,3})(`{3,}|~{3,})(.*)$", line)
+        if marker:
+            token = marker.group(2)
+            if fence is None:
+                fence = (token[0], len(token))
+            elif (token[0] == fence[0] and len(token) >= fence[1]
+                  and not marker.group(3).strip()):
+                fence = None
+            visible.append("")
+        elif fence is None and not line.startswith(("    ", "\t")):
+            visible.append(line)
+        else:
+            visible.append("")
+    return "\n".join(visible)
+
+
 def main():
     if not SITE.is_dir():
         raise SystemExit(f"FAIL: staged site not found: {SITE}")
+    excluded = sorted(path for path in EXPECTED if path.startswith((".git/", ".github/")))
+    if excluded:
+        raise SystemExit(f"FAIL: Pages upload action would exclude: {excluded}")
     actual = {str(path.relative_to(SITE)) for path in SITE.rglob("*") if path.is_file()}
     if actual != EXPECTED:
         extra = sorted(actual - EXPECTED)
@@ -66,8 +92,34 @@ def main():
             missing.append((index.relative_to(SITE), value))
 
     markdown_link = re.compile(r"\[[^]]*\]\(([^)]+)\)")
+    reference_definition = re.compile(r"(?m)^\s*\[([^]]+)\]:\s*(?:<([^>]+)>|(\S+))")
+    reference_use = re.compile(r"!?\[([^]]+)\]\[([^]]*)\]")
     for source in SITE.glob("*.md"):
-        for value in markdown_link.findall(source.read_text(encoding="utf-8")):
+        markdown = source.read_text(encoding="utf-8")
+        visible = without_fenced_code(markdown)
+        for value in markdown_link.findall(visible):
+            target = local_target(source, value)
+            if target is not None and not target.exists():
+                missing.append((source.relative_to(SITE), value))
+        definitions = {}
+        for label, angle, plain in reference_definition.findall(visible):
+            definitions[label.casefold()] = angle or plain
+        for value in definitions.values():
+            target = local_target(source, value)
+            if target is not None and not target.exists():
+                missing.append((source.relative_to(SITE), value))
+        for label, identifier in reference_use.findall(visible):
+            key = (identifier or label).casefold()
+            value = definitions.get(key)
+            if value is None:
+                missing.append((source.relative_to(SITE), f"undefined reference [{key}]"))
+                continue
+            target = local_target(source, value)
+            if target is not None and not target.exists():
+                missing.append((source.relative_to(SITE), value))
+        embedded = Links()
+        embedded.feed(visible)
+        for value in embedded.values:
             target = local_target(source, value)
             if target is not None and not target.exists():
                 missing.append((source.relative_to(SITE), value))
@@ -77,7 +129,7 @@ def main():
         "jash/jash-pack.bin", "ARTIFACTS.manifest", "SHA256SUMS",
         "basm-nano/basm_nano.c", "basm-nano/basm_sacred.c",
         "evidence/jash-session.txt", "evidence/jash-session.manifest",
-        "jash-live.svg", "CNAME",
+        "jash-live.svg", "readme/hero-proof-geometry.svg", "CNAME",
     ]
     for value in required:
         if not (SITE / value).exists():
