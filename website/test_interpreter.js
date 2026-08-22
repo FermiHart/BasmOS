@@ -85,6 +85,7 @@ const siteClaims = [
   ['current JASH hash', '3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d'],
   ['current Pack hash', '97789cb32d65251f9f748bd4efbb4e3c6a8c2a0aff6bc71abd31a9d72d61f3f0'],
   ['GitHub repository', 'https://github.com/FermiHart/BasmOS'],
+  ['versioned releases', 'https://github.com/FermiHart/BasmOS/releases/latest'],
   ['clone command', 'git clone https://github.com/FermiHart/BasmOS.git'],
   ['toolchain diagnostic', 'make toolchain'],
   ['toolchain installer', 'make toolchain-install'],

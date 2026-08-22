@@ -68,6 +68,8 @@ Exact sizes and complete SHA-256 values live in
 [`ARTIFACTS.manifest`](ARTIFACTS.manifest) and [`SHA256SUMS`](SHA256SUMS).
 Guest binaries are intentionally versioned because their exact bytes are the
 subject of the project. Host executables are never versioned.
+Versioned binaries, checksums and provenance are published through
+[GitHub Releases](https://github.com/FermiHart/BasmOS/releases/latest).
 
 ## Proof Geometry
 

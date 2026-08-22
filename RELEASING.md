@@ -114,29 +114,19 @@ outside this repository.
 
 ## 5. Tag And Publish A Release
 
-Create a signed tag when signing is configured, push it, and attach the exact
-guest artifacts plus their checksums:
+The release workflow accepts only an annotated SSH-signed tag whose commit is
+reachable from `main`. It runs the complete proof, requires a clean reproducible
+rebuild, emits Sigstore provenance and publishes the exact guest artifacts with
+a flat release checksum file:
 
 ```sh
 git tag -s "$VERSION" -m "BasmOS $VERSION"
 git push origin "$VERSION"
-
-gh release create "$VERSION" \
-  basmos.bin \
-  basmos-vm.bin \
-  basmos-sh.bin \
-  jash/jash.bin \
-  jash/jash-pack.bin \
-  ARTIFACTS.manifest \
-  SHA256SUMS \
-  --repo "$OWNER/$REPO" \
-  --verify-tag \
-  --title="BasmOS $VERSION" \
-  --notes='Reproducible BasmOS guest artifacts. Verify with sha256sum -c SHA256SUMS and make proof.'
 ```
 
-If signed tags are not configured, configure a trusted signing identity before
-publishing rather than silently replacing the command with an unsigned tag.
+`.github/allowed_signers` binds accepted release tags to the founder signing
+key. Never replace the signed tag with an unsigned tag or manually upload assets
+that did not pass the workflow.
 
 ## 6. Post-Publication Checks
 
@@ -144,7 +134,10 @@ publishing rather than silently replacing the command with an unsigned tag.
 gh workflow list --repo "$OWNER/$REPO"
 gh run list --repo "$OWNER/$REPO" --limit 10
 gh release view "$VERSION" --repo "$OWNER/$REPO"
+gh release download "$VERSION" --repo "$OWNER/$REPO" --dir release-check
+(cd release-check && sha256sum -c RELEASE_SHA256SUMS)
+gh attestation verify release-check/basmos.bin --repo "$OWNER/$REPO"
 ```
 
-Download the release into a fresh directory, run `sha256sum -c SHA256SUMS`, and
-confirm that the Pages download produces the same 512-byte `basmos.bin`.
+Confirm that the Pages download produces the same 512-byte `basmos.bin` as the
+tag-bound release.

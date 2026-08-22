@@ -1,0 +1,73 @@
+# SPDX-License-Identifier: BSD-3-Clause
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prove-and-release:
+    if: github.repository == 'FermiHart/BasmOS'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - name: Checkout signed tag
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - name: Require founder-signed tag on main
+        run: |
+          test "$(git cat-file -t "$GITHUB_REF_NAME")" = tag
+          test "$(git rev-list -n 1 "$GITHUB_REF_NAME")" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          git -c gpg.ssh.allowedSignersFile=.github/allowed_signers \
+            verify-tag "$GITHUB_REF_NAME"
+
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential nasm nodejs python3 qemu-system-x86
+
+      - name: Verify toolchain
+        run: make toolchain
+
+      - name: Run complete artifact proof
+        run: make proof
+
+      - name: Require reproducible committed artifacts
+        run: |
+          make manifest
+          make readme-art
+          git diff --exit-code
+
+      - name: Assemble release bundle
+        run: |
+          install -d dist
+          install -m 0644 basmos.bin basmos-vm.bin basmos-sh.bin dist/
+          install -m 0644 jash/jash.bin jash/jash-pack.bin dist/
+          install -m 0644 ARTIFACTS.manifest dist/
+          (cd dist && sha256sum basmos.bin basmos-vm.bin basmos-sh.bin \
+            jash.bin jash-pack.bin > RELEASE_SHA256SUMS)
+
+      - name: Attest release provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6
+        with:
+          subject-path: dist/*
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/* \
+            --verify-tag \
+            --title "BasmOS ${GITHUB_REF_NAME#v}" \
+            --generate-notes \
+            --latest
