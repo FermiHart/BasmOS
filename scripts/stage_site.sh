@@ -29,7 +29,7 @@ cp bemu/bemu_nano.c "$out/bemu/"
 cp jash/jash.basm jash/jash.bin jash/jash-pack.basm jash/jash-pack.bin "$out/jash/"
 cp evidence/jash-session.commands evidence/jash-session.ansi \
    evidence/jash-session.txt evidence/jash-session.manifest "$out/evidence/"
-cp scripts/capture_jash.py scripts/verify_site.py "$out/scripts/"
+cp scripts/capture_jash.py scripts/toolchain.sh scripts/verify_site.py "$out/scripts/"
 cp verify_qemu.py verify_domains.py verify_ipc_model.py verify_jash.py \
    verify_jash_qemu.py verify_jash_fuzz.py website/test_interpreter.js "$out/"
 touch "$out/.nojekyll"

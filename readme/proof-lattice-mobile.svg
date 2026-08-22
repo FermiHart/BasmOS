@@ -50,5 +50,5 @@
 <circle cx="132" cy="1086" r="12" fill="#ff6b8a"/>
 <text x="174" y="1080" fill="#ff6b8a" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="30" font-weight="800" text-anchor="start" letter-spacing="0">QEMU</text>
 <text x="174" y="1112" fill="#aeb9d6" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" font-weight="600" text-anchor="start" letter-spacing="0.5">SYSTEM READBACK</text>
-<text x="360" y="1216" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="700" text-anchor="middle" letter-spacing="1.2">ARTIFACT SET / 997C34A5602501E7</text>
+<text x="360" y="1216" fill="#d58cff" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="25" font-weight="700" text-anchor="middle" letter-spacing="1.2">ARTIFACT SET / 812D6685CB142022</text>
 </svg>

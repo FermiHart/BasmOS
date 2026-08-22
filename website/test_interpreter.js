@@ -84,6 +84,11 @@ const siteClaims = [
   ['sigil derivation', 'SHA256(basmos-sh.bin || jash.bin)'],
   ['current JASH hash', '3ed12f5d1d90d006522fab676e796441fb870e8b23083dfd6d1907f8693b536d'],
   ['current Pack hash', '97789cb32d65251f9f748bd4efbb4e3c6a8c2a0aff6bc71abd31a9d72d61f3f0'],
+  ['GitHub repository', 'https://github.com/FermiHart/BasmOS'],
+  ['clone command', 'git clone https://github.com/FermiHart/BasmOS.git'],
+  ['toolchain diagnostic', 'make toolchain'],
+  ['toolchain installer', 'make toolchain-install'],
+  ['direct sector download', 'href="basmos.bin" download'],
   ['transcript evidence link', 'evidence/jash-session.txt'],
   ['session manifest link', 'evidence/jash-session.manifest'],
   ['deep BasmOS links', 'href="#/basmos/proof"'],
@@ -119,6 +124,7 @@ for (const [name, claim] of siteClaims) {
 }
 const rejectedClaims = ['PACK WRITES · 0', 'PRF1|ARTIFACT|JASH|253|3|FF',
   'jash@basmos.org', '5cceb51d8037f790943b4ddc5df42e70025188daa1ca1da23c3d931a398ba309',
+  '399 B payload', 'payload is 399 bytes', '111 bytes remain',
   'Since this report', 'coined “nanokernel”'];
 for (const claim of rejectedClaims) check('site rejects stale claim ' + claim, !html.includes(claim));
 console.log('  crash: ' + (s.crash ? JSON.stringify(s.crash) : 'none'));

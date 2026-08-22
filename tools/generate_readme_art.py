@@ -120,7 +120,7 @@ def hero(items, set_fingerprint):
     out.append(text(cx, cy + 12, str(record_size), 36, "#f4f0dd", 900, "middle"))
     out.append(text(cx, cy + 58, "3 · 6 · 9", 18, "#ffcc66", 800, "middle", 2))
 
-    stats = [(f"{record_size} B", "COMPLETE"), ("399 B", "PAYLOAD"), ("3", "EXECUTORS"), ("65,536", "IPC STATES")]
+    stats = [(f"{record_size} B", "COMPLETE"), ("401 B", "PAYLOAD"), ("3", "EXECUTORS"), ("65,536", "IPC STATES")]
     for index, (number, label) in enumerate(stats):
         x = 72 + index * 152
         out.append(text(x, 505, number, 25, PALETTE[index], 800))
@@ -151,7 +151,7 @@ def hero_mobile(items, set_fingerprint):
     out.append(text(360, 150, "BasmOS", 96, "#f4f0dd", 800, "middle"))
     out.append(text(360, 202, f"{record_size}-BYTE IA-32 NANOKERNEL", 32, "#ffcc66", 700, "middle", 1))
     out.append(text(360, 252, "PM32 / PAGING / PREEMPTION / IPC", 26, "#aebbe8", 600, "middle"))
-    stats = [(f"{record_size} B", "COMPLETE"), ("399 B", "PAYLOAD"), ("3", "EXECUTORS"), ("65,536", "IPC STATES")]
+    stats = [(f"{record_size} B", "COMPLETE"), ("401 B", "PAYLOAD"), ("3", "EXECUTORS"), ("65,536", "IPC STATES")]
     for index, (number, label) in enumerate(stats):
         x = 140 + (index % 2) * 340
         y = 320 + (index // 2) * 92

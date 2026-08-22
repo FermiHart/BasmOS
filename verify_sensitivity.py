@@ -260,10 +260,10 @@ def main():
 
     for c in order:
         print(f"  {c:16s} {counts[c]:4d}")
-    dead_in_payload = sum(1 for r in rows[:payload_end]
-                          if r["class"] == "INTACT")
+    intact_in_payload = sum(1 for r in rows[:payload_end]
+                            if r["class"] == "INTACT")
     print(f"payload: {payload_end} bytes; "
-          f"{dead_in_payload} of them observably dead under the "
+          f"{intact_in_payload} of them observably intact under the "
           f"demonstrated contract")
     print(f"RESULT: INFO — evidence written to {json_path} and {md_path}")
 

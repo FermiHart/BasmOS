@@ -21,6 +21,8 @@ import time
 from pathlib import Path
 
 IMG = sys.argv[1] if len(sys.argv) > 1 else "basmos.bin"
+ASSEMBLER = Path(sys.argv[2] if len(sys.argv) > 2 else "basm-nano/basm-nano")
+ORG = 0x7C00
 EXPECTED = bytes((0x33, 0x0F, 0x36, 0x0F, 0x39, 0x0A))
 image = Path(IMG).read_bytes()
 if len(image) != 512 or image[510:] != b"\x55\xaa":
@@ -29,6 +31,20 @@ if len(image) != 512 or image[510:] != b"\x55\xaa":
 
 tmp = tempfile.TemporaryDirectory(prefix="basmos-qmp-")
 SOCK = str(Path(tmp.name) / "qmp.sock")
+rebuilt = Path(tmp.name) / "basmos.bin"
+map_path = Path(tmp.name) / "basmos.map"
+subprocess.run([
+    str(ASSEMBLER), "-f", "bin", "--map", str(map_path),
+    "-o", str(rebuilt), "basmos.basm",
+], check=True)
+if rebuilt.read_bytes() != image:
+    print(f"FAIL: {IMG} does not match a fresh source build", file=sys.stderr)
+    sys.exit(1)
+symbols = {}
+for line in map_path.read_text(encoding="ascii").splitlines():
+    fields = line.split()
+    if len(fields) == 3:
+        symbols[fields[2]] = ORG + int(fields[0])
 
 qemu = subprocess.Popen([
     "qemu-system-i386",
@@ -122,11 +138,23 @@ try:
     live = qemu.poll() is None and qemu_status == "running"
     ok = live
     gates = [bytes(idt[i:i + 8]) for i in range(0, len(idt), 8)]
+    def gate_offset(gate):
+        return int.from_bytes(gate[:2] + gate[6:8], "little")
+
+    exact_gates = {
+        0: "exception_handler",
+        13: "gp_handler",
+        32: "timer_handler",
+        33: "sys_send",
+        34: "sys_recv",
+    }
     idt_ok = (
         len(gates) == 35
         and all(gate[2:8] == b"\x08\x00\x00\x8e\x00\x00" for gate in gates)
         and all(gate == gates[0] for i, gate in enumerate(gates[:32]) if i != 13)
         and len({gates[i][:2] for i in (0, 13, 32, 33, 34)}) == 5
+        and all(gate_offset(gates[vector]) == symbols[name]
+                for vector, name in exact_gates.items())
     )
     pde_value = int.from_bytes(bytes(pde), "little") if len(pde) == 4 else 0
     paging_ok = (pde_value & 0x83) == 0x83 and (pde_value & 0xFFC00000) == 0
@@ -155,7 +183,7 @@ try:
           "the 6, the 9 and the heartbeat require asynchronous IRQ0 preemption")
     print(f"  [{'PASS' if heartbeat_ok else 'FAIL'}] heartbeat @0x6FC: "
           f"{b1} -> {b2} (+{delta} ticks in 0.5s); a frozen byte would betray a dead PIT")
-    print(f"  [{'PASS' if idt_ok else 'FAIL'}] IDT: 31 generic fail-stop + #GP + 3 service gates")
+    print(f"  [{'PASS' if idt_ok else 'FAIL'}] IDT: exact generic fail-stop + #GP + 3 service gates")
     print(f"  [{'PASS' if paging_ok else 'FAIL'}] PDE0: present | rw | 4MB page "
           f"(runtime={pde_value:#010x})")
 

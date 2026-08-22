@@ -110,7 +110,11 @@ pm:
     mov ax, timer_handler
     push edx
     push eax                ; vector 32: IRQ0 / yield
-    mov al, exception_handler
+%ifdef BEMU_CONTRACT
+    mov al, exception_handler ; contract handlers share one 256-byte page
+%else
+    mov ax, exception_handler ; metal handler must not inherit timer's high byte
+%endif
     push 32
     pop ecx
 .idt_fill:

@@ -261,6 +261,7 @@ footer .joke{margin-top:.8rem;color:#91ad91}
   <a class="brand" href="#/">NANOKERNEL.ORG</a>
   <a href="#/basmos">BasmOS</a>
   <a href="#/paper">NK-TR-001</a>
+  <a href="https://github.com/FermiHart/BasmOS" rel="noopener">GitHub ↗</a>
   <span class="spacer"></span>
   <span class="bnav">
     <a href="#/basmos/proof">proof</a>
@@ -297,7 +298,7 @@ footer .joke{margin-top:.8rem;color:#91ad91}
       preemptive scheduling, two tasks, IPC. Its sibling sector adds a real ring-3 monitor,
       TSS and user-module loader. No second stage; assembled 100% with BASM.</p>
       <div class="pj-stats">
-        <span>512 B sector</span><span>399 B payload</span><span>232 B machine-contract</span><span>256 B JASH/CPL3</span><span>source-built tools</span>
+        <span>512 B sector</span><span>401 B payload</span><span>232 B machine-contract</span><span>256 B JASH/CPL3</span><span>source-built tools</span>
         <span>QEMU · browser · KVM</span><span>boots in your browser</span>
       </div>
       <span class="cta">ENTER THE SECTOR →</span>
@@ -313,7 +314,7 @@ footer .joke{margin-top:.8rem;color:#91ad91}
         <b>BasmOS: A Complete Protected-Mode Operating System in a Single 512-Byte Boot Sector</b>
         <span>technical report — design, size engineering, verification methodology</span>
       </a>
-      <a class="doc" href="#/basmos">
+      <a class="doc" href="#/basmos/run">
         <span class="id">NK-001 · GUIDE</span>
         <b>Build &amp; verify BasmOS</b>
         <span>make targets, QEMU verification, byte map, real hardware</span>
@@ -353,10 +354,10 @@ footer .joke{margin-top:.8rem;color:#91ad91}
       No second stage. No bootloader. Assembled 100% with <b>BASM</b>.
     </p>
     <div class="stats">
-      <div class="stat"><b>399</b><span>PAYLOAD (B)</span></div>
-      <div class="stat"><b>315</b><span>CODE (B)</span></div>
+      <div class="stat"><b>401</b><span>PAYLOAD (B)</span></div>
+      <div class="stat"><b>317</b><span>CODE (B)</span></div>
       <div class="stat"><b>84</b><span>DATA (B)</span></div>
-      <div class="stat"><b>111</b><span>HEADROOM (B)</span></div>
+      <div class="stat"><b>109</b><span>HEADROOM (B)</span></div>
       <div class="stat"><b>0</b><span>SECOND STAGES</span></div>
       <div class="stat"><b>256</b><span>IPC RING (B)</span></div>
     </div>
@@ -364,6 +365,7 @@ footer .joke{margin-top:.8rem;color:#91ad91}
       <button type="button" class="cta" id="btnboot">▶ BOOT IT IN YOUR BROWSER</button>
       <button type="button" class="cta alt" id="btndl">⬇ basmos.bin (512 B)</button>
       <button type="button" class="cta alt" id="btnhex">⧉ copy hex</button>
+      <a class="cta alt" href="https://github.com/FermiHart/BasmOS" rel="noopener">GITHUB / SOURCE ↗</a>
     </div>
     <p class="weightjoke" id="joke">the entire binary is embedded in this page.</p>
   </header>
@@ -398,7 +400,7 @@ footer .joke{margin-top:.8rem;color:#91ad91}
       <aside class="inspector" id="inspector">
         <div class="iaddr" id="iaddr">0x7C00 … 0x7DFF</div>
         <div class="iname" id="iname">the whole sector</div>
-        <div class="idesc" id="idesc">399 bytes of payload, 111 bytes of headroom, and the 0xAA55 signature. Inspect a byte to see which symbol owns it and what it does. The domain gate separately requires cross-domain data and code accesses to enter #GP13 — each task owns its data window <em>and</em> its fetch window.</div>
+        <div class="idesc" id="idesc">401 bytes of payload, 109 bytes of headroom, and the 0xAA55 signature. Inspect a byte to see which symbol owns it and what it does. The domain gate separately requires cross-domain data and code accesses to enter #GP13 — each task owns its data window <em>and</em> its fetch window.</div>
         <div class="ibytes" id="ibytes"></div>
       </aside>
     </div>
@@ -484,7 +486,7 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
     <p class="sub">the same <code>basmos.basm</code> source assembles into two personalities. The second one never boots at all.</p>
     <div class="feats">
       <div class="feat"><span class="n">232 B</span><h3 style="color:#15ff5c">ZERO BYTES OF BOOT</h3>
-        <p><code>basm -DBEMU_CONTRACT</code> drops the real-mode prologue, embedded GDT, paging setup, PIC and PIT. The 232-byte contract guest is <b>167 bytes smaller than the 399-byte payload</b> and <b>280 bytes smaller than the complete 512-byte sector</b>. What remains is IDT, task domains, scheduler, IPC and tasks; <code>bemu-nano</code> starts the vCPU directly in protected mode with paging on.</p></div>
+        <p><code>basm -DBEMU_CONTRACT</code> drops the real-mode prologue, embedded GDT, paging setup, PIC and PIT. The 232-byte contract guest is <b>169 bytes smaller than the 401-byte payload</b> and <b>280 bytes smaller than the complete 512-byte sector</b>. What remains is IDT, task domains, scheduler, IPC and tasks; <code>bemu-nano</code> starts the vCPU directly in protected mode with paging on.</p></div>
       <div class="feat"><span class="n">0</span><h3 style="color:#38d9ff">PORTS TOUCHED</h3>
         <p>Under the contract the guest speaks to <b>no device at all</b> — measured PIO writes: <b>zero</b>. There is no PIC and no PIT. Time is one instruction: <code>hlt</code> asks the machine for the next tick, and the VMM injects vector 0x20. The guest defines its own physics.</p></div>
       <div class="feat"><span class="n">KVM</span><h3 style="color:#ff9432">AUDITABLE HOST RUNNER</h3>
@@ -530,8 +532,8 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
         <tr><td><code>0xB8000–0xB8F9F</code></td><td>4,000 B</td><td>VGA text memory</td></tr>
       </tbody>
     </table>
-    <p class="memnote">task1 has <b>no separate stack allocation</b>: <code>other_sp = t1frame−32 = 0x7C8F</code>.
-      Its 32-byte saved-register frame and 12-byte interrupt frame cycle through <code>0x7C8F–0x7CBA</code>.</p>
+    <p class="memnote">task1 has <b>no separate stack allocation</b>: <code>other_sp = t1frame−32 = 0x7C91</code>.
+      Its 32-byte saved-register frame and 12-byte interrupt frame cycle through <code>0x7C91–0x7CBC</code>.</p>
   </section>
 
   <section id="vs">
@@ -546,14 +548,14 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
        Full evidence table and limitations: <a href="RESEARCH.md"><code>RESEARCH.md</code></a>.</p>
     <div class="feats">
       <div class="feat"><span class="n">512 B</span><h3 style="color:#15ff5c">THE CLAIM (BARE METAL)</h3>
-        <p>In the public survey completed on 2026-08-19, BasmOS is the smallest publicly verifiable IA-32 nanokernel found in the category requiring protected mode, active paging, IDT and timer, at least two timer-preempted tasks and functional IPC. The complete bare-metal artifact is 512 bytes; its payload is 399 bytes.</p></div>
+        <p>In the public survey completed on 2026-08-19, BasmOS is the smallest publicly verifiable IA-32 nanokernel found in the category requiring protected mode, active paging, IDT and timer, at least two timer-preempted tasks and functional IPC. The complete bare-metal artifact is 512 bytes; its payload is 401 bytes.</p></div>
       <div class="feat"><span class="n">232 B</span><h3 style="color:#38d9ff">THE CLAIM (MACHINE CONTRACT)</h3>
         <p>Under the bemu-nano contract the same source ships as 232 bytes — always labeled as such,
-        never as bare metal. On bare metal the answer stays 512&nbsp;B / 399&nbsp;B, full stop.</p></div>
+         never as bare metal. On bare metal the answer stays 512&nbsp;B / 401&nbsp;B, full stop.</p></div>
       <div class="feat"><span class="n">150×</span><h3 style="color:#ff9432">RELATED 1992 NANOKERNEL SCALE</h3>
         <p>The 1992 KeyKOS nanokernel paper describes about 60&nbsp;KB of executable code.
          BasmOS implements a compact kernel core — preemption, trap services and logical IPC between shared-CPL0 tasks —
-        in 399 bytes. With the machine contract: 259× smaller.</p></div>
+        in 401 bytes. With the machine contract: 259× smaller.</p></div>
       <div class="feat"><span class="n">3</span><h3 style="color:#cf7dff">EXECUTORS THAT MUST AGREE</h3>
         <p>QEMU and the interpreter execute the 512-byte sector; bare KVM (bemu-nano) checks its BIOS personality
         and the separate 232-byte machine-contract build. Their specified observables must agree or verification fails.</p></div>
@@ -567,14 +569,29 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
 
   <section id="run">
     <h2>RUN IT YOURSELF</h2>
-    <pre class="term"><span class="p">$</span> <span class="k">make</span>            <span class="c"># menu; make all builds 512B record + 232B contract + 512B ring-3 sector</span>
+    <p class="sub">Clone the complete source and proof suite, or download the sealed artifacts directly. The installer is reviewed source in this repository; no remote shell pipeline is used.</p>
+    <div class="ctas" style="margin:0 0 1rem">
+      <a class="cta" href="https://github.com/FermiHart/BasmOS" rel="noopener">GITHUB REPOSITORY ↗</a>
+      <a class="cta alt" href="basmos.bin" download>DOWNLOAD basmos.bin</a>
+      <a class="cta alt" href="SHA256SUMS">SHA-256 MANIFEST</a>
+      <a class="cta alt" href="ARTIFACTS.manifest">ARTIFACT MANIFEST</a>
+    </div>
+    <pre class="term"><span class="p">$</span> <span class="k">git clone https://github.com/FermiHart/BasmOS.git</span>
+ <span class="p">$</span> <span class="k">cd BasmOS</span>
+ <span class="p">$</span> <span class="k">make toolchain</span> <span class="c"># diagnose compilers, QEMU, NASM, headers and /dev/kvm</span>
+ <span class="p">$</span> <span class="k">make toolchain-install</span> <span class="c"># Debian/Ubuntu: explicit apt installation</span>
+ <span class="p">$</span> <span class="k">make all</span>       <span class="c"># build 512B record + 232B contract + 512B ring-3 sector</span>
+ <span class="p">$</span> <span class="k">make verify-ci</span> <span class="c"># hosted-CI proof path; does not require KVM</span>
+ <span class="p">$</span> <span class="k">make proof</span>     <span class="c"># complete local proof; requires readable/writable /dev/kvm</span>
+
+<span class="c"># Focused execution and verification:</span>
+ <span class="p">$</span> <span class="k">make</span>            <span class="c"># menu of all supported targets</span>
  <span class="p">$</span> <span class="k">make verify</span>     <span class="c"># QEMU + browser interpreter + bemu-nano (KVM, zero firmware)</span>
  <span class="p">$</span> <span class="k">make verify-shell</span> <span class="c"># QEMU + KVM: TSS, CPL3, IRQ0, module, hostile instructions</span>
  <span class="p">$</span> <span class="k">make shell</span>      <span class="c"># load a binary module through COM1 and run it in ring 3</span>
  <span class="p">$</span> <span class="k">make jash-live</span>  <span class="c"># native C/KVM Wire to the real 256-byte CPL3 shell</span>
  <span class="p">$</span> <span class="k">make verify-jash</span> <span class="c"># QEMU + KVM, manifests, Decks, ANSI, CS and byte readback</span>
  <span class="p">$</span> <span class="k">make verify-sacred</span> <span class="c"># compile Metatron C source art; require 5/5 byte identity</span>
- <span class="p">$</span> <span class="k">make proof</span>      <span class="c"># native proofctl + every QEMU/KVM/PTY/browser/hardening gate</span>
  <span class="p">$</span> <span class="k">make clean-room-proof</span> <span class="c"># erase outputs, rebuild, verify, hash</span>
  <span class="p">$</span> <span class="k">make run</span>        <span class="c"># QEMU with a read-only floppy image and no network</span>
  <span class="p">$</span> <span class="k">bemu/bemu-nano</span> basmos.bin              <span class="c"># BIOS-contract: real mode @0x7C00</span>
@@ -596,13 +613,13 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
     <div class="meta"><b style="color:var(--green);letter-spacing:.18em">F E R M I ∞ H A R T</b> ·
       <a href="mailto:contact@fermihart.com">contact@fermihart.com</a> · Nanokernel.org<br>
       License: BSD 3-Clause ·
-      Artifact: <code>basmos.bin</code> (512 B, payload 399 B) — embedded in <a href="#/basmos">the project page</a>, bootable there.</div>
+      Artifact: <code>basmos.bin</code> (512 B, payload 401 B) — embedded in <a href="#/basmos">the project page</a>, bootable there.</div>
 
     <div class="abstract">
       <b>Abstract.</b> BasmOS is a <b>nanokernel</b>: an operating system whose entire
       implementation — bootstrap, protected-mode transition, paged memory, preemptive
       scheduling, system calls and inter-task communication — fits in the one 512-byte
-      sector the PC BIOS loads. The payload is 399 bytes (315 code, 84 data); the rest is
+      sector the PC BIOS loads. The payload is 401 bytes (317 code, 84 data); the rest is
       padding ahead of the mandatory <code>0xAA55</code> signature. The kernel is assembled
       entirely with BASM and requires no second-stage loader: the kernel <em>is</em> the boot
       record. Behavior is verified deterministically by reading VGA text memory back from
@@ -618,7 +635,7 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
     protected mode, enables paging, preempts two tasks on the timer interrupt, and passes
     bytes between them through a ring buffer — all inside the sector that is also its own
     boot record.</p>
-    <p>Contributions: (i) a full protected-mode OS in 399 payload bytes; (ii) a set of
+    <p>Contributions: (i) a full protected-mode OS in 401 payload bytes; (ii) a set of
     reusable size-engineering techniques (§4); (iii) a deterministic, externally observable
      verification method (§6.1); (iv) independently implemented QEMU, browser-interpreter and
      KVM execution paths with specified observable agreement (§6.2).</p>
@@ -693,7 +710,7 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
     <table>
       <tr><th>symbol</th><th>bytes</th><th>role</th></tr>
       <tr><td>start</td><td class="num">22</td><td>real-mode entry, PE enable, far jmp</td></tr>
-      <tr><td>pm</td><td class="num">153</td><td>IDT construction, segments, paging, PIC/PIT, stack</td></tr>
+      <tr><td>pm</td><td class="num">155</td><td>IDT construction, segments, paging, PIC/PIT, stack</td></tr>
       <tr><td>t1frame</td><td class="num">12</td><td>task1 bootstrap frame (data)</td></tr>
       <tr><td>task0</td><td class="num">34</td><td>5-byte retf prologue + private-domain producer: send loop, no hlt, no yield</td></tr>
       <tr><td>task1</td><td class="num">33</td><td>private-domain consumer, including HLT loop</td></tr>
@@ -704,8 +721,8 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
       <tr><td>idtr</td><td class="num">6</td><td>IDTR image</td></tr>
       <tr><td>gdt</td><td class="num">62</td><td>flat kernel, task data domains, VGA and task code-window descriptors</td></tr>
       <tr><td>other_sp</td><td class="num">4</td><td>all persistent scheduler state</td></tr>
-      <tr><th>payload</th><th>399</th><th>315 code + 84 data</th></tr>
-      <tr><td>padding + 0xAA55</td><td class="num">113</td><td>111 headroom + 2-byte signature</td></tr>
+      <tr><th>payload</th><th>401</th><th>317 code + 84 data</th></tr>
+      <tr><td>padding + 0xAA55</td><td class="num">111</td><td>109 headroom + 2-byte signature</td></tr>
     </table>
 
     <h2>8 · Related magnitude</h2>
@@ -719,10 +736,12 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
     <p>Scope decisions, not accidents: a single privilege level (ring 0); no interactive
     input; trusted CPL0 task code (windows contain runaway fetches, not deliberate far transfers); a static two-task set; a 4&nbsp;MB identity map; PSE-capable IA-32 hardware; and no
     recovery policy beyond fail-stop for CPU exceptions. The PIC and PIT are initialized,
-    every architectural exception has a valid gate, and 111 payload bytes remain available.</p>
+     every architectural exception has a valid gate, and 109 payload bytes remain available.</p>
 
     <h2>10 · Reproducibility</h2>
-    <p><code>make</code> assembles the sector with BASM; <code>make verify</code> performs the
+    <p><code>make toolchain</code> diagnoses the local prerequisites and <code>make toolchain-install</code>
+    installs the reviewed Debian/Ubuntu package set. <code>make</code> lists the build and proof targets;
+    <code>make verify</code> performs the
     QEMU readback of §6.1; <code>make map</code> prints the per-symbol byte budget behind §7.
     The full binary is embedded in the project page — downloadable, copyable as hex, and
     executable in place. BasmOS is released under the BSD 3-Clause license.</p>
@@ -759,43 +778,40 @@ RESULT: PASS — 512B ring-3 monitor loaded, ran and returned from a user module
 <footer>
   <p><b style="color:var(--green)">NANOKERNEL.ORG</b> — nanokernels: proof, not promise.</p>
   <p>by <b style="letter-spacing:.18em">F E R M I ∞ H A R T</b> · <a href="mailto:contact@fermihart.com">contact@fermihart.com</a></p>
-  <p>BasmOS · assembled with BASM · <a href="LICENSE">BSD-3-Clause</a> · preserve license and attribution notices.</p>
+  <p>BasmOS · <a href="https://github.com/FermiHart/BasmOS" rel="noopener">source on GitHub</a> · assembled with BASM · <a href="LICENSE">BSD-3-Clause</a> · preserve license and attribution notices.</p>
   <p class="joke">Press DEL to enter SETUP — there is no setup. It's 512 bytes. <kbd>b</kbd> boots.</p>
 </footer>
 
 <script>
-/* ═══ THE PRODUCT ═══ real payload (399 B) of basmos.bin, hex verbatim */
+/* ═══ THE PRODUCT ═══ real payload (401 B) of basmos.bin, hex verbatim */
 const PAYLOAD_HEX =
-  "fa31c08ed80f01164d7d0f20c0400f22c0ea167c0800b8100000008ed88ed0bc1806000031d2b68eb8327d08005250b01b525066b8047d5250b0fe6a"+
-  "20595250e2fc66c70568050000017d0f011d477d00000f20e00c100f22e0b800100000c700830000000f22d889c40f20c00fbae81f0f22c0b011e620"+
-  "b020e621b004e621b001e621b0fee621b036e64330c0e640e64066b810008ec0b0288ee8b50766c705977c00002000890da77c0000eb0c0000000038"+
-  "000000020200006a306a05cb66bd18008edd66b8330f6566a300000000a200000000fbb039cd21ebfc6566c70502000000360fcd2284c0740ea20000"+
-  "0000b40a6566a304000000f4ebe9f4ebfdf4ebfd60b020e62026fe05fc0600002687258b7d0000618eddcf89cafec2268b1d8b7d0000263b53187405"+
-  "26880189d1cf30c0268b158b7d0000263b4a187405268a01fec1cf1701000500003f004b7d0000ffff0000009acf00ffff00000092cf00ff00000800"+
-  "924000ff00000900924000ff0f00800b9240002100bb7c009a40002000dd7c009a40008f7c0000";
+  "fa31c08ed80f01164f7d0f20c0400f22c0ea167c0800b8100000008ed88ed0bc1806000031d2b68eb8347d08005250b01d525066b8067d525066b8007d6a20595250e2fc66c70568050000037d0f011d497d00000f20e00c100f22e0b800100000c700830000000f22d889c40f20c00fbae81f0f22c0b011"+
+  "e620b020e621b004e621b001e621b0fee621b036e64330c0e640e64066b810008ec0b0288ee8b50766c705997c00002000890da97c0000eb0c0000000038000000020200006a306a05cb66bd18008edd66b8330f6566a300000000a200000000fbb039cd21ebfc6566c70502000000360fcd2284c0740ea2"+
+  "00000000b40a6566a304000000f4ebe9f4ebfdf4ebfd60b020e62026fe05fc0600002687258d7d0000618eddcf89cafec2268b1d8d7d0000263b5318740526880189d1cf30c0268b158d7d0000263b4a187405268a01fec1cf1701000500003f004d7d0000ffff0000009acf00ffff00000092cf00ff0000"+
+  "0800924000ff00000900924000ff0f00800b9240002100bd7c009a40002000df7c009a4000917c0000";
 
 const BIN = new Uint8Array(512);
-for (let i = 0; i < 399; i++) BIN[i] = parseInt(PAYLOAD_HEX.substr(i*2, 2), 16);
+for (let i = 0; i < 401; i++) BIN[i] = parseInt(PAYLOAD_HEX.substr(i*2, 2), 16);
 BIN[510] = 0x55; BIN[511] = 0xAA;
 
 /* symbol map (offset, size, id, name, description, color) */
 const REG = [
  [0,22,'start','start · BITS 16','wake-up: cli · DS=0 · lgdt · PE set by a single-byte inc ax · far jmp 0x08:pm','#38d9ff'],
- [22,153,'pm','pm · hardened 32-bit init','ESP builds 35 IDT gates · #GP gate · paging · PIC/PIT · segment capabilities','#4a86ff'],
-  [175,12,'t1frame','t1frame · baked frame','task1’s EIP/CS/EFLAGS shipped as data; CS=0x38, its own code window','#ff5fd0'],
-   [187,5,'retf','task0 · code-window entry','push 0x30 · push 5 · retf: task0 begins executing inside its own CS','#46ff7d'],
-   [192,29,'task0','task0 · bounded producer','DS base 0x800/limit 0xFF; GS writes white 3; CPU-bound send loop','#46ff7d'],
-   [221,33,'task1','task1 · bounded consumer','DS base 0x900/limit 0xFF; GS writes white 6 and received green 9','#b9ff4f'],
-   [254,3,'fault','exception_handler','generic architectural exceptions enter stable fail-stop','#ff3158'],
-   [257,3,'gp','gp_handler · vector 13','distinct #GP fail-stop makes the negative domain probes exact','#ff3158'],
-   [260,12,'timer','timer_handler · vector 32','pushad + EOI + ES-scoped heartbeat','#ff5252'],
-   [272,11,'sw','do_switch · bounded scheduler','ES swaps stack; EBP restores the incoming task DS selector','#ff9432'],
-   [283,23,'send','sys_send · int 33','flat ES is required to reach the kernel-owned ring and peer frame','#cf7dff'],
-   [306,21,'recv','sys_recv · int 34','flat ES reads the ring; inc cl wraps modulo 256','#a44dff'],
-   [327,6,'idtr','idtr','limit covers exceptions 0..31 plus timer/yield, send and receive','#ffe45c'],
-   [333,62,'gdt','gdt','flat kernel + task0/task1 data + VGA + task0/task1 code descriptors','#e0a41f'],
-   [395,4,'other','other_sp','the only persistent scheduler cell; also exposes the opposite endpoint cursor','#2ef0c0'],
-   [399,111,'pad','headroom','111 bytes remain before the boot signature','#20301f'],
+ [22,155,'pm','pm · hardened 32-bit init','ESP builds 35 IDT gates · #GP gate · paging · PIC/PIT · segment capabilities','#4a86ff'],
+  [177,12,'t1frame','t1frame · baked frame','task1’s EIP/CS/EFLAGS shipped as data; CS=0x38, its own code window','#ff5fd0'],
+    [189,5,'retf','task0 · code-window entry','push 0x30 · push 5 · retf: task0 begins executing inside its own CS','#46ff7d'],
+    [194,29,'task0','task0 · bounded producer','DS base 0x800/limit 0xFF; GS writes white 3; CPU-bound send loop','#46ff7d'],
+    [223,33,'task1','task1 · bounded consumer','DS base 0x900/limit 0xFF; GS writes white 6 and received green 9','#b9ff4f'],
+    [256,3,'fault','exception_handler','generic architectural exceptions enter stable fail-stop','#ff3158'],
+    [259,3,'gp','gp_handler · vector 13','distinct #GP fail-stop makes the negative domain probes exact','#ff3158'],
+    [262,12,'timer','timer_handler · vector 32','pushad + EOI + ES-scoped heartbeat','#ff5252'],
+    [274,11,'sw','do_switch · bounded scheduler','ES swaps stack; EBP restores the incoming task DS selector','#ff9432'],
+    [285,23,'send','sys_send · int 33','flat ES is required to reach the kernel-owned ring and peer frame','#cf7dff'],
+    [308,21,'recv','sys_recv · int 34','flat ES reads the ring; inc cl wraps modulo 256','#a44dff'],
+    [329,6,'idtr','idtr','limit covers exceptions 0..31 plus timer/yield, send and receive','#ffe45c'],
+    [335,62,'gdt','gdt','flat kernel + task0/task1 data + VGA + task0/task1 code descriptors','#e0a41f'],
+    [397,4,'other','other_sp','the only persistent scheduler cell; also exposes the opposite endpoint cursor','#2ef0c0'],
+    [401,109,'pad','headroom','109 bytes remain before the boot signature','#20301f'],
  [510,2,'sig','0xAA55','the BIOS’s permission slip: “this boots”','#ffffff'],
 ];
 const regOf = i => REG.find(r => i >= r[0] && i < r[0]+r[1]);

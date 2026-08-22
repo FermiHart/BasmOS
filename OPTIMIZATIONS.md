@@ -10,7 +10,7 @@ release.
 
 | Artifact | Total | Payload | Free before signature |
 |---|---:|---:|---:|
-| `basmos.bin` | 512 B | 399 B | 111 B |
+| `basmos.bin` | 512 B | 401 B | 109 B |
 
 The payload contains boot entry, PM32 transition, PSE paging, IDT, PIC/PIT,
 timer-driven switching of a CPU-bound and a sleeping task, bounded data and
@@ -113,13 +113,10 @@ assembles the same five artifacts with NASM and requires byte identity.
 `make verify-sensitivity` flips every byte of the record sector (XOR 0xFF),
 boots the mutant in QEMU and classifies the observable effect on the
 demonstrated contract (3/6/9, liveness, heartbeat). Current result over the
-399-byte payload: 278 payload bytes are DEAD when flipped, 34 visibly ALTER
-the contract, 2 freeze only the timer evidence, and 85 are observably intact
-under normal operation. The committed map is one run; two additional complete
-runs agreed on 510 of 512 bytes. The two exceptions (offsets 108-109, the
-ModRM of `mov eax,cr0` and the opcode of `bts eax,31` — the paging-enable
-pair) oscillate between DEAD and ALTERED-VISIBLE depending on whether the
-mutated decode still paints before failing. The full map is committed in
+401-byte payload: 279 payload bytes are DEAD when flipped, 33 visibly ALTER
+the contract, 3 freeze only the timer evidence, and 86 are observably intact
+under normal operation. Three complete successful runs of the current artifact
+produced byte-identical JSON and Markdown maps. The full map is committed in
 `evidence/byte-sensitivity.md`.
 
 ## Measured Symbol Map

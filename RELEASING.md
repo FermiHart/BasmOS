@@ -12,11 +12,13 @@ When guest source changes, rebuild and review the new artifacts before updating
 their expected hashes:
 
 ```sh
+make toolchain
 make clean
 make all
 make map
 make shell-map
 make jash-map
+make verify-sensitivity
 make manifest
 make readme-art
 ```

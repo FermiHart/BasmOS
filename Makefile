@@ -23,11 +23,13 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
 	@printf '  \033[1mmake all\033[0m      build the record, machine-contract, ring-3 and JASH artifacts\n'
+	@printf '  \033[1mmake toolchain\033[0m\n               check compilers, executors, headers and KVM access\n'
+	@printf '  \033[1mmake toolchain-install\033[0m\n               install the Debian/Ubuntu toolchain, then check it\n'
 	@printf '  \033[1mmake shell\033[0m    load and run a module in the ring-3 capsule over serial\n'
 	@printf '  \033[1mmake jash\033[0m     demonstrate the CPL3 shell, Decks and typed Surfaces\n'
 	@printf '  \033[1mmake jash-live\033[0m\n               enter interactive JASH; type help, finish with bye\n'
@@ -51,6 +53,12 @@ help: ## display this menu
 	@printf '  \033[1mmake clean\033[0m    remove generated artifacts\n\n'
 
 all: $(KERNEL) $(VMKERN) $(SHKERN) $(JASH) $(JPACK) ## build kernel and user-space artifacts
+
+toolchain: ## check the complete build and verification toolchain
+	@scripts/toolchain.sh --check
+
+toolchain-install: ## install the complete toolchain on Debian/Ubuntu
+	@scripts/toolchain.sh --install
 
 $(BASM): basm-nano/basm_nano.c
 	$(MAKE) -C basm-nano
@@ -157,8 +165,8 @@ verify-bear: all ## optional cc-vs-Bear byte identity (BEAR=/path/to/bear)
 	cmp "$$tmp/jash-pack.bin" $(JPACK) && \
 	echo "BEAR: 5/5 artifacts are byte-identical between cc and $(BEAR)"
 
-verify-qemu: $(KERNEL)
-	python3 verify_qemu.py $(KERNEL)
+verify-qemu: $(KERNEL) $(BASM)
+	python3 verify_qemu.py $(KERNEL) $(BASM)
 
 verify-domains: $(KERNEL) $(VMKERN) $(BASM) $(BEMU_RUNNER) ## prove private DS windows and a cross-domain #GP
 	python3 verify_domains.py $(KERNEL) $(VMKERN) $(BASM) bemu/bemu-nano

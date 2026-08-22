@@ -194,6 +194,9 @@ manifest: [`evidence/jash-session.manifest`](evidence/jash-session.manifest)
 ```sh
 git clone https://github.com/FermiHart/BasmOS.git
 cd BasmOS
+make toolchain
+# Debian/Ubuntu can install the reviewed package set explicitly:
+make toolchain-install
 make all
 make proof
 ```
@@ -220,6 +223,8 @@ make verify-readme    # artifact-bound SVGs are deterministic and current
 
 - Basic build: C compiler, GNU Make and Linux UAPI headers for `<linux/kvm.h>`.
 - Full proof: Python 3, Node.js, QEMU `qemu-system-i386`, NASM and `/dev/kvm`.
+- `make toolchain` diagnoses all commands, headers and KVM access without privileges.
+- `make toolchain-install` installs the Debian/Ubuntu package set through `apt-get`.
 - Optional sovereign compiler diversity: `make verify-bear BEAR=/path/to/bear`.
 
 </details>
@@ -245,7 +250,7 @@ and functional inter-task IPC in the complete bare-metal artifact.
 
 In the documented public survey completed on **2026-08-19**, BasmOS is the
 smallest publicly verifiable artifact found in that category: **512 bytes total,
-399-byte payload**. Additional features are allowed, and every byte required from
+401-byte payload**. Additional features are allowed, and every byte required from
 BIOS entry to demonstrated behavior is counted. This is a reproducible dated
 survey result, not certification by an external record authority.
 
