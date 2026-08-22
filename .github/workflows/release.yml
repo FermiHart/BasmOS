@@ -39,6 +39,12 @@ jobs:
       - name: Verify toolchain
         run: make toolchain
 
+      - name: Require KVM
+        run: |
+          test -c /dev/kvm
+          sudo chmod a+rw /dev/kvm
+          test -r /dev/kvm && test -w /dev/kvm
+
       - name: Run complete artifact proof
         run: make proof
 
