@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Additive, opt-in gates. Existing BasmOS Makefile and artifact contracts stay intact.
+PYTHON ?= python3
+.PHONY: upgrade-test upgrade-bench upgrade-reproduce upgrade-receipt upgrade-integrate upgrade-native
+upgrade-test:
+	$(PYTHON) tools/upgrade/gate.py
+upgrade-bench:
+	$(PYTHON) tools/upgrade/benchmark.py
+upgrade-reproduce:
+	$(PYTHON) tools/upgrade/reproduce.py
+upgrade-receipt: upgrade-test
+	$(PYTHON) tools/upgrade/receipt.py
+# Requires the FULL original repository. Do not replace or disable the generator.
+# The canonical C changes invalidate the generated source-art digest.
+upgrade-integrate:
+	$(PYTHON) tools/generate_sacred_basm.py
+	$(PYTHON) tools/generate_sacred_basm.py --check
+upgrade-native:
+	$(PYTHON) tools/upgrade/native_gate.py

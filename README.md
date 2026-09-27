@@ -220,6 +220,19 @@ make verify-sacred    # canonical and geometric C editions: 5/5 identical
 make verify-readme    # artifact-bound SVGs are deterministic and current
 ```
 
+Assembler correctness and performance checks:
+
+```sh
+make -f Makefile.upgrade upgrade-test       # GCC/Clang + ASan/UBSan contracts
+make -f Makefile.upgrade upgrade-reproduce  # original/updated bug reproductions
+make -f Makefile.upgrade upgrade-bench      # paired host assembly-pass timings
+```
+
+These checks require a 64-bit POSIX host, GCC, Clang, Python 3 and GNU binutils.
+See [assembler validation](https://github.com/FermiHart/BasmOS/blob/main/docs/upgrade/README.md) for the contracts and
+[measured optimization results](https://github.com/FermiHart/BasmOS/blob/main/docs/upgrade/OPTIMIZATION.md) for the benchmark
+method and its limits. The assembler improvements preserve all five guest images.
+
 <details>
 <summary><strong>Toolchain requirements</strong></summary>
 

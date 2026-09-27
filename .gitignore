@@ -5,6 +5,10 @@
 /basm-nano/basm-sacred
 /bemu/bemu-nano
 /tools/proofctl
+/build/
+
+# Local upgrade delivery bundle (integrated sources are versioned separately)
+/Upgrade-2.0/
 
 # Python and editor state
 __pycache__/

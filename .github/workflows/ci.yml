@@ -17,13 +17,16 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
 
       - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y build-essential nasm nodejs python3 qemu-system-x86
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang nasm nodejs python3 qemu-system-x86
 
       - name: Verify toolchain entrypoint
         run: make toolchain
 
       - name: Build exact artifacts
         run: make all
+
+      - name: Verify assembler contracts with GCC, Clang and sanitizers
+        run: make -f Makefile.upgrade upgrade-test
 
       - name: Verify executable Metatron source art
         run: make verify-sacred
