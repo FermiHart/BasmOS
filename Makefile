@@ -23,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -36,6 +36,7 @@ help: ## display this menu
 	@printf '  \033[1mmake bemu\033[0m     boot the 512-byte sector in bEMU-NANO with terminal display\n'
 	@printf '  \033[1mmake bemu-contract\033[0m\n               enter the 232-byte guest directly in PM32 with paging\n'
 	@printf '  \033[1mmake verify\033[0m   verify the record with QEMU, the JS interpreter and KVM\n'
+	@printf '  \033[1mmake verify-bemu-bounds\033[0m\n               test VMM stack bounds and overflow without KVM\n'
 	@printf '  \033[1mmake verify-shell\033[0m\n               verify TSS, IRQ0, CPL3 module load, execution and return\n'
 	@printf '  \033[1mmake verify-jash\033[0m\n               verify ANSI, commands, Deck switching and CPL3 selectors\n'
 	@printf '  \033[1mmake verify-jash-capture\033[0m\n               recapture JASH in KVM and compare transcript/SVG evidence\n'
@@ -109,9 +110,9 @@ bemu-contract: $(VMKERN) $(BEMU_RUNNER) ## run the 232-byte machine-contract var
 	$(TIMEOUT) 30s bemu/bemu-nano $(VMKERN) --contract --show
 
 # Automated verification: QEMU, the independent site interpreter and bEMU-NANO/KVM.
-verify: verify-qemu verify-domains verify-ipc verify-browser verify-bemu verify-sacred ## verify the record across execution engines
+verify: verify-qemu verify-domains verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-sacred ## verify the record across execution engines
 
-verify-ci: all $(PROOFCTL) verify-qemu verify-ipc-model verify-browser verify-shell-qemu verify-jash-qemu ## hosted-CI gate without KVM
+verify-ci: all $(PROOFCTL) verify-qemu verify-ipc-model verify-browser verify-shell-qemu verify-jash-qemu verify-bemu-bounds ## hosted-CI gate without KVM
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
 	@python3 verify_mutations.py
@@ -186,6 +187,9 @@ verify-bemu: $(KERNEL) $(VMKERN) $(BEMU_RUNNER)
 	$(TIMEOUT) 15s bemu/bemu-nano $(KERNEL)
 	$(TIMEOUT) 15s bemu/bemu-nano $(VMKERN) --contract
 
+verify-bemu-bounds: $(VMKERN) ## exercise serial/crash stack reads with synthetic KVM exits
+	$(MAKE) -C bemu test
+
 verify-shell: verify-shell-qemu verify-shell-bemu ## verify ring 3 in QEMU and KVM
 
 verify-shell-qemu: $(SHKERN)
@@ -233,7 +237,7 @@ proof: all $(PROOFCTL) verify-readme ## run the full reproducible gate
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
 	@$(MAKE) verify-site
-	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, sacred C, README geometry, shell, JASH, capture, staged site, fuzz, mutations'
+	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, bEMU stack bounds, sacred C, README geometry, shell, JASH, capture, staged site, fuzz, mutations'
 	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \

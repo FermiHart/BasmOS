@@ -11,12 +11,20 @@
 
 CC      ?= cc
 CFLAGS  ?= -O2 -Wall -Wextra -Werror
+BOUNDS_TEST = ../build/tests/bemu-stack-bounds
 
-.PHONY: all clean
+.PHONY: all test clean
 all: bemu-nano
 
 bemu-nano: bemu_nano.c
 	$(CC) $(CFLAGS) -o $@ bemu_nano.c
 
+$(BOUNDS_TEST): ../tests/bemu_stack_bounds.c bemu_nano.c
+	mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ $<
+
+test: $(BOUNDS_TEST)
+	$(BOUNDS_TEST) ../basmos-vm.bin
+
 clean:
-	rm -f bemu-nano
+	rm -f bemu-nano $(BOUNDS_TEST)

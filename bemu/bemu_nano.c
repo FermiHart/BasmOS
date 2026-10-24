@@ -379,8 +379,10 @@ int main(int argc, char **argv)
                     else if (run->io.port == COM1_RBR && !(uart_lcr & 0x80)) {
                         struct kvm_regs now;
                         if (ioctl(vcpu, KVM_GET_REGS, &now) < 0) die("KVM_GET_REGS serial");
-                        if (now.rsp + 8 < RAM_SIZE) {
-                            uint32_t saved_cs = *(uint32_t *)(ram + now.rsp + 4);
+                        /* Subtract from the bound: guest RSP can wrap on addition. */
+                        if (now.rsp <= RAM_SIZE - 8) {
+                            uint32_t saved_cs;
+                            memcpy(&saved_cs, ram + now.rsp + 4, sizeof saved_cs);
                             if ((saved_cs & 0xFFFF) == 0x1B) seen_monitor = 1;
                             if ((saved_cs & 0xFFFF) == 0x2B) seen_module = 1;
                         }
@@ -442,7 +444,7 @@ int main(int argc, char **argv)
                 struct kvm_regs stopped;
                 uint32_t frame[4] = {0, 0, 0, 0};
                 if (ioctl(vcpu, KVM_GET_REGS, &stopped) < 0) die("KVM_GET_REGS crash");
-                if (stopped.rsp + sizeof frame <= RAM_SIZE)
+                if (stopped.rsp <= RAM_SIZE - sizeof frame)
                     memcpy(frame, ram + stopped.rsp, sizeof frame);
                 fprintf(stderr, "[bemu-nano] CRASH: guest halt with IF=0 "
                                 "(fail-stop gate) after %ld ticks; "

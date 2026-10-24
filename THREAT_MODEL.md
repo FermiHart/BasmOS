@@ -104,6 +104,12 @@ It does not pass guest devices through to the host. The guest nevertheless runs
 through the host kernel's KVM interface and hardware virtualization, while the
 C VMM parses files, arguments, serial streams, and exit data.
 
+Saved stack-frame reads check the full RAM range using bounds that cannot wrap
+on a 64-bit guest stack pointer. `make verify-bemu-bounds` exercises the serial
+and fail-stop handlers with synthetic KVM exits and guarded host mappings,
+covering exact boundaries, unaligned frames, and overflow without `/dev/kvm`.
+These tests validate host-side handling, not reachability from guest code.
+
 A malicious guest may target KVM, CPU virtualization, or defects in
 `bemu-nano`. The Make targets use wall-clock timeouts for automated runs and
 `bemu-nano` limits handled exits, but neither mechanism guarantees termination
