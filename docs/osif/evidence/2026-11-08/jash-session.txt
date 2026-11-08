@@ -1,0 +1,136 @@
+BJash BasmOS native profile
+Canonical editor + argv + strict JSON. Type help.
+jash[basmos]> help
+Jash BasmOS commands: help version echo argv json osif uname ticks status clear true false exit byte
+Canonical editor/keymap/argv/JSON; literal arguments and single-command execution.
+Quoted JSON: json '{"message":"hello","value":0}'
+No filesystem, process spawn, pipelines, expansion, network or IPC in this kernel ABI.
+jash[basmos]> echo __OSIF_CASE_00__
+__OSIF_CASE_00__
+jash[basmos]> version
+Jash BasmOS native profile / canonical source 082ab18b1770ae32c54ab34acf87666935416090 / i386 OSIF v1
+jash[basmos]> echo __OSIF_CASE_01__
+__OSIF_CASE_01__
+jash[basmos]> argv "a b" '' x
+["a b","","x"]
+jash[basmos]> echo __OSIF_CASE_02__
+__OSIF_CASE_02__
+jash[basmos]> echo --json one "two words" ''
+["one","two words",""]
+jash[basmos]> echo __OSIF_CASE_03__
+__OSIF_CASE_03__
+jash[basmos]> echo alpha 'two words' '' omega
+alpha two words  omega
+jash[basmos]> echo __OSIF_CASE_04__
+__OSIF_CASE_04__
+jash[basmos]> argv 'a|b' 'x;y' '$HOME'
+["a|b","x;y","$HOME"]
+jash[basmos]> echo __OSIF_CASE_05__
+__OSIF_CASE_05__
+jash[basmos]> json '{"name":"BasmOS","n":7,"ratio":3.125,"exponent":6.02e2,"ok":true,"a":[null,false]}'
+{"name":"BasmOS","n":7,"ratio":3.125,"exponent":6.02e2,"ok":true,"a":[null,false]}
+jash[basmos]> echo __OSIF_CASE_06__
+__OSIF_CASE_06__
+jash[basmos]> json '{"s":"line\nquote\" slash\\ zero\u0000"}'
+{"s":"line\u000aquote\" slash\\ zero\u0000"}
+jash[basmos]> echo __OSIF_CASE_07__
+__OSIF_CASE_07__
+jash[basmos]> json '{"a":1,"a":2}'
+json: invalid input errno=17
+jash[basmos]> status
+status=2
+jash[basmos]> echo __OSIF_CASE_08__
+__OSIF_CASE_08__
+jash[basmos]> json '{"a":1}x'
+json: invalid input errno=22
+jash[basmos]> status
+status=2
+jash[basmos]> echo __OSIF_CASE_09__
+__OSIF_CASE_09__
+jash[basmos]> osif
+{"target":"basmos","abi":1,"kernel_caps":15,"arena_bytes":2097152,"osinfo_caps":1,"console":true,"ticks":true,"filesystem":false,"process_spawn":false,"ipc":false,"network":false,"profile":"canonical-reduced"}
+jash[basmos]> echo __OSIF_CASE_10__
+__OSIF_CASE_10__
+jash[basmos]> osif test
+osif-test open=-38 unknown=-38 zero_write=0
+jash[basmos]> echo __OSIF_CASE_11__
+__OSIF_CASE_11__
+jash[basmos]> uname
+BasmOS osif-1 i386
+jash[basmos]> echo __OSIF_CASE_12__
+__OSIF_CASE_12__
+jash[basmos]> ticks
+ticks=22
+jash[basmos]> echo __OSIF_CASE_13__
+__OSIF_CASE_13__
+jash[basmos]> ticks
+ticks=27
+jash[basmos]> echo __OSIF_CASE_14__
+__OSIF_CASE_14__
+jash[basmos]> byte 0
+byte[\0] value=0
+jash[basmos]> echo __OSIF_CASE_15__
+__OSIF_CASE_15__
+jash[basmos]> false
+jash[basmos]> status
+status=1
+jash[basmos]> echo __OSIF_CASE_16__
+__OSIF_CASE_16__
+jash[basmos]> true
+jash[basmos]> status
+status=0
+jash[basmos]> echo __OSIF_CASE_17__
+__OSIF_CASE_17__
+jash[basmos]> no_such_command
+jash: unavailable command: no_such_command
+jash[basmos]> status
+status=127
+jash[basmos]> echo __OSIF_CASE_18__
+__OSIF_CASE_18__
+jash[basmos]> echo left | echo right
+jash: unsupported syntax or unclosed quote; command discarded
+jash[basmos]> status
+status=2
+jash[basmos]> echo __OSIF_CASE_19__
+__OSIF_CASE_19__
+jash[basmos]> echo 'unfinished
+jash: unsupported syntax or unclosed quote; command discarded
+jash[basmos]> status
+status=2
+jash[basmos]> echo __OSIF_CASE_20__
+__OSIF_CASE_20__
+jash[basmos]> echo worlXjash[basmos]> echo world
+world
+jash[basmos]> echo __OSIF_CASE_21__
+__OSIF_CASE_21__
+jash[basmos]> echo acjash[basmos]> echo acjash[basmos]> echo abc
+abc
+jash[basmos]> echo __OSIF_CASE_22__
+__OSIF_CASE_22__
+jash[basmos]> echo discardedjash[basmos]> echo rebuilt
+rebuilt
+jash[basmos]> echo __OSIF_CASE_23__
+__OSIF_CASE_23__
+jash[basmos]> echo recalled
+recalled
+jash[basmos]> jash[basmos]> echo recalled
+recalled
+jash[basmos]> echo __OSIF_CASE_24__
+__OSIF_CASE_24__
+jash[basmos]> echo crlf
+crlf
+jash[basmos]> status
+status=0
+jash[basmos]> echo __OSIF_CASE_25__
+__OSIF_CASE_25__
+jash[basmos]> echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+jash: line too long; command discarded
+jash[basmos]> status
+status=2
+jash[basmos]> echo __OSIF_CASE_26__
+__OSIF_CASE_26__
+jash[basmos]> clear
+jash[basmos]> echo __OSIF_CASE_27__
+__OSIF_CASE_27__
+jash[basmos]> exit 7
+Jash BasmOS exit=7

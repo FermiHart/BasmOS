@@ -1,0 +1,51 @@
+{
+  "pass": true,
+  "scope": "static ELF/load contract; native execution is a separate gate",
+  "elf_class": 32,
+  "machine": "i386",
+  "entry": 0,
+  "module_bytes": 13679,
+  "module_sha256": "0795b5be663d7f691fed3ee3b41b1acfe4e5bffb912a89ad7d090043e9fffc0e",
+  "elf_sha256": "b4183f5a351c2d6df507cb15b7746267cdc8550b8e5cce534b42683b666aa0a3",
+  "user_arena_bytes": 2097152,
+  "bss_bytes": 133188,
+  "allocated_end": 146884,
+  "initial_stack": 2097136,
+  "int80_sites": 2,
+  "dynamic_dependencies": false,
+  "test_transport_linked": false,
+  "canonical_symbols": {
+    "_start": 0,
+    "basmos_profile_main": 9260,
+    "jash_basmos_prompt": 9250,
+    "jash_line_insert_byte": 118,
+    "jash_keydec_feed": 1048,
+    "jash_argv_build_into": 1536,
+    "jdj_parse": 7190,
+    "jdj_write": 7475,
+    "bear_osif_syscall6": 8234
+  },
+  "sections": [
+    {
+      "name": ".text",
+      "address": 0,
+      "bytes": 12028,
+      "nobits": false,
+      "file_offset": 4096
+    },
+    {
+      "name": ".rodata",
+      "address": 12032,
+      "bytes": 1647,
+      "nobits": false,
+      "file_offset": 16128
+    },
+    {
+      "name": ".bss",
+      "address": 13696,
+      "bytes": 133188,
+      "nobits": true,
+      "file_offset": 17792
+    }
+  ]
+}

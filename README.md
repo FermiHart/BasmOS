@@ -295,3 +295,11 @@ and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
   <a href="mailto:contact@fermihart.com">contact@fermihart.com</a> ·
   <a href="https://nanokernel.org">nanokernel.org</a>
 </p>
+
+## Native Jash OSIF profile
+
+The opt-in [OSIF BasmOS profile](docs/OSIF_BASMOS.md) runs a freestanding
+i386 Jash module in CPL3 over a complete 512-byte boot sector. Its versioned
+interface supplies nonblocking console I/O, ticks and single-task exit.
+Build with `make -f Makefile.osif osif`; see the linked reproduction guide
+for the matching Jash backend, measured sizes, native evidence and scope.

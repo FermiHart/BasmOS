@@ -1,0 +1,106 @@
+{
+  "date_local": "2026-11-08",
+  "timezone": "America/Sao_Paulo",
+  "basmos_base": "db1e36a7123d37374831433260e43cc45a01a20e",
+  "jash_base": "082ab18b1770ae32c54ab34acf87666935416090",
+  "jash_checkpoint": "a33d057504b52f43cc645c3d562c4aadbc16fc87",
+  "jash_branch": "feat/osif-basmos-20261108",
+  "basmos_branch": "feat/jash-osif-20261108",
+  "compiler": "cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+  "linker": "GNU ld (GNU Binutils for Ubuntu) 2.42",
+  "command": "make -f Makefile.osif osif-verify JASH_ROOT=/path/to/jash BASMOS_QEMU=/path/to/qemu-system-i386",
+  "pass": true,
+  "kernel_payload_bytes": 509,
+  "boot_artifact_bytes": 14191,
+  "native_abi_checks": 15,
+  "native_command_cases": 28,
+  "privilege_checks": 16,
+  "loader_cases": 5,
+  "adapter_assertions": 69,
+  "runner_assertions": 11,
+  "source_sha256": {
+    "Makefile.osif": "499ea4cc080b37df5a2344f7aa613e9a31ac00c4f1e678768ae33c7aab982d73",
+    "experiments/osif/basmos-osif.basm": "7a782839641df8882fc80fe033a7b4c607d23425b8091963978f4ba27c69f64a",
+    "tests/osif_basmos_qemu.py": "49d8577f3c9e8b02cbf53521f589afb3b3452f8b3186236e3bcef32a9ce6ed8c",
+    "tests/osif_runner_regression.py": "ba1e70972a0f37b0af8ea311c7ea94f4455f9ac4477553b3f02b1d2b3c828ec0",
+    "tests/fixtures/osif_abi_probe.S": "28d7be71d44a008b21ad2ff0ab96f31be026479514f087a95669074c073096b7",
+    "tools/qemu_lab.py": "0bc24e564b5a0a6f11d40d9e666d0d6e7d71bf3cd52c9b72c2a268992401b4a4",
+    "tools/gdb_lab.py": "f7846c61a05429a46494cf633ec1f79db4f7a33dbf16985c2457bc52e19c6d92",
+    "tools/run_osif_jash.py": "46dee5ac4ab1008bf4d069de027b1a878f79d83811ea7b6c82c92039c36d82a0"
+  },
+  "unchanged_canonical_jash_inputs": [
+    {
+      "path": "c/core/argv.c",
+      "git_blob": "973a00c363294de4e217ae0e995418ff0f055b89",
+      "sha256": "5c04d5b2505f7a5bdb5704db45f1f84d2ef4f6dbd53ce4419942e9de13e84aa4"
+    },
+    {
+      "path": "c/core/argv.h",
+      "git_blob": "578deb53926051f17b60cf353fa9bc8baa73a6d5",
+      "sha256": "3eab501292dc62c48107fcf37f9d6f38be6b639f19db7f80545be31c25e4d8dc"
+    },
+    {
+      "path": "c/core/json_writer.c",
+      "git_blob": "e3ce4c0814e56b58955b958f46147df0af9147cb",
+      "sha256": "7d82723c4db99630cd3080b4c2b89a378afbe8a47d365df39866f83507c99ef8"
+    },
+    {
+      "path": "c/core/json_writer.h",
+      "git_blob": "b3b692667b205f9754911a634740f0d15bfd7043",
+      "sha256": "855309bb2f63d776b0fa7ff829f4365bd242a993f7ba8b3f9c0c1cf5690d185d"
+    },
+    {
+      "path": "c/core/data_json.c",
+      "git_blob": "d96e9cc99e1ddaa286241b29b5e5ae643872c4ed",
+      "sha256": "04bc1c5ec6d7e688b3755f4e94c07a266f03c54c592eb563bcaf4926e4973fbc"
+    },
+    {
+      "path": "c/core/data_json.h",
+      "git_blob": "222056844f5a63ff917634adb00fdcdd13ef9799",
+      "sha256": "ac3d2d966c34215d3fabad269b1766c89646da0496b418d82bb4008a69ce1991"
+    },
+    {
+      "path": "c/core/data_value.h",
+      "git_blob": "eeb3ae8787a3fa73f433c361c3f985bff22b1789",
+      "sha256": "cc4e8f210cd3cd5d5dc302c9ba9f07c600157b8d34dbac407a24678f143a1d3b"
+    },
+    {
+      "path": "c/readline/edit.c",
+      "git_blob": "2968f0de0b5f2e3edd94f87c89b300b1af518cb5",
+      "sha256": "3e03ccbe7d717b5f4bf20a21d215bddbe44ab34bb6f9947a0064f2b2513c2549"
+    },
+    {
+      "path": "c/readline/edit.h",
+      "git_blob": "028090e7017d504b4e112fd31e0b0bb804e077e6",
+      "sha256": "bbc59b05c4fe0561e8c44fc8c88ee6b3977859f30f2696cc241ae384361c58ad"
+    },
+    {
+      "path": "c/readline/keymap.c",
+      "git_blob": "3770c91b99729f7ca8514dc2e3f147a90660caa6",
+      "sha256": "95f77b80e54ec3c897970c6a916ef33f11058006a4ce0b9e25fa99752fb7a274"
+    },
+    {
+      "path": "c/readline/keymap.h",
+      "git_blob": "e9a811e358879b4a130b19fd3cf7d769a7423b9e",
+      "sha256": "4d2bbd46079a7a6ca823fe06512976e30dd52ab869cbaab4ef4bc2b9f5b519fc"
+    },
+    {
+      "path": "c/osif/osif.h",
+      "git_blob": "a4c8d6525472f9daa2b5431cdc2a59563385bcf2",
+      "sha256": "95b83d4ca1e4287cb040a44539e55b8415508e379efad78c7208de30861c3b33"
+    },
+    {
+      "path": "c/osif/osinfo.h",
+      "git_blob": "9cd4ece5fbd4c108a16e3efab4153db89bbd6e44",
+      "sha256": "8989de8ee6d5f2211248712027aa169cd2ddb383a31390601600d9727d154fc1"
+    }
+  ],
+  "path_normalization": "Absolute workspace prefixes in copied reports were replaced by BasmOS/, jash/, or initial-lab/. Measurements and register values are unchanged.",
+  "unexecuted": [
+    "KVM",
+    "physical hardware",
+    "full general-profile Jash suite",
+    "full maximum-size loader payload transfer"
+  ],
+  "additional_gate": "Existing Jash no-unbounded-string-copy gate: two tests passed on the selected source snapshot; full repository gate not claimed."
+}

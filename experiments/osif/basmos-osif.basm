@@ -1,0 +1,264 @@
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+;
+; BasmOS OSIF v1: one BIOS sector, freestanding i386 module in CPL3.
+; Serial boot: 'B', uint32 little-endian image length, image bytes.
+; Length must be 1..0x1F0000; invalid lengths halt before any payload store.
+; User CS/DS/ES/SS share base 0x100000 and a 2 MiB limit; link module at 0.
+; Entry EIP=0, ESP=0x1FFFF0, IF=1, DF=0, IOPL=0.
+; EAX syscall: 0 ABI info; 1 putc(BL); 2 poll; 3 ticks; 4 exit(BL).
+; Query returns EAX=1, EDX=0xF capability bits, ECX=0x200000 arena bytes.
+; Putc returns 1 or -11; poll returns 0..255 or -11. Unknown call: -38.
+; Returning calls only clobber EAX/ECX/EDX. No user pointers are dereferenced.
+; 100 Hz nominal PIT ticks at physical 0xB00; exit status byte at 0xB08.
+; Exit stores marker 4 at 0xB09; untouched zero distinguishes an earlier fault.
+; This profile has one task. It does not claim process isolation or IPC.
+
+BITS 16
+org 0x7C00
+section .text
+
+start:
+    cli
+    cld
+    xor ax, ax
+    mov ds, ax
+    in al, 0x92
+    db 0x24, 0xFE        ; and al,0xFE: keep the fast-reset bit clear
+    or al, 2
+    out 0x92, al
+    lgdt [gdt]
+    mov eax, cr0
+    inc ax
+    mov cr0, eax
+    jmp 0x08:pm
+
+BITS 32
+pm:
+    mov eax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    ; Interrupt gates keep short OSIF transactions atomic. Polling waits run
+    ; in user mode, allowing the timer to keep making progress.
+    mov esp, 0x00908
+    xor edx, edx
+    mov dh, 0xEE
+    mov eax, syscall_handler + 0x80000
+    push edx
+    push eax
+    mov dh, 0x8E
+    mov eax, exception_handler + 0x80000
+    push 95
+    pop ecx
+.idt_hi:
+    push edx
+    push eax
+    db 0xE2, 0xFC
+    mov eax, timer_handler + 0x80000
+    push edx
+    push eax
+    mov eax, exception_handler + 0x80000
+    push 32
+    pop ecx
+.idt_lo:
+    push edx
+    push eax
+    db 0xE2, 0xFC
+    lidt [idtr]
+
+    ; Initialize all TSS fields, OSIF counters, stack backing and every PDE.
+    ; No correctness assumption about power-on RAM contents is required.
+    xor eax, eax
+    mov edi, 0x00A00
+    mov ecx, 0x580
+    db 0xF3, 0xAB        ; rep stosd: 0xA00..0x1FFF, ES is kernel-flat
+
+    mov eax, cr4
+    or al, 0x10
+    mov cr4, eax
+    mov eax, 0x01000
+    mov dword [eax], 0x87
+    mov cr3, eax
+    mov esp, eax
+    mov eax, cr0
+    db 0x0F, 0xBA, 0xE8, 31
+    mov cr0, eax
+
+    mov al, 0x11
+    out 0x20, al
+    mov al, 0x20
+    out 0x21, al
+    mov al, 4
+    out 0x21, al
+    mov al, 1
+    out 0x21, al
+    mov al, 0xFE
+    out 0x21, al
+    mov al, 0x36
+    out 0x43, al
+    mov al, 0x9C
+    out 0x40, al
+    mov al, 0x2E
+    out 0x40, al
+
+    mov dword [0x00A04], 0x01000
+    mov word [0x00A08], 0x10
+    mov word [0x00A66], 0x68
+    mov ax, 0x28
+    ltr ax
+
+    ; COM1 115200 8N1; divisor one, UART interrupts disabled.
+    mov dx, 0x03FB
+    mov al, 0x80
+    out dx, al
+    mov dl, 0xF8
+    mov al, 1
+    out dx, al
+    inc edx
+    xor al, al
+    out dx, al
+    mov dl, 0xFB
+    mov al, 3
+    out dx, al
+    mov dl, 0xF9
+    xor al, al
+    out dx, al           ; IER=0 after clearing DLAB, independent of firmware
+    mov dl, 0xF8
+    mov al, 0x42
+    out dx, al
+
+load_header:
+    mov edi, 0x00B04
+    push 4
+    pop ecx
+.byte:
+    call boot_getc
+    db 0xAA              ; stosb
+    loop .byte
+    mov ecx, [0x00B04]
+    dec ecx
+    db 0x81, 0xF9        ; cmp ecx,0x1effff (reject zero via wrap)
+    dd 0x1EFFFF
+    db 0x77, exception_handler - ($ + 1)
+    inc ecx
+    mov edi, 0x100000
+load_payload:
+    call boot_getc
+    db 0xAA
+    loop load_payload
+
+enter_user:
+    push 0x23
+    push 0x1FFFF0
+    push 0x202
+    push 0x1B
+    push 0
+    mov ax, 0x23
+    mov ds, ax
+    mov es, ax
+    xor eax, eax
+    mov fs, ax
+    mov gs, ax
+    iretd
+
+boot_getc:
+    mov dx, 0x03FD
+.wait:
+    in al, dx
+    test al, 1
+    jz .wait
+    mov dl, 0xF8
+    in al, dx
+    ret
+
+exception_handler:
+    hlt
+    jmp exception_handler
+
+timer_handler:
+    push eax
+    mov al, 0x20
+    out 0x20, al
+    db 0x36, 0xFF, 0x05
+    dd 0x00B00
+    pop eax
+    iretd
+
+syscall_handler:
+    cmp eax, 0
+    je sys_info
+    cmp eax, 1
+    je sys_putc
+    cmp eax, 2
+    je sys_poll
+    cmp eax, 3
+    je sys_ticks
+    cmp eax, 4
+    je sys_exit
+    mov eax, -38
+    iretd
+
+sys_info:
+    mov eax, 1
+    mov edx, 0x0F
+    mov ecx, 0x200000
+    iretd
+
+sys_putc:
+    mov dx, 0x03FD
+    in al, dx
+    test al, 0x20
+    jz sys_again
+    mov al, bl
+    mov dl, 0xF8
+    out dx, al
+    mov eax, 1
+    iretd
+
+sys_poll:
+    mov dx, 0x03FD
+    in al, dx
+    test al, 1
+    jz sys_again
+    mov dl, 0xF8
+    in al, dx
+    db 0x0F, 0xB6, 0xC0  ; movzx eax,al
+    iretd
+
+sys_again:
+    mov eax, -11
+    iretd
+
+sys_ticks:
+    db 0x36
+    mov eax, [0x00B00]
+    iretd
+
+sys_exit:
+    mov bh, 4             ; explicit exit-path receipt; this call never returns
+    db 0x36
+    mov [0x00B08], ebx     ; BL=status, BH=marker; upper two bytes unspecified
+    jmp exception_handler
+
+idtr:
+    dw 129 * 8 - 1
+    dd 0x00500
+gdt:
+    dw gdt_end - gdt + 1
+    dd gdt - 2
+    dw 0xFFFF, 0
+    db 0, 0x9A, 0xCF, 0
+    dw 0xFFFF, 0
+    db 0, 0x92, 0xCF, 0
+    dw 0x01FF, 0
+    db 0x10, 0xFA, 0xC0, 0
+    dw 0x01FF, 0
+    db 0x10, 0xF2, 0xC0, 0
+    dw 0x0067, 0x0A00
+    db 0, 0x89, 0, 0
+gdt_end:
+payload_end:
+    times 510 - ($ - $$) db 0
+    dw 0xAA55

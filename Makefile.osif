@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Opt-in native Jash OSIF profile; original record artifacts are separate.
+.DEFAULT_GOAL := osif
+PYTHON ?= python3
+BASM_NANO ?= basm-nano/basm-nano
+OSIF_BUILD_DIR ?= build/osif
+JASH_ROOT ?= ../jash
+BASMOS_QEMU ?= qemu-system-i386
+
+.PHONY: osif osif-abi osif-verify osif-run
+osif: $(OSIF_BUILD_DIR)/basmos-osif.bin
+
+$(BASM_NANO): basm-nano/basm_nano.c
+	$(MAKE) -C basm-nano
+
+$(OSIF_BUILD_DIR)/basmos-osif.bin: experiments/osif/basmos-osif.basm $(BASM_NANO)
+	mkdir -p $(OSIF_BUILD_DIR)
+	$(BASM_NANO) -f bin --map $(OSIF_BUILD_DIR)/basmos-osif.map \
+	    -o $@ $<
+
+osif-abi: osif
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_basmos_qemu.py \
+	    --kernel $(OSIF_BUILD_DIR)/basmos-osif.bin \
+	    --kernel-map $(OSIF_BUILD_DIR)/basmos-osif.map \
+	    --output-dir $(OSIF_BUILD_DIR)/abi-evidence --abi-only
+
+osif-verify: osif
+	$(MAKE) -C "$(JASH_ROOT)" basmos-profile-check
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_basmos_qemu.py \
+	    --kernel $(OSIF_BUILD_DIR)/basmos-osif.bin \
+	    --kernel-map $(OSIF_BUILD_DIR)/basmos-osif.map \
+	    --module "$(JASH_ROOT)/build-basmos/jash-basmos.bin" \
+	    --module-elf "$(JASH_ROOT)/build-basmos/jash-basmos.elf" \
+	    --output-dir $(OSIF_BUILD_DIR)/evidence
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_runner_regression.py \
+	    --kernel $(OSIF_BUILD_DIR)/basmos-osif.bin \
+	    --module "$(JASH_ROOT)/build-basmos/jash-basmos.bin" \
+	    --output-dir $(OSIF_BUILD_DIR)/runner-validation
+
+osif-run: osif
+	$(MAKE) -C "$(JASH_ROOT)" basmos-profile
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tools/run_osif_jash.py \
+	    --kernel $(OSIF_BUILD_DIR)/basmos-osif.bin \
+	    --module "$(JASH_ROOT)/build-basmos/jash-basmos.bin"
