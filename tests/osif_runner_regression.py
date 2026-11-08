@@ -6,7 +6,9 @@
 The negative module emits the Jash prompt and executes UD2 with EAX=4/EBX=0.
 Its non-error-code exception leaves the same CPL0 stack shape as int 0x80.
 Only the kernel-written exit marker reliably distinguishes that fault from
-normal exit zero. All modules enter through the real serial loader in QEMU.
+normal exit zero. The ABI 2 variant provides a harmless peer at offset 4 and
+uses EAX=0, the post-dispatch exit value. All modules enter through the real
+serial loader in QEMU.
 """
 import argparse
 import hashlib
@@ -58,10 +60,19 @@ def record(path):
     return {"path": str(path), "bytes": len(data), "sha256": sha(data)}
 
 
+def fault_source(abi):
+    if abi == 1:
+        return FAULT_SOURCE
+    return (FAULT_SOURCE.replace("_start:\n    cld", "_start:\n    jmp main\n    .org 4\npeer:\n    jmp peer\nmain:\n    cld")
+            .replace("int $0x80", "int $0x21")
+            .replace("movl $4, %eax", "xorl %eax, %eax"))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kernel", type=Path, required=True)
     parser.add_argument("--module", type=Path, required=True)
+    parser.add_argument("--abi", type=int, choices=(1, 2), default=1)
     parser.add_argument("--runner", type=Path, default=ROOT / "tools/run_osif_jash.py")
     parser.add_argument("--output-dir", type=Path, default=ROOT / "build/osif/runner-validation")
     parser.add_argument("--timeout", type=float, default=30)
@@ -70,7 +81,7 @@ def main():
         parser.error("--timeout must be positive")
     output = args.output_dir.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    report = {"pass": False, "executor": "QEMU TCG", "physical_hardware": False,
+    report = {"pass": False, "abi": args.abi, "executor": "QEMU TCG", "physical_hardware": False,
               "checks": {}, "artifacts": {}, "runs": {}}
     try:
         kernel_bytes, module_bytes = args.kernel.read_bytes(), args.module.read_bytes()
@@ -84,12 +95,12 @@ def main():
             kernel.write_bytes(kernel_bytes)
             module.write_bytes(module_bytes)
             source, obj, fault = (temporary / ("fault." + s) for s in ("S", "o", "bin"))
-            source.write_text(FAULT_SOURCE)
+            source.write_text(fault_source(args.abi))
             subprocess.run(["as", "--32", "-o", str(obj), str(source)], check=True)
             subprocess.run(["ld", "-m", "elf_i386", "-Ttext", "0", "--oformat", "binary",
                             "-o", str(fault), str(obj)], check=True)
             report["fault_fixture_sha256"] = sha(fault.read_bytes())
-            (output / "fault-exit-collision.S").write_text(FAULT_SOURCE)
+            (output / "fault-exit-collision.S").write_text(fault_source(args.abi))
             (output / "fault-exit-collision.bin").write_bytes(fault.read_bytes())
             commands0, commands7 = temporary / "exit0.txt", temporary / "exit7.txt"
             commands0.write_text("exit 0\n")
@@ -98,6 +109,7 @@ def main():
                      ("ud2_collision", fault, commands0))
             for name, image, commands in cases:
                 command = [sys.executable, str(runner), "--kernel", str(kernel),
+                           "--abi", str(args.abi),
                            "--module", str(image), "--commands", str(commands),
                            "--timeout", str(args.timeout)]
                 result = subprocess.run(command, capture_output=True, timeout=args.timeout + 10)
@@ -128,8 +140,10 @@ def main():
                     state = qemu.read(0xB08, 2)
             report["fault_registers"] = monitor
             report["fault_status_marker_hex"] = state.hex()
-            report["checks"]["fault_matches_old_signature"] = (
-                all(token in monitor for token in ("EAX=00000004", "EBX=00000000", "ESP=00000fec", "CPL=0", "HLT=1"))
+            eax = "EAX=00000004" if args.abi == 1 else "EAX=00000000"
+            stack = "ESP=00000fec" if args.abi == 1 else "ESP=000017ec"
+            report["checks"]["fault_matches_exit_register_signature"] = (
+                all(token in monitor for token in (eax, "EBX=00000000", stack, "CPL=0", "HLT=1"))
                 and state == b"\0\0")
         report["checks"]["runner_unchanged_during_test"] = record(runner)["sha256"] == report["artifacts"]["runner"]["sha256"]
         report["pass"] = all(report["checks"].values())

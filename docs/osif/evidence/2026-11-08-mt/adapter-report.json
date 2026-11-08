@@ -1,0 +1,6 @@
+{
+  "pass": true,
+  "checks": 86,
+  "scope": "hosted OSIF adapter; explicit test transport",
+  "abi": 2
+}

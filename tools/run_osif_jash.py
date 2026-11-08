@@ -8,6 +8,7 @@ restores terminal settings. With --commands FILE, LF/CRLF command lines are
 sent after the Jash prompt and the runner returns the guest's exit status.
 Command files should finish with `exit N`. A timeout returns 124; an abnormal
 halt or runner error returns 125. QEMU uses TCG, serial FIFOs and QMP stdio.
+Select --abi 2 for the two-context INT 0x21 profile; the default is ABI 1.
 """
 import argparse
 from contextlib import contextmanager
@@ -26,6 +27,7 @@ import tty
 from qemu_lab import Qemu
 
 MAX_MODULE_BYTES = 0x1F0000
+MAX_MODULE_BYTES_BY_ABI = {1: MAX_MODULE_BYTES, 2: 0x1B0000}
 PROMPT = b"jash[basmos]> "
 
 
@@ -144,15 +146,19 @@ class SerialQemu(Qemu):
             raise
 
 
-def guest_exit(qemu, registers):
+def guest_exit(qemu, registers, abi=1):
     """Require the kernel exit marker; fault registers can mimic an exit frame."""
     status, exit_marker = qemu.read(0xB08, 2)
     def register(name):
         match = re.search(r"\b" + name + r"=([0-9a-fA-F]{8})\b", registers)
         return int(match[1], 16) if match else None
     eax, ebx, esp = (register(name) for name in ("EAX", "EBX", "ESP"))
-    normal = (exit_marker == 4 and "CPL=0" in registers and "HLT=1" in registers and eax == 4 and
-              ebx is not None and (ebx & 255) == status and esp == 0xFEC)
+    # ABI 2's compact dispatcher decrements EAX to zero before sys_exit.
+    # Either thread can exit, using its own kernel stack through the TSS.
+    expected_eax = 4 if abi == 1 else 0
+    exit_stacks = {0xFEC} if abi == 1 else {0xFEC, 0x17EC}
+    normal = (exit_marker == 4 and "CPL=0" in registers and "HLT=1" in registers and eax == expected_eax and
+              ebx is not None and (ebx & 255) == status and esp in exit_stacks)
     if normal:
         print(f"\n[BasmOS] guest OSIF exit: status={status}; memory[0xB08]={status}; exit_marker={exit_marker}; halted=yes.", file=sys.stderr)
         return status
@@ -160,7 +166,7 @@ def guest_exit(qemu, registers):
     return 125
 
 
-def session(qemu, serial, module, commands, timeout, input_fd):
+def session(qemu, serial, module, commands, timeout, input_fd, abi=1):
     serial.ready(timeout)
     serial.send(len(module).to_bytes(4, "little") + module, timeout)
     pending = b""
@@ -202,7 +208,7 @@ def session(qemu, serial, module, commands, timeout, input_fd):
                 while time.monotonic() < until:
                     if select.select([serial.output], [], [], 0.01)[0]:
                         serial.receive()
-                return guest_exit(qemu, registers)
+                return guest_exit(qemu, registers, abi)
             next_check = now + 0.1
         if now >= deadline and (commands is not None or not prompt_seen):
             label = "command file did not reach guest exit" if prompt_seen else "Jash prompt did not appear"
@@ -213,6 +219,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kernel", type=Path, required=True, help="512-byte BasmOS OSIF sector")
     parser.add_argument("--module", type=Path, required=True, help="flat freestanding Jash binary")
+    parser.add_argument("--abi", type=int, choices=(1, 2), default=1,
+                        help="kernel profile ABI: 1 (single task) or 2 (two contexts)")
     parser.add_argument("--commands", type=Path, help="command file ending with exit N; - reads stdin")
     parser.add_argument("--timeout", type=float, default=30,
                         help="boot/upload and command-mode timeout in seconds (default: 30)")
@@ -228,8 +236,9 @@ def main():
         if len(sector) != 512 or sector[-2:] != b"\x55\xaa":
             raise ValueError("kernel must be a complete 512-byte boot sector with signature 55 AA")
         module = args.module.read_bytes()
-        if not 1 <= len(module) <= MAX_MODULE_BYTES:
-            raise ValueError(f"module length must be 1..{MAX_MODULE_BYTES} bytes")
+        maximum = MAX_MODULE_BYTES_BY_ABI[args.abi]
+        if not 1 <= len(module) <= maximum:
+            raise ValueError(f"module length for ABI {args.abi} must be 1..{maximum} bytes")
         commands = None
         if args.commands is not None:
             commands = sys.stdin.buffer.read() if str(args.commands) == "-" else args.commands.read_bytes()
@@ -241,7 +250,7 @@ def main():
         with terminal_mode(interactive) as input_fd:
             with tempfile.TemporaryDirectory(prefix="basmos-jash-") as directory:
                 with Serial(directory) as serial, SerialQemu(kernel, serial) as qemu:
-                    return session(qemu, serial, module, commands, args.timeout, input_fd)
+                    return session(qemu, serial, module, commands, args.timeout, input_fd, args.abi)
     except TimeoutError as error:
         print(f"[BasmOS] timeout: {error}", file=sys.stderr)
         return 124

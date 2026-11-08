@@ -1,0 +1,21 @@
+{
+  "pass": true,
+  "limit_bytes": 512,
+  "kernel_bytes": 512,
+  "payload_bytes": 507,
+  "padding_bytes": 3,
+  "signature_bytes": 2,
+  "kernel_sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a",
+  "source_sha256": "c2611cfa533a92210ae9970453a6cfd0ef5a1e6e8a525138c02e330c67e746a1",
+  "checks": {
+    "complete_kernel_exactly_512_bytes": true,
+    "boot_signature_included": true,
+    "payload_within_510_bytes": true,
+    "padding_is_zero": true,
+    "source_rebuild_matches_kernel": true,
+    "source_rebuild_matches_map": true,
+    "511_byte_payload_rejected": true,
+    "failed_build_preserves_previous_sector": true,
+    "failed_build_publishes_no_new_image": true
+  }
+}

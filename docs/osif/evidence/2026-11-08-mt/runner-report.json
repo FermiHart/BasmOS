@@ -1,0 +1,56 @@
+{
+  "pass": true,
+  "abi": 2,
+  "executor": "QEMU TCG",
+  "physical_hardware": false,
+  "checks": {
+    "real_exit0_returns0": true,
+    "real_exit0_marker4": true,
+    "real_exit7_returns7": true,
+    "real_exit7_marker4": true,
+    "echo_executed": true,
+    "json_executed": true,
+    "ud2_not_reported_exit0": true,
+    "ud2_marker0_abnormal": true,
+    "ud2_fixture_reached_prompt": true,
+    "fault_matches_exit_register_signature": true,
+    "runner_unchanged_during_test": true
+  },
+  "artifacts": {
+    "kernel": {
+      "path": "BasmOS/build/osif-mt/basmos-mt.bin",
+      "bytes": 512,
+      "sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a"
+    },
+    "jash": {
+      "path": "jash/build-basmos-mt/jash-basmos.bin",
+      "bytes": 15252,
+      "sha256": "8f860afad0e58a1f4393cc61fac09fe0ff7aa90b4abd1ab0117cdbc851359c93"
+    },
+    "runner": {
+      "path": "BasmOS/tools/run_osif_jash.py",
+      "bytes": 11332,
+      "sha256": "d7e2e7464c11883d9f35aae65850206bbc22c22922a45c3f23ce83697592577d"
+    }
+  },
+  "runs": {
+    "real_exit0": {
+      "returncode": 0,
+      "stdout": "Jash BasmOS native profile\nCanonical editor + argv + strict JSON. Type help.\njash[basmos]> exit 0\nJash BasmOS exit=0\n",
+      "stderr": "\n[BasmOS] guest OSIF exit: status=0; memory[0xB08]=0; exit_marker=4; halted=yes.\n"
+    },
+    "real_exit7": {
+      "returncode": 7,
+      "stdout": "Jash BasmOS native profile\nCanonical editor + argv + strict JSON. Type help.\njash[basmos]> echo OSIF marker ready\nOSIF marker ready\njash[basmos]> json '{\"demo\":\"BasmOS\",\"n\":0,\"ok\":true}'\n{\"demo\":\"BasmOS\",\"n\":0,\"ok\":true}\njash[basmos]> exit 7\nJash BasmOS exit=7\n",
+      "stderr": "\n[BasmOS] guest OSIF exit: status=7; memory[0xB08]=7; exit_marker=4; halted=yes.\n"
+    },
+    "ud2_collision": {
+      "returncode": 125,
+      "stdout": "jash[basmos]> ",
+      "stderr": "\n[BasmOS] abnormal guest halt: memory[0xB08]=0; exit_marker=0; verified OSIF exit absent.\n"
+    }
+  },
+  "fault_fixture_sha256": "1af945c50628843bb21ee29d3f40d3af265e5018a8e729feedbff8f2d386f66b",
+  "fault_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000000 ECX=00000000 EDX=000003f8\r\nESI=00000039 EDI=00100039 EBP=00000000 ESP=000017ec\r\nEIP=00007d34 EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+  "fault_status_marker_hex": "0000"
+}

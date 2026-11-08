@@ -1,6 +1,10 @@
 <!-- SPDX-License-Identifier: BSD-3-Clause -->
 # Native Jash through OSIF BasmOS
 
+For the subsequent 512-byte profile with two preempted contexts and byte
+mailboxes, see [OSIF ABI 2](OSIF_BASMOS_MT.md). This page records the separate
+ABI 1 implementation and its original qualification.
+
 The experimental `basmos-osif` profile boots a freestanding i386 Jash module
 in CPL3 and offers a versioned console/timer/exit interface. The complete BIOS
 sector is 512 bytes: 509 bytes of payload, 1 padding byte and the boot

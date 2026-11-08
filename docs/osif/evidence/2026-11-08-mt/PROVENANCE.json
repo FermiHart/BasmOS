@@ -1,0 +1,375 @@
+{
+  "date": "2026-11-08",
+  "profile": "BasmOS OSIF ABI 2 / two preempted shared-arena CPL3 contexts",
+  "author": "F E R M I \u221e H A R T <contact@fermihart.com>",
+  "parents": {
+    "BasmOS": "adde3807c851d9a7819fecbd6ded3c23a8e97b3a",
+    "jash": "a33d057504b52f43cc645c3d562c4aadbc16fc87"
+  },
+  "branches": {
+    "BasmOS": "feat/jash-osif-20261108",
+    "jash": "feat/osif-basmos-20261108"
+  },
+  "canonical_jash_baseline": "082ab18b1770ae32c54ab34acf87666935416090",
+  "canonical_sources_unchanged": true,
+  "kernel_budget": {
+    "limit_bytes": 512,
+    "kernel_bytes": 512,
+    "payload_bytes": 507,
+    "padding_bytes": 3,
+    "signature_bytes": 2,
+    "kernel_sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a"
+  },
+  "user_module": {
+    "module_bytes": 15252,
+    "module_sha256": "8f860afad0e58a1f4393cc61fac09fe0ff7aa90b4abd1ab0117cdbc851359c93",
+    "elf_sha256": "13bc63172cce7e00d1c9d66a0476f77b2e7b26ebcc3bef02aa00c45787aeb335",
+    "bss_bytes": 133204,
+    "allocated_end": 148468,
+    "user_arena_bytes": 2097152
+  },
+  "supervisor_extension_in_application": false,
+  "verification": {
+    "command": "make -f Makefile.osif-mt osif-mt-verify JASH_ROOT=/path/to/jash BASMOS_QEMU=/path/to/qemu-system-i386",
+    "functional_pass": true,
+    "sector_checks": 9,
+    "native_abi_checks": 19,
+    "loader_cases": 5,
+    "cpu_context_checks": 21,
+    "privilege_fault_cases": 6,
+    "jash_command_cases": 26,
+    "hosted_adapter_assertions": 86,
+    "runner_checks": 11,
+    "cross_context_roundtrips": 512,
+    "physical_hardware": false,
+    "kvm": false,
+    "full_general_jash_suite_run": false,
+    "maximum_length_full_payload_transfer_qualified": false,
+    "memory_containment_qualified": false,
+    "data_segment_limit_diagnostic": "observed_no_trap"
+  },
+  "versions": {
+    "cc": "cc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0",
+    "ld": "GNU ld (GNU Binutils for Ubuntu) 2.42",
+    "python": "Python 3.12.14"
+  },
+  "evidence_path_normalization": "Absolute execution workspace prefixes are replaced by BasmOS/ and jash/ in published JSON; observations and values are unchanged.",
+  "sources": {
+    "BasmOS": [
+      {
+        "path": "Makefile.osif-mt",
+        "bytes": 2074,
+        "sha256": "7495732609b4caaa85b6b9b5b63b8925b97a4a9637784600dffeced9a1a63f7a",
+        "git_blob": "cf30321096911c891350a9ee65a4f0e373209aec"
+      },
+      {
+        "path": "basm-nano/basm_nano.c",
+        "bytes": 43682,
+        "sha256": "4515a4e5f7d4e06ed68e5a0d2ca43aeba4cfa9cfff48ea43657aef6a83f4a43c",
+        "git_blob": "ca7f56a1e81585048b57ca0dc988471dfb0cdc77"
+      },
+      {
+        "path": "experiments/osif/basmos-mt.basm",
+        "bytes": 6384,
+        "sha256": "c2611cfa533a92210ae9970453a6cfd0ef5a1e6e8a525138c02e330c67e746a1",
+        "git_blob": "119d9e767465eee097789895ffc89ad8080bf337"
+      },
+      {
+        "path": "experiments/osif/KERNEL_MT_ABI.md",
+        "bytes": 12045,
+        "sha256": "62d3ccd909109403a3970718441b9804c0bf5e2270f851273ff01dea110183c8",
+        "git_blob": "5412ab493b720d2a8ba068f90cd676b62c16732e"
+      },
+      {
+        "path": "tests/osif_mt_qemu.py",
+        "bytes": 26926,
+        "sha256": "7e99540413906abcba6a8d126d65dd45988ae8d348c763b53fc539642ad45ea5",
+        "git_blob": "eb8cf5de538e3aee685521c788dc35ae99b7a243"
+      },
+      {
+        "path": "tests/fixtures/osif_mt_probe.S",
+        "bytes": 9335,
+        "sha256": "887c828acecd7faa3afb84c28dcbbec7d71f825d0245d166b47d336ecb2ed0e5",
+        "git_blob": "e8f4a3c5698cf83c5ee274ef235ee1f33b0d43f1"
+      },
+      {
+        "path": "tests/sector_budget.py",
+        "bytes": 4201,
+        "sha256": "87c69282fe2ae7b45bd7854548aa9824b75b3f9beb68199bc993e9a4cdffa4fd",
+        "git_blob": "765cc2907f966c39d1ff69702789c849daa11ba2"
+      },
+      {
+        "path": "tests/osif_basmos_qemu.py",
+        "bytes": 27451,
+        "sha256": "49d8577f3c9e8b02cbf53521f589afb3b3452f8b3186236e3bcef32a9ce6ed8c",
+        "git_blob": "776e9ef928a4f32d4bbe2e086f0b8f4b7e1c3480"
+      },
+      {
+        "path": "tests/osif_runner_regression.py",
+        "bytes": 7664,
+        "sha256": "6ca2bd4e4a251ced694f76445e7b7fcf8267b1ba02883c81f89a86d797b106b4",
+        "git_blob": "9fefe30216cfb9101df468858c4cd7df3aadca9d"
+      },
+      {
+        "path": "tools/run_osif_jash.py",
+        "bytes": 11332,
+        "sha256": "d7e2e7464c11883d9f35aae65850206bbc22c22922a45c3f23ce83697592577d",
+        "git_blob": "e063fa904514ce61a75fc732bc5d631190be4f7c"
+      },
+      {
+        "path": "tools/qemu_lab.py",
+        "bytes": 3725,
+        "sha256": "0bc24e564b5a0a6f11d40d9e666d0d6e7d71bf3cd52c9b72c2a268992401b4a4",
+        "git_blob": "82a5cb4930f7840ec8b079889a7cc712b50976ba"
+      },
+      {
+        "path": "tools/gdb_lab.py",
+        "bytes": 6365,
+        "sha256": "f7846c61a05429a46494cf633ec1f79db4f7a33dbf16985c2457bc52e19c6d92",
+        "git_blob": "d984650e5169c16d7c035fc5cfd6771555550563"
+      }
+    ],
+    "jash": [
+      {
+        "path": "Makefile",
+        "bytes": 2982,
+        "sha256": "f195e0a918c7e11f97f6616ef7dabebf0499ef12c63f841cf4b12fe72a3e256b",
+        "git_blob": "4d5bc4b00b3e331cc07df347eae0f5f68fcee6ff"
+      },
+      {
+        "path": "c/core/argv.c",
+        "bytes": 5639,
+        "sha256": "5c04d5b2505f7a5bdb5704db45f1f84d2ef4f6dbd53ce4419942e9de13e84aa4",
+        "git_blob": "973a00c363294de4e217ae0e995418ff0f055b89"
+      },
+      {
+        "path": "c/core/argv.h",
+        "bytes": 2638,
+        "sha256": "3eab501292dc62c48107fcf37f9d6f38be6b639f19db7f80545be31c25e4d8dc",
+        "git_blob": "578deb53926051f17b60cf353fa9bc8baa73a6d5"
+      },
+      {
+        "path": "c/core/data_json.c",
+        "bytes": 22316,
+        "sha256": "04bc1c5ec6d7e688b3755f4e94c07a266f03c54c592eb563bcaf4926e4973fbc",
+        "git_blob": "d96e9cc99e1ddaa286241b29b5e5ae643872c4ed"
+      },
+      {
+        "path": "c/core/data_json.h",
+        "bytes": 2517,
+        "sha256": "ac3d2d966c34215d3fabad269b1766c89646da0496b418d82bb4008a69ce1991",
+        "git_blob": "222056844f5a63ff917634adb00fdcdd13ef9799"
+      },
+      {
+        "path": "c/core/data_value.h",
+        "bytes": 11052,
+        "sha256": "cc4e8f210cd3cd5d5dc302c9ba9f07c600157b8d34dbac407a24678f143a1d3b",
+        "git_blob": "eeb3ae8787a3fa73f433c361c3f985bff22b1789"
+      },
+      {
+        "path": "c/core/json_writer.c",
+        "bytes": 9007,
+        "sha256": "7d82723c4db99630cd3080b4c2b89a378afbe8a47d365df39866f83507c99ef8",
+        "git_blob": "e3ce4c0814e56b58955b958f46147df0af9147cb"
+      },
+      {
+        "path": "c/core/json_writer.h",
+        "bytes": 2996,
+        "sha256": "855309bb2f63d776b0fa7ff829f4365bd242a993f7ba8b3f9c0c1cf5690d185d",
+        "git_blob": "b3b692667b205f9754911a634740f0d15bfd7043"
+      },
+      {
+        "path": "c/osif/basmos/MT.md",
+        "bytes": 7709,
+        "sha256": "1a9f6fc8504237546c4c7daee0e9600e6292930673b9657fbedc98e91b74aea2",
+        "git_blob": "5e6fc84a7591ed9415a37922fbd67bf32dfa8a8b"
+      },
+      {
+        "path": "c/osif/basmos/README.md",
+        "bytes": 8954,
+        "sha256": "ba3330549573fd5596ce8003da65731730fd82b91672e40cb49383738354647b",
+        "git_blob": "a55ab9a4f627d282ddc283a80f8ebf70b8c3b5fb"
+      },
+      {
+        "path": "c/osif/basmos/basmos.h",
+        "bytes": 1944,
+        "sha256": "72f04896a7452ce3c28722a9e74d511e9cfc4a752a2e26ae29d8a64626d55e46",
+        "git_blob": "d7f7b380bc69923b7072b28fac813a03769727e2"
+      },
+      {
+        "path": "c/osif/basmos/crt0-mt.S",
+        "bytes": 880,
+        "sha256": "aca051673dc257ed08e0a11da282775adef538659216140e4139f285af15bf13",
+        "git_blob": "dbfce56a3c45d8a048696c491cf2aa9dffee30d0"
+      },
+      {
+        "path": "c/osif/basmos/crt0.S",
+        "bytes": 601,
+        "sha256": "1b0fa2c07bf01094d994195aa90bb08718619deb2d9aad6746f3d531d8f1e027",
+        "git_blob": "4b00e1d30d1d67f08008d6b66d322df1f6f37073"
+      },
+      {
+        "path": "c/osif/basmos/include/dirent.h",
+        "bytes": 183,
+        "sha256": "93c76aea16e1a95e2af52b1d14b67c292ca9c5a598b86ba7c56efd099f9d1982",
+        "git_blob": "c78a1f955e7d61abbbecfd02d2d59df0781be7b4"
+      },
+      {
+        "path": "c/osif/basmos/include/errno.h",
+        "bytes": 401,
+        "sha256": "2795f0067906803f3ccc3825e9f56077795f964fa4a5ec17c7d079b7c7222b1a",
+        "git_blob": "b97ef2f2332a01da3bc38c856dd4afbb02f7b685"
+      },
+      {
+        "path": "c/osif/basmos/include/inttypes.h",
+        "bytes": 171,
+        "sha256": "43b139d4e69ac1cbdf6ae879f45d2bdb399fa00567fabe9fab6941a809d62210",
+        "git_blob": "1e9470490ab3ac6d2c629d1e802733ee087dcce8"
+      },
+      {
+        "path": "c/osif/basmos/include/limits.h",
+        "bytes": 325,
+        "sha256": "f7f5f8cfa45bea20de21e632a8ebae9216e5144d41712c1b2fd4d13e8a65741c",
+        "git_blob": "387ec0d81f5d7d3843476be9c8f83dc719c306ff"
+      },
+      {
+        "path": "c/osif/basmos/include/math.h",
+        "bytes": 151,
+        "sha256": "9c612df09aac4f0e4d05a8b0d9bd746c894a4756a573d8fba5439d07d2b6ac6c",
+        "git_blob": "d0f2f545c914c6fbe27ca1496cb6f38c008d1293"
+      },
+      {
+        "path": "c/osif/basmos/include/stdio.h",
+        "bytes": 325,
+        "sha256": "96da473003e7add71ad84e9323e0a90df3fb1a06aba7c6b6e3b89b7419a107fa",
+        "git_blob": "f2673abfea4e9c3d0ec927760bdf316420b6ea42"
+      },
+      {
+        "path": "c/osif/basmos/include/stdlib.h",
+        "bytes": 269,
+        "sha256": "8dd66714dbd29b20bfc23fad2ac7ec0342cb22c1d35c18961ed4bca14dd43ae1",
+        "git_blob": "082b76188e70f0398d648ab2c3ca82efd1758774"
+      },
+      {
+        "path": "c/osif/basmos/include/string.h",
+        "bytes": 415,
+        "sha256": "246bff0d5b5bd1c68aca68347ae9951d82c826a30a96fc25bb34956951344bdf",
+        "git_blob": "b51a60266c34aaad5bb2f9d363f78d0dd8064ceb"
+      },
+      {
+        "path": "c/osif/basmos/include/sys/types.h",
+        "bytes": 200,
+        "sha256": "d051d076453884529f0a03ab265739714a2996f71d3b64320c5a1b2314a03e26",
+        "git_blob": "42f4075b7944da18715b08ce4c6456a059ee10bf"
+      },
+      {
+        "path": "c/osif/basmos/include/unistd.h",
+        "bytes": 205,
+        "sha256": "cc6f3de89dc075873cd2632b8718947037db9c34975dc8770e777f5e206b9c54",
+        "git_blob": "cd86afca1715ff67c803525f12a862fc7e4856d7"
+      },
+      {
+        "path": "c/osif/basmos/linker-mt.ld",
+        "bytes": 926,
+        "sha256": "417c226b42bae97fd6596b39591453a1dc697cc29c4069bd6dd8c788576c6af5",
+        "git_blob": "ab330346919cf681fb7414c8d8c6e02b5d76760f"
+      },
+      {
+        "path": "c/osif/basmos/linker.ld",
+        "bytes": 805,
+        "sha256": "2fbbbbfb008617a304599fbdec6fa811112f5b090d95ecb5a063c8fd566f0b76",
+        "git_blob": "e1c65312473bac876a2433f6ab2acd4e1ebb9844"
+      },
+      {
+        "path": "c/osif/basmos/mt.c",
+        "bytes": 1614,
+        "sha256": "2bef00fd70a76e2d7e751ca5f621f41ef07c7a2a0a6007b59713e69b388ff773",
+        "git_blob": "bef641ece359aa4fdd5ca13688ceeb1075e4d00c"
+      },
+      {
+        "path": "c/osif/basmos/osinfo.c",
+        "bytes": 2320,
+        "sha256": "9750e53c6c36d685e97f46ae22e592fbdd601768f262c647b1a62b5fcb4c2d51",
+        "git_blob": "7ef5f83c45752b3bd8365e1cae7441b71c5e47de"
+      },
+      {
+        "path": "c/osif/basmos/profile.mk",
+        "bytes": 3724,
+        "sha256": "f1d487a7c7137ed88547ae30619e08ff599a00afcdf14f1a845e79821fc423ee",
+        "git_blob": "63793d4b3be315b9ff947948dc9559aeba868ab5"
+      },
+      {
+        "path": "c/osif/basmos/profile_entry.c",
+        "bytes": 16247,
+        "sha256": "5f1048b235066f4e520b98c4ae73aaef99b2745e6ddf453f392a5a39bc448b1a",
+        "git_blob": "3e49d19b1119237d6058fb7d2ce63e0d1427a45d"
+      },
+      {
+        "path": "c/osif/basmos/runtime.c",
+        "bytes": 3504,
+        "sha256": "0325e26e42e21ea6f32bcb7d7e6eab11ddf5c83b6a37f9b89c48dcbe2ab46245",
+        "git_blob": "d37c3675358260c57338445a330ba4cbdfad3f67"
+      },
+      {
+        "path": "c/osif/basmos/syscall.c",
+        "bytes": 4322,
+        "sha256": "d408e1445e31505b202efb0f6a2653b243319858a89f3f0e434bc570013f8ca6",
+        "git_blob": "981036233cd1f5fba9e132ed21ea77a8dcb449d6"
+      },
+      {
+        "path": "c/osif/osif.h",
+        "bytes": 9165,
+        "sha256": "95b83d4ca1e4287cb040a44539e55b8415508e379efad78c7208de30861c3b33",
+        "git_blob": "a4c8d6525472f9daa2b5431cdc2a59563385bcf2"
+      },
+      {
+        "path": "c/osif/osinfo.h",
+        "bytes": 7575,
+        "sha256": "8989de8ee6d5f2211248712027aa169cd2ddb383a31390601600d9727d154fc1",
+        "git_blob": "9cd4ece5fbd4c108a16e3efab4153db89bbd6e44"
+      },
+      {
+        "path": "c/readline/edit.c",
+        "bytes": 5323,
+        "sha256": "3e03ccbe7d717b5f4bf20a21d215bddbe44ab34bb6f9947a0064f2b2513c2549",
+        "git_blob": "2968f0de0b5f2e3edd94f87c89b300b1af518cb5"
+      },
+      {
+        "path": "c/readline/edit.h",
+        "bytes": 2399,
+        "sha256": "bbc59b05c4fe0561e8c44fc8c88ee6b3977859f30f2696cc241ae384361c58ad",
+        "git_blob": "028090e7017d504b4e112fd31e0b0bb804e077e6"
+      },
+      {
+        "path": "c/readline/keymap.c",
+        "bytes": 4324,
+        "sha256": "95f77b80e54ec3c897970c6a916ef33f11058006a4ce0b9e25fa99752fb7a274",
+        "git_blob": "3770c91b99729f7ca8514dc2e3f147a90660caa6"
+      },
+      {
+        "path": "c/readline/keymap.h",
+        "bytes": 2781,
+        "sha256": "4d2bbd46079a7a6ca823fe06512976e30dd52ab869cbaab4ef4bc2b9f5b519fc",
+        "git_blob": "e9a811e358879b4a130b19fd3cf7d769a7423b9e"
+      },
+      {
+        "path": "tests/test_basmos_artifact.py",
+        "bytes": 8361,
+        "sha256": "08a007b45aec940fa65a312c557e6e30d7a4756cd497f86474d00ea1a7ef0366",
+        "git_blob": "4bef92f39e4a5b9edd1b49087b1b9023175e2605"
+      },
+      {
+        "path": "tests/test_basmos_osif.c",
+        "bytes": 8541,
+        "sha256": "6ee4f3a1b3cc353e7f88d5e59df4099ca7ae7ca4f1297e4fc46c954d48fcd307",
+        "git_blob": "240204d8bb0e90aa7ecd721e901d57a19ed1a510"
+      }
+    ]
+  },
+  "prior_artifacts_preserved": {
+    "five_original_basmos_sha256sums": "PASS",
+    "osif_v1_kernel_sha256": "bc03b8f742a5eb7d04080f52d662fcf7947685fd73c0f88fa0be52493584d62a",
+    "osif_v1_module_sha256": "0795b5be663d7f691fed3ee3b41b1acfe4e5bffb912a89ad7d090043e9fffc0e"
+  },
+  "matching_jash_commit": "5a069316e1330b3a1c9b3508492e7e5a57fbc648"
+}

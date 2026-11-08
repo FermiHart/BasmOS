@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Complete boot/kernel image must remain within one 512-byte BIOS sector.
+.DEFAULT_GOAL := osif-mt
+PYTHON ?= python3
+BASM_NANO ?= basm-nano/basm-nano
+OSIF_MT_BUILD_DIR ?= build/osif-mt
+JASH_ROOT ?= ../jash
+BASMOS_QEMU ?= qemu-system-i386
+
+.PHONY: osif-mt osif-mt-abi osif-mt-verify osif-mt-run
+osif-mt: $(OSIF_MT_BUILD_DIR)/basmos-mt.bin
+	$(PYTHON) tests/sector_budget.py --assembler $(BASM_NANO) \
+	    --source experiments/osif/basmos-mt.basm \
+	    --kernel $(OSIF_MT_BUILD_DIR)/basmos-mt.bin \
+	    --map $(OSIF_MT_BUILD_DIR)/basmos-mt.map \
+	    --output $(OSIF_MT_BUILD_DIR)/budget-report.json
+
+$(BASM_NANO): basm-nano/basm_nano.c
+	$(MAKE) -C basm-nano
+
+$(OSIF_MT_BUILD_DIR)/basmos-mt.bin: experiments/osif/basmos-mt.basm $(BASM_NANO)
+	mkdir -p $(OSIF_MT_BUILD_DIR)
+	$(BASM_NANO) -f bin --map $(OSIF_MT_BUILD_DIR)/basmos-mt.map \
+	    -o $@ $<
+
+osif-mt-abi: osif-mt
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_mt_qemu.py \
+	    --kernel $(OSIF_MT_BUILD_DIR)/basmos-mt.bin \
+	    --kernel-map $(OSIF_MT_BUILD_DIR)/basmos-mt.map \
+	    --output-dir $(OSIF_MT_BUILD_DIR)/abi-evidence --abi-only
+
+osif-mt-verify: osif-mt
+	$(MAKE) -C "$(JASH_ROOT)" basmos-mt-profile-check
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_mt_qemu.py \
+	    --kernel $(OSIF_MT_BUILD_DIR)/basmos-mt.bin \
+	    --kernel-map $(OSIF_MT_BUILD_DIR)/basmos-mt.map \
+	    --module "$(JASH_ROOT)/build-basmos-mt/jash-basmos.bin" \
+	    --module-elf "$(JASH_ROOT)/build-basmos-mt/jash-basmos.elf" \
+	    --output-dir $(OSIF_MT_BUILD_DIR)/evidence
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tests/osif_runner_regression.py \
+	    --abi 2 --kernel $(OSIF_MT_BUILD_DIR)/basmos-mt.bin \
+	    --module "$(JASH_ROOT)/build-basmos-mt/jash-basmos.bin" \
+	    --output-dir $(OSIF_MT_BUILD_DIR)/runner-validation
+
+osif-mt-run: osif-mt
+	$(MAKE) -C "$(JASH_ROOT)" basmos-mt-profile
+	BASMOS_QEMU="$(BASMOS_QEMU)" $(PYTHON) tools/run_osif_jash.py \
+	    --abi 2 --kernel $(OSIF_MT_BUILD_DIR)/basmos-mt.bin \
+	    --module "$(JASH_ROOT)/build-basmos-mt/jash-basmos.bin"

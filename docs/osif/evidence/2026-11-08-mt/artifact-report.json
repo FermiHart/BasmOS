@@ -1,0 +1,71 @@
+{
+  "pass": true,
+  "scope": "static ELF/load contract; native execution is a separate gate",
+  "elf_class": 32,
+  "machine": "i386",
+  "entry": 0,
+  "abi_version": 2,
+  "syscall_interrupt": "0x21",
+  "user_contexts": 2,
+  "peer_entry": 4,
+  "peer_stack": 1834992,
+  "module_bytes": 15252,
+  "module_sha256": "8f860afad0e58a1f4393cc61fac09fe0ff7aa90b4abd1ab0117cdbc851359c93",
+  "elf_sha256": "13bc63172cce7e00d1c9d66a0476f77b2e7b26ebcc3bef02aa00c45787aeb335",
+  "user_arena_bytes": 2097152,
+  "bss_bytes": 133204,
+  "allocated_end": 148468,
+  "initial_stack": 2097136,
+  "syscall_sites": 2,
+  "int80_sites": 0,
+  "dynamic_dependencies": false,
+  "test_transport_linked": false,
+  "canonical_symbols": {
+    "_start": 0,
+    "basmos_profile_main": 9611,
+    "jash_basmos_prompt": 9601,
+    "jash_line_insert_byte": 149,
+    "jash_keydec_feed": 1079,
+    "jash_argv_build_into": 1567,
+    "jdj_parse": 7221,
+    "jdj_write": 7506,
+    "bear_osif_syscall6": 8267,
+    "_worker_start": 4,
+    "basmos_peer_main": 13012,
+    "basmos_mt_ready": 15248,
+    "basmos_peer_progress": 148464,
+    "basmos_peer_received": 148460,
+    "basmos_peer_last": 148456,
+    "basmos_peer_error": 148452
+  },
+  "sections": [
+    {
+      "name": ".text",
+      "address": 0,
+      "bytes": 13219,
+      "nobits": false,
+      "file_offset": 4096
+    },
+    {
+      "name": ".rodata",
+      "address": 13248,
+      "bytes": 1999,
+      "nobits": false,
+      "file_offset": 17344
+    },
+    {
+      "name": ".data",
+      "address": 15248,
+      "bytes": 4,
+      "nobits": false,
+      "file_offset": 19344
+    },
+    {
+      "name": ".bss",
+      "address": 15264,
+      "bytes": 133204,
+      "nobits": true,
+      "file_offset": 19348
+    }
+  ]
+}

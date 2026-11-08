@@ -1,0 +1,36 @@
+{
+  "qemu_release": "v8.2.2",
+  "qemu_commit": "11aa0b1ff115b86160c4d37e7c37e6a6b13b77ea",
+  "translate_blob": "83c2b4048085222aeaa890dc1ff2cc2dc243a355",
+  "seg_helper_blob": "eb29a1fd4e7225c7e7aace73dcf2a914e8395389",
+  "source_urls": [
+    "https://github.com/qemu/qemu/blob/11aa0b1ff115b86160c4d37e7c37e6a6b13b77ea/target/i386/tcg/translate.c",
+    "https://github.com/qemu/qemu/blob/11aa0b1ff115b86160c4d37e7c37e6a6b13b77ea/target/i386/tcg/seg_helper.c",
+    "https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-2b-manual.pdf"
+  ],
+  "code_paths": {
+    "mov_moffs": "translate.c:4160-4178",
+    "add_ds": "translate.c:2348-2351",
+    "effective_address": "translate.c:641-692",
+    "load": "translate.c:531-534",
+    "selector_validation": "seg_helper.c:1283-1367"
+  },
+  "fixture": {
+    "bytes_hex": "eb040000ebfea100002000ebf9",
+    "probe_at_offset": 6,
+    "instruction_hex": "a100002000",
+    "instruction": "mov eax,ds:0x200000"
+  },
+  "observed": {
+    "CPL": 3,
+    "HLT": 0,
+    "DS": 35,
+    "DS_base": 1048576,
+    "DS_limit": 2097151,
+    "CR0": 17,
+    "EFER": 0,
+    "exit_receipt": "0000"
+  },
+  "finding": "Pinned upstream TCG ordinary moffs load computes linear address using segment base without emitting a segment-limit comparison; its selector-load helper separately enforces selector privilege and caches limits. This explains the observed no-trap beyond the configured DS limit.",
+  "qualification": "No memory-containment pass; no physical-hardware/KVM validation."
+}

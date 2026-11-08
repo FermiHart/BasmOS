@@ -303,3 +303,10 @@ i386 Jash module in CPL3 over a complete 512-byte boot sector. Its versioned
 interface supplies nonblocking console I/O, ticks and single-task exit.
 Build with `make -f Makefile.osif osif`; see the linked reproduction guide
 for the matching Jash backend, measured sizes, native evidence and scope.
+
+The [ABI 2 multitasking profile](docs/OSIF_BASMOS_MT.md) adds two preempted
+CPL3 contexts and two capacity-one kernel mailboxes within the same hard
+**512-byte complete-sector limit**. Build and qualify it with
+`make -f Makefile.osif-mt osif-mt-verify JASH_ROOT=/path/to/jash`.
+Its documented scope includes shared application memory, a reduced Jash
+profile and an explicitly unqualified TCG data-segment-limit diagnostic.

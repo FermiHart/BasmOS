@@ -1,0 +1,122 @@
+BJash BasmOS native profile
+Canonical editor + argv + strict JSON. Type help.
+jash[basmos]> help
+Jash BasmOS commands: help version echo argv json osif uname ticks status clear true false exit byte peer ipc
+Canonical editor/keymap/argv/JSON; literal arguments and single-command execution.
+Quoted JSON: json '{"message":"hello","value":0}'
+Two preemptive CPL3 contexts share one arena; two capacity-one byte mailboxes.
+No filesystem, process spawn, pipelines, expansion or network in this profile.
+jash[basmos]> echo __MT_CASE_00__
+__MT_CASE_00__
+jash[basmos]> argv "a b" '' x
+["a b","","x"]
+jash[basmos]> echo __MT_CASE_01__
+__MT_CASE_01__
+jash[basmos]> echo --json one "two words" ''
+["one","two words",""]
+jash[basmos]> echo __MT_CASE_02__
+__MT_CASE_02__
+jash[basmos]> argv 'a|b' 'x;y' '$HOME'
+["a|b","x;y","$HOME"]
+jash[basmos]> echo __MT_CASE_03__
+__MT_CASE_03__
+jash[basmos]> json '{"n":0,"ratio":3.125,"ok":true,"a":[null,false]}'
+{"n":0,"ratio":3.125,"ok":true,"a":[null,false]}
+jash[basmos]> echo __MT_CASE_04__
+__MT_CASE_04__
+jash[basmos]> json '{"s":"zero\u0000"}'
+{"s":"zero\u0000"}
+jash[basmos]> echo __MT_CASE_05__
+__MT_CASE_05__
+jash[basmos]> json '{"a":1,"a":2}'
+json: invalid input errno=17
+jash[basmos]> status
+status=2
+jash[basmos]> echo __MT_CASE_06__
+__MT_CASE_06__
+jash[basmos]> echo worlXjash[basmos]> echo world
+world
+jash[basmos]> echo __MT_CASE_07__
+__MT_CASE_07__
+jash[basmos]> echo acjash[basmos]> echo acjash[basmos]> echo abc
+abc
+jash[basmos]> echo __MT_CASE_08__
+__MT_CASE_08__
+jash[basmos]> echo discardedjash[basmos]> echo rebuilt
+rebuilt
+jash[basmos]> echo __MT_CASE_09__
+__MT_CASE_09__
+jash[basmos]> echo recalled
+recalled
+jash[basmos]> jash[basmos]> echo recalled
+recalled
+jash[basmos]> echo __MT_CASE_10__
+__MT_CASE_10__
+jash[basmos]> echo left | echo right
+jash: unsupported syntax or unclosed quote; command discarded
+jash[basmos]> status
+status=2
+jash[basmos]> echo __MT_CASE_11__
+__MT_CASE_11__
+jash[basmos]> false
+jash[basmos]> status
+status=1
+jash[basmos]> echo __MT_CASE_12__
+__MT_CASE_12__
+jash[basmos]> true
+jash[basmos]> status
+status=0
+jash[basmos]> echo __MT_CASE_13__
+__MT_CASE_13__
+jash[basmos]> byte 0
+byte[\0] value=0
+jash[basmos]> echo __MT_CASE_14__
+__MT_CASE_14__
+jash[basmos]> osif
+{"target":"basmos","abi":2,"kernel_caps":59,"arena_bytes":2097152,"osinfo_caps":1,"console":true,"ticks":false,"filesystem":false,"process_spawn":false,"ipc":true,"preemptive_contexts":2,"mailboxes":2,"mailbox_capacity":1,"shared_arena":true,"network":false,"profile":"canonical-reduced"}
+jash[basmos]> echo __MT_CASE_15__
+__MT_CASE_15__
+jash[basmos]> osif test
+osif-test open=-38 unknown=-38 zero_write=0
+jash[basmos]> echo __MT_CASE_16__
+__MT_CASE_16__
+jash[basmos]> peer
+{"progress":495367,"received":0,"last":0,"error":0}
+jash[basmos]> echo __MT_CASE_17__
+__MT_CASE_17__
+jash[basmos]> ipc 0
+ipc sent=0 received=0
+jash[basmos]> echo __MT_CASE_18__
+__MT_CASE_18__
+jash[basmos]> ipc 255
+ipc sent=255 received=255
+jash[basmos]> echo __MT_CASE_19__
+__MT_CASE_19__
+jash[basmos]> ipc 1
+ipc sent=1 received=1
+jash[basmos]> echo __MT_CASE_20__
+__MT_CASE_20__
+jash[basmos]> ipc 127
+ipc sent=127 received=127
+jash[basmos]> echo __MT_CASE_21__
+__MT_CASE_21__
+jash[basmos]> ipc 128
+ipc sent=128 received=128
+jash[basmos]> echo __MT_CASE_22__
+__MT_CASE_22__
+jash[basmos]> ipc 0
+ipc sent=0 received=0
+jash[basmos]> echo __MT_CASE_23__
+__MT_CASE_23__
+jash[basmos]> ipc test
+ipc-test bytes=32 zero=pass empty=pass
+jash[basmos]> echo __MT_CASE_24__
+__MT_CASE_24__
+jash[basmos]> ticks
+ticks: unavailable
+jash[basmos]> status
+status=125
+jash[basmos]> echo __MT_CASE_25__
+__MT_CASE_25__
+jash[basmos]> exit 7
+Jash BasmOS exit=7

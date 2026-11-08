@@ -1,0 +1,282 @@
+; SPDX-License-Identifier: BSD-3-Clause
+; Copyright (c) 2026, F E R M I ∞ H A R T <contact@fermihart.com>
+; BasmOS OSIF v2: two preempted CPL3 contexts in one shared 2 MiB arena.
+; Complete supervisor and serial loader: 507 bytes + 3 padding + 55 AA.
+; INT 0x21, full EAX operation: query0, putc1, poll2, exit4, send5, recv6.
+; Query: EAX2, EDX0x3B capabilities, ECX0x200000 arena bytes. Ticks absent.
+; IPC: BH bit0 selects one of two one-byte mailboxes; BL is the sent byte.
+; Send returns1/-11, receive returns0..255/-11, unknown operations return-38.
+; Entry0 uses ESP0x1FFFF0; entry4 uses ESP0x1BFFF0. Both CS1B, DS/ES/SS23.
+; The timer preserves all integer registers and DS/ES/FS/GS. No FPU state.
+; No paging, process isolation, dynamic task creation, or IPC ring is claimed.
+; See KERNEL_MT_ABI.md for the boot protocol, state layout, and limitations.
+BITS 16
+org 0x7C00
+section .text
+
+start:
+    cli
+    cld
+    xor ax, ax
+    mov ds, ax
+    in al, 0x92
+    db 0x24, 0xFE        ; and al,0xFE: keep the fast-reset bit clear
+    or al, 2
+    out 0x92, al
+    lgdt [gdt]
+    mov eax, cr0
+    inc ax
+    mov cr0, eax
+    jmp 0x08:pm
+
+BITS 32
+pm:
+    mov eax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+
+    ; Interrupt gates keep short OSIF transactions atomic. Polling waits run
+    ; in user mode, allowing the timer to keep making progress.
+    mov esp, 0x00610
+    xor edx, edx
+    mov dh, 0xEE
+    mov eax, syscall_handler + 0x80000
+    push edx
+    push eax
+    mov dh, 0x8E
+    mov eax, timer_handler + 0x80000
+    push edx
+    push eax
+    mov eax, exception_handler + 0x80000
+    push 32
+    pop ecx
+.idt_lo:
+    push edx
+    push eax
+    db 0xE2, 0xFC
+    lidt [idtr]
+
+    ; Zero the full TSS, both mailbox words, exit receipt and scheduler pointer.
+    ; Every later read of kernel-owned mutable state has an explicit init.
+    xor eax, eax
+    mov ebx, 0x00A00
+    mov edi, ebx
+    push 68
+    pop ecx
+    db 0xF3, 0xAB        ; rep stosd: 68 dwords, 0xA00..0xB0F inclusive
+
+    mov ah, 0x10
+    mov esp, eax
+
+    mov al, 0x13         ; ICW1: master PIC single mode, ICW4 follows ICW2
+    out 0x20, al
+    mov al, 0x20
+    out 0x21, al
+    mov al, 1
+    out 0x21, al
+    mov al, 0xFE         ; only IRQ0 unmasked; cascaded/slave IRQs unused
+    out 0x21, al
+    mov al, 0x36
+    out 0x43, al
+    mov al, 0x9C
+    out 0x40, al
+    mov al, 0x2E
+    out 0x40, al
+
+    mov byte [ebx + 8], 0x10    ; upper SS0 byte was zeroed
+    mov byte [ebx + 102], 0x68  ; I/O bitmap starts beyond TSS limit
+    push 0x28
+    pop eax
+    ltr ax
+
+    ; COM1 115200 8N1; divisor one, UART interrupts disabled.
+    mov dx, 0x03FB
+    mov al, 0x80
+    out dx, al
+    mov dl, 0xF8
+    mov al, 1
+    out dx, al
+    inc edx
+    xor al, al
+    out dx, al
+    mov dl, 0xFB
+    mov al, 3
+    out dx, al
+    mov dl, 0xF9
+    xor al, al
+    out dx, al           ; IER=0 after clearing DLAB, independent of firmware
+    mov dl, 0xF8
+    mov al, 0x42
+    out dx, al
+
+load_header:
+    mov edi, 0x00B04
+    mov cl, 4            ; ECX=0 after the earlier REP STOSD
+.byte:
+    call boot_getc
+    db 0xAA              ; stosb
+    loop .byte
+    mov ecx, [edi - 4]
+    dec ecx
+    db 0x81, 0xF9        ; cmp ecx,0x1affff (reject zero via wrap)
+    dd 0x1AFFFF          ; image length1..0x1B0000, below both user stacks
+    db 0x77, exception_handler - ($ + 1)
+    inc ecx
+    mov edi, 0x100000
+load_payload:
+    call boot_getc
+    db 0xAA
+    loop load_payload
+
+enter_user:
+    push 0x23
+    pop eax
+    mov ds, ax
+    mov es, ax
+    xor eax, eax
+    mov fs, ax
+    mov gs, ax
+    ; Park the peer on the existing ring0 stack, whose top is0x1000.
+    push 0x23
+    push 0x1BFFF0
+    push 0x202
+    push 0x1B
+    push 4
+    pushad
+    db 0x1E, 0x06, 0x0F, 0xA0, 0x0F, 0xA8 ; push ds/es/fs/gs,4 bytes each
+    db 0x36, 0x89, 0x25
+    dd 0x00B0C
+    mov esp, 0x1800      ; shell ring0 stack; TSS.ESP0 set before entering it
+    db 0x36
+    mov [ebx + 4], esp
+    push 0x23
+    push 0x1FFFF0
+    push 0x202
+    push 0x1B
+    push 0
+    iretd
+
+boot_getc:
+    mov dl, 0xFD         ; DH=3 from UART init throughout the loader
+.wait:
+    in al, dx
+    test al, 1
+    jz .wait
+    mov dl, 0xF8
+    in al, dx
+    ret
+
+sys_exit:
+    mov bh, 4             ; explicit exit-path receipt; this call never returns
+    db 0x36
+    mov [0x00B08], ebx     ; BL=status, BH=marker; upper two bytes unspecified
+
+exception_handler:
+    hlt
+    jmp exception_handler
+
+timer_handler:
+    pushad
+    db 0x1E, 0x06, 0x0F, 0xA0, 0x0F, 0xA8
+    mov al, 0x20
+    out 0x20, al
+    db 0x36, 0x87, 0x25 ; xchg esp,ss:[other_sp]; frames remain in kernel RAM
+    dd 0x00B0C
+    db 0x8D, 0x44, 0x24, 68 ; 16 segment +32 PUSHAD +20 IRET frame bytes
+    db 0x36
+    mov [0x00A04], eax
+    db 0x0F, 0xA9, 0x0F, 0xA1, 0x07, 0x1F
+    popad
+    iretd
+
+syscall_handler:
+    test eax, eax
+    je sys_info
+    dec eax
+    je sys_putc
+    dec eax
+    je sys_poll
+    dec eax
+    je sys_unknown
+    dec eax
+    je sys_exit
+    dec eax
+    mov edx, ebx
+    db 0xC1, 0xEA, 7   ; shr edx,7: BH bit0 becomes DL bit1
+    db 0x83, 0xE2, 2   ; and edx,2: strictly bounded channel
+    mov dh, 0x0B
+    db 0xD1, 0xE8      ; shr eax,1: only residual values0/1 accepted
+    jnz sys_unknown
+    db 0x72, sys_recv - ($ + 1)
+sys_send:
+    db 0x36, 0x80, 0x7A, 1, 0  ; cmp byte ss:[edx+1],0
+    jne sys_again
+    db 0x36
+    mov [edx], bl
+    db 0x36, 0xFE, 0x42, 1     ; inc byte ss:[edx+1]
+    inc eax
+    iretd
+sys_recv:
+    db 0x36, 0x66, 0x87, 0x02  ; xchg ax,ss:[edx]; EAX=0 on entry
+    test ah, ah
+    jz sys_again
+    xor ah, ah
+    iretd
+sys_unknown:
+    push -38
+    pop eax
+    iretd
+
+sys_info:
+    mov al, 2
+    push 0x3B
+    pop edx
+    mov ecx, 0x200000
+    iretd
+
+sys_putc:
+    mov dx, 0x03FD
+    in al, dx
+    test al, 0x20
+    jz sys_again
+    mov al, bl
+    mov dl, 0xF8
+    out dx, al
+    mov al, 1
+    iretd
+
+sys_poll:
+    mov dx, 0x03FD
+    in al, dx
+    test al, 1
+    jz sys_again
+    mov dl, 0xF8
+    in al, dx
+    iretd
+
+sys_again:
+    push -11
+    pop eax
+    iretd
+
+idtr:
+    dw 34 * 8 - 1
+    dd 0x00500
+gdt:
+    dw gdt_end - gdt + 1
+    dd gdt - 2
+    dw 0xFFFF, 0
+    db 0, 0x9A, 0xCF, 0
+    dw 0xFFFF, 0
+    db 0, 0x92, 0xCF, 0
+    dw 0x01FF, 0
+    db 0x10, 0xFA, 0xC0, 0
+    dw 0x01FF, 0
+    db 0x10, 0xF2, 0xC0, 0
+    dw 0x0067, 0x0A00
+    db 0, 0x89, 0, 0
+gdt_end:
+payload_end:
+    times 510 - ($ - $$) db 0
+    dw 0xAA55
