@@ -28,7 +28,18 @@ from qemu_lab import Qemu
 
 MAX_MODULE_BYTES = 0x1F0000
 MAX_MODULE_BYTES_BY_ABI = {1: MAX_MODULE_BYTES, 2: 0x1B0000}
-PROMPT = b"jash[basmos]> "
+PROMPTS = (b"fh@nanokernel.org $ ", b"jash[basmos]> ")
+ANSI_CSI = re.compile(rb"\x1b\[[0-?]*[ -/]*[@-~]")
+
+
+def prompt_in(data):
+    """Recognize current colour and legacy prompts without changing output.
+
+    SGR may occur between the visible identity's characters. The retained
+    serial tail also joins escape sequences split across UART reads.
+    """
+    visible = ANSI_CSI.sub(b"", data)
+    return any(prompt in visible for prompt in PROMPTS)
 
 
 class Interrupted(Exception):
@@ -176,7 +187,7 @@ def session(qemu, serial, module, commands, timeout, input_fd, abi=1):
     next_check = 0.0
     while True:
         now = time.monotonic()
-        if not prompt_seen and PROMPT in serial.tail:
+        if not prompt_seen and prompt_in(serial.tail):
             prompt_seen = True
             deadline = now + timeout
         if prompt_seen and commands is not None and not commands_sent:

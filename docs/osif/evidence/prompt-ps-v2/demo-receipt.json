@@ -1,0 +1,397 @@
+{
+  "pass": true,
+  "recording": "real UART output from fresh QEMU TCG guest",
+  "timestamp_utc": "2026-11-09T00:50:13.683969+00:00",
+  "kernel": {
+    "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/assets/basmos-mt.bin",
+    "bytes": 512,
+    "sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a"
+  },
+  "module": {
+    "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/assets/jash-basmos.bin",
+    "bytes": 16948,
+    "sha256": "e79238bc03aabe5004834d4cade3cc6422dd53736631196874b1b524672f65f1"
+  },
+  "kernel_commit": "42a46df7697c15cc9dc1707a352fa18756bf2d4e",
+  "jash_parent_commit": "5a069316e1330b3a1c9b3508492e7e5a57fbc648",
+  "jash_source_state": "Native colour prompt and ps upgrade; exact binary hash above.",
+  "ps_available": true,
+  "ps_model": "Two fixed ABI contexts; runtime CPL/IOPL and coherent peer counters; not dynamic POSIX processes.",
+  "prompt_ansi": "\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+  "prompt_visible": "fh@nanokernel.org $ ",
+  "uname_a_behavior": "The reduced uname handler prints sysname, release and machine; flags are not individually interpreted.",
+  "terminal_render_columns": 72,
+  "terminal_render_rows": 24,
+  "guest_instruction_bytes_modified": false,
+  "debugger_memory_writes": false,
+  "qemu_version": {
+    "qemu": {
+      "micro": 2,
+      "minor": 2,
+      "major": 8
+    },
+    "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+  },
+  "loaded_module_matches_after_expected_startup_write": true,
+  "startup_data_change": {
+    "symbol": "basmos_mt_ready",
+    "offset": 16944,
+    "file_value": 1112755540,
+    "running_value": 1,
+    "explanation": "The unmodified crt0 writes ready=1 after clearing BSS; every other loaded file byte is compared exactly."
+  },
+  "exit": {
+    "status": 7,
+    "marker": 4,
+    "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000407 ECX=00000001 EDX=00000001\r\nESI=00000000 EDI=00000000 EBP=001ff4b8 ESP=000017ec\r\nEIP=00007d34 EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+  },
+  "ps_runtime_checks_pass": true,
+  "real_ansi_prompt_seen": true,
+  "duration_seconds": 53.877176,
+  "commands": [
+    {
+      "index": 0,
+      "key": "identity",
+      "command": "uname -a",
+      "start": 4.771636,
+      "enter": 5.269286,
+      "complete": 5.279532,
+      "hold_seconds": 2.0,
+      "output_offset": 131,
+      "output_bytes": 65,
+      "response": "\nBasmOS osif-2 i386\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CkJhc21PUyBvc2lmLTIgaTM4NgobWzE7MzZtZmgbWzA7MzdtQBtbMTszMm1uYW5va2VybmVsLm9yZxtbMG0gJCA=",
+      "output_clean": "BasmOS osif-2 i386",
+      "pass": true
+    },
+    {
+      "index": 1,
+      "key": "ps",
+      "command": "ps",
+      "start": 7.27982,
+      "enter": 7.496316,
+      "complete": 7.501417,
+      "hold_seconds": 2.5,
+      "output_offset": 198,
+      "output_bytes": 213,
+      "response": "\nTID CPL IOPL STATE     NAME\n0   3   0    running   jash\n1   3   0    runnable  ipc-peer\n2 fixed contexts; preemptive; shared arena\npeer: progress=3861625 rx=0 error=0\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "ClRJRCBDUEwgSU9QTCBTVEFURSAgICAgTkFNRQowICAgMyAgIDAgICAgcnVubmluZyAgIGphc2gKMSAgIDMgICAwICAgIHJ1bm5hYmxlICBpcGMtcGVlcgoyIGZpeGVkIGNvbnRleHRzOyBwcmVlbXB0aXZlOyBzaGFyZWQgYXJlbmEKcGVlcjogcHJvZ3Jlc3M9Mzg2MTYyNSByeD0wIGVycm9yPTAKG1sxOzM2bWZoG1swOzM3bUAbWzE7MzJtbmFub2tlcm5lbC5vcmcbWzBtICQg",
+      "output_clean": "TID CPL IOPL STATE     NAME\n0   3   0    running   jash\n1   3   0    runnable  ipc-peer\n2 fixed contexts; preemptive; shared arena\npeer: progress=3861625 rx=0 error=0",
+      "pass": true
+    },
+    {
+      "index": 2,
+      "key": "ps_json",
+      "command": "ps --json",
+      "start": 10.001571,
+      "enter": 10.542825,
+      "complete": 10.547929,
+      "hold_seconds": 3.0,
+      "output_offset": 420,
+      "output_bytes": 298,
+      "response": "\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":3},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":6707577,\"received\":0,\"last\":0,\"error\":0}]}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnsibW9kZWwiOiJmaXhlZC1jb250ZXh0cyIsImFiaSI6Miwic2hhcmVkX2FyZW5hIjp0cnVlLCJ0YXNrcyI6W3sidGlkIjowLCJuYW1lIjoiamFzaCIsInN0YXRlIjoicnVubmluZyIsImNwbCI6MywiaW9wbCI6MCwiY29tbWFuZHMiOjN9LHsidGlkIjoxLCJuYW1lIjoiaXBjLXBlZXIiLCJzdGF0ZSI6InJ1bm5hYmxlIiwiY3BsIjozLCJpb3BsIjowLCJwcm9ncmVzcyI6NjcwNzU3NywicmVjZWl2ZWQiOjAsImxhc3QiOjAsImVycm9yIjowfV19ChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":3},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":6707577,\"received\":0,\"last\":0,\"error\":0}]}",
+      "pass": true
+    },
+    {
+      "index": 3,
+      "key": "capabilities",
+      "command": "osif",
+      "start": 13.548141,
+      "enter": 13.8509,
+      "complete": 13.85599,
+      "hold_seconds": 3.0,
+      "output_offset": 722,
+      "output_bytes": 335,
+      "response": "\n{\"target\":\"basmos\",\"abi\":2,\"kernel_caps\":59,\"arena_bytes\":2097152,\"osinfo_caps\":1,\"console\":true,\"ticks\":false,\"filesystem\":false,\"process_spawn\":false,\"ipc\":true,\"preemptive_contexts\":2,\"mailboxes\":2,\"mailbox_capacity\":1,\"shared_arena\":true,\"network\":false,\"profile\":\"canonical-reduced\"}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnsidGFyZ2V0IjoiYmFzbW9zIiwiYWJpIjoyLCJrZXJuZWxfY2FwcyI6NTksImFyZW5hX2J5dGVzIjoyMDk3MTUyLCJvc2luZm9fY2FwcyI6MSwiY29uc29sZSI6dHJ1ZSwidGlja3MiOmZhbHNlLCJmaWxlc3lzdGVtIjpmYWxzZSwicHJvY2Vzc19zcGF3biI6ZmFsc2UsImlwYyI6dHJ1ZSwicHJlZW1wdGl2ZV9jb250ZXh0cyI6MiwibWFpbGJveGVzIjoyLCJtYWlsYm94X2NhcGFjaXR5IjoxLCJzaGFyZWRfYXJlbmEiOnRydWUsIm5ldHdvcmsiOmZhbHNlLCJwcm9maWxlIjoiY2Fub25pY2FsLXJlZHVjZWQifQobWzE7MzZtZmgbWzA7MzdtQBtbMTszMm1uYW5va2VybmVsLm9yZxtbMG0gJCA=",
+      "output_clean": "{\"target\":\"basmos\",\"abi\":2,\"kernel_caps\":59,\"arena_bytes\":2097152,\"osinfo_caps\":1,\"console\":true,\"ticks\":false,\"filesystem\":false,\"process_spawn\":false,\"ipc\":true,\"preemptive_contexts\":2,\"mailboxes\":2,\"mailbox_capacity\":1,\"shared_arena\":true,\"network\":false,\"profile\":\"canonical-reduced\"}",
+      "pass": true
+    },
+    {
+      "index": 4,
+      "key": "osif_test",
+      "command": "osif test",
+      "start": 16.856134,
+      "enter": 17.396691,
+      "complete": 17.40689,
+      "hold_seconds": 2.2,
+      "output_offset": 1066,
+      "output_bytes": 90,
+      "response": "\nosif-test open=-38 unknown=-38 zero_write=0\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "Cm9zaWYtdGVzdCBvcGVuPS0zOCB1bmtub3duPS0zOCB6ZXJvX3dyaXRlPTAKG1sxOzM2bWZoG1swOzM3bUAbWzE7MzJtbmFub2tlcm5lbC5vcmcbWzBtICQg",
+      "output_clean": "osif-test open=-38 unknown=-38 zero_write=0",
+      "pass": true
+    },
+    {
+      "index": 5,
+      "key": "peer_before",
+      "command": "peer",
+      "start": 19.607062,
+      "enter": 19.910121,
+      "complete": 19.91521,
+      "hold_seconds": 4.0,
+      "output_offset": 1160,
+      "output_bytes": 100,
+      "response": "\n{\"progress\":14956660,\"received\":0,\"last\":0,\"error\":0}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnsicHJvZ3Jlc3MiOjE0OTU2NjYwLCJyZWNlaXZlZCI6MCwibGFzdCI6MCwiZXJyb3IiOjB9ChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "{\"progress\":14956660,\"received\":0,\"last\":0,\"error\":0}",
+      "pass": true
+    },
+    {
+      "index": 6,
+      "key": "peer_after_idle",
+      "command": "peer",
+      "start": 23.915339,
+      "enter": 24.218129,
+      "complete": 24.228539,
+      "hold_seconds": 2.4,
+      "output_offset": 1264,
+      "output_bytes": 100,
+      "response": "\n{\"progress\":18820679,\"received\":0,\"last\":0,\"error\":0}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnsicHJvZ3Jlc3MiOjE4ODIwNjc5LCJyZWNlaXZlZCI6MCwibGFzdCI6MCwiZXJyb3IiOjB9ChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "{\"progress\":18820679,\"received\":0,\"last\":0,\"error\":0}",
+      "pass": true
+    },
+    {
+      "index": 7,
+      "key": "ipc_zero",
+      "command": "ipc 0",
+      "start": 26.628676,
+      "enter": 26.996513,
+      "complete": 27.027065,
+      "hold_seconds": 2.2,
+      "output_offset": 1369,
+      "output_bytes": 68,
+      "response": "\nipc sent=0 received=0\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CmlwYyBzZW50PTAgcmVjZWl2ZWQ9MAobWzE7MzZtZmgbWzA7MzdtQBtbMTszMm1uYW5va2VybmVsLm9yZxtbMG0gJCA=",
+      "output_clean": "ipc sent=0 received=0",
+      "pass": true
+    },
+    {
+      "index": 8,
+      "key": "ipc_ff",
+      "command": "ipc 255",
+      "start": 29.227203,
+      "enter": 29.681475,
+      "complete": 29.706921,
+      "hold_seconds": 2.2,
+      "output_offset": 1444,
+      "output_bytes": 72,
+      "response": "\nipc sent=255 received=255\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CmlwYyBzZW50PTI1NSByZWNlaXZlZD0yNTUKG1sxOzM2bWZoG1swOzM3bUAbWzE7MzJtbmFub2tlcm5lbC5vcmcbWzBtICQg",
+      "output_clean": "ipc sent=255 received=255",
+      "pass": true
+    },
+    {
+      "index": 9,
+      "key": "ipc_selftest",
+      "command": "ipc test",
+      "start": 31.907081,
+      "enter": 32.404431,
+      "complete": 33.047003,
+      "hold_seconds": 3.0,
+      "output_offset": 1524,
+      "output_bytes": 85,
+      "response": "\nipc-test bytes=32 zero=pass empty=pass\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CmlwYy10ZXN0IGJ5dGVzPTMyIHplcm89cGFzcyBlbXB0eT1wYXNzChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "ipc-test bytes=32 zero=pass empty=pass",
+      "pass": true
+    },
+    {
+      "index": 10,
+      "key": "ps_after_ipc",
+      "command": "ps --json",
+      "start": 36.04718,
+      "enter": 36.587848,
+      "complete": 36.592968,
+      "hold_seconds": 2.0,
+      "output_offset": 1618,
+      "output_bytes": 303,
+      "response": "\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":11},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":29979283,\"received\":34,\"last\":234,\"error\":0}]}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnsibW9kZWwiOiJmaXhlZC1jb250ZXh0cyIsImFiaSI6Miwic2hhcmVkX2FyZW5hIjp0cnVlLCJ0YXNrcyI6W3sidGlkIjowLCJuYW1lIjoiamFzaCIsInN0YXRlIjoicnVubmluZyIsImNwbCI6MywiaW9wbCI6MCwiY29tbWFuZHMiOjExfSx7InRpZCI6MSwibmFtZSI6ImlwYy1wZWVyIiwic3RhdGUiOiJydW5uYWJsZSIsImNwbCI6MywiaW9wbCI6MCwicHJvZ3Jlc3MiOjI5OTc5MjgzLCJyZWNlaXZlZCI6MzQsImxhc3QiOjIzNCwiZXJyb3IiOjB9XX0KG1sxOzM2bWZoG1swOzM3bUAbWzE7MzJtbmFub2tlcm5lbC5vcmcbWzBtICQg",
+      "output_clean": "{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":11},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":29979283,\"received\":34,\"last\":234,\"error\":0}]}",
+      "pass": true
+    },
+    {
+      "index": 11,
+      "key": "arguments",
+      "command": "argv \"hello world\" '' 512",
+      "start": 38.593093,
+      "enter": 39.890273,
+      "complete": 39.895362,
+      "hold_seconds": 2.0,
+      "output_offset": 1946,
+      "output_bytes": 71,
+      "response": "\n[\"hello world\",\"\",\"512\"]\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "ClsiaGVsbG8gd29ybGQiLCIiLCI1MTIiXQobWzE7MzZtZmgbWzA7MzdtQBtbMTszMm1uYW5va2VybmVsLm9yZxtbMG0gJCA=",
+      "output_clean": "[\"hello world\",\"\",\"512\"]",
+      "pass": true
+    },
+    {
+      "index": 12,
+      "key": "json",
+      "command": "json '{\"os\":\"BasmOS\",\"cpl\":3,\"ok\":true}'",
+      "start": 41.895496,
+      "enter": 43.774489,
+      "complete": 43.789917,
+      "hold_seconds": 2.5,
+      "output_offset": 2057,
+      "output_bytes": 80,
+      "response": "\n{\"os\":\"BasmOS\",\"cpl\":3,\"ok\":true}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "Cnsib3MiOiJCYXNtT1MiLCJjcGwiOjMsIm9rIjp0cnVlfQobWzE7MzZtZmgbWzA7MzdtQBtbMTszMm1uYW5va2VybmVsLm9yZxtbMG0gJCA=",
+      "output_clean": "{\"os\":\"BasmOS\",\"cpl\":3,\"ok\":true}",
+      "pass": true
+    },
+    {
+      "index": 13,
+      "key": "false",
+      "command": "false",
+      "start": 46.290056,
+      "enter": 46.636072,
+      "complete": 46.646269,
+      "hold_seconds": 0.35,
+      "output_offset": 2142,
+      "output_bytes": 46,
+      "response": "\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "ChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "",
+      "pass": true
+    },
+    {
+      "index": 14,
+      "key": "status_one",
+      "command": "status",
+      "start": 46.996424,
+      "enter": 47.385638,
+      "complete": 47.390742,
+      "hold_seconds": 1.5,
+      "output_offset": 2194,
+      "output_bytes": 55,
+      "response": "\nstatus=1\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnN0YXR1cz0xChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "status=1",
+      "pass": true
+    },
+    {
+      "index": 15,
+      "key": "true",
+      "command": "true",
+      "start": 48.890913,
+      "enter": 49.194145,
+      "complete": 49.199239,
+      "hold_seconds": 0.35,
+      "output_offset": 2253,
+      "output_bytes": 46,
+      "response": "\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "ChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "",
+      "pass": true
+    },
+    {
+      "index": 16,
+      "key": "status_zero",
+      "command": "status",
+      "start": 49.549375,
+      "enter": 49.938485,
+      "complete": 49.948691,
+      "hold_seconds": 1.5,
+      "output_offset": 2305,
+      "output_bytes": 55,
+      "response": "\nstatus=0\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ ",
+      "response_base64": "CnN0YXR1cz0wChtbMTszNm1maBtbMDszN21AG1sxOzMybW5hbm9rZXJuZWwub3JnG1swbSAkIA==",
+      "output_clean": "status=0",
+      "pass": true
+    },
+    {
+      "index": 17,
+      "key": "exit",
+      "command": "exit 7",
+      "start": 51.44882,
+      "enter": 51.860256,
+      "complete": 51.865369,
+      "hold_seconds": 2.0,
+      "output_offset": 2366,
+      "output_bytes": 20,
+      "response": "\nJash BasmOS exit=7\n",
+      "response_base64": "Ckphc2ggQmFzbU9TIGV4aXQ9Nwo=",
+      "output_clean": "Jash BasmOS exit=7",
+      "pass": true
+    }
+  ],
+  "cpu_observations": [
+    {
+      "t": 3.117359,
+      "label": "shell application context in CPL3",
+      "context": "shell",
+      "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000000 ECX=00000001 EDX=00000001\r\nESI=001ff468 EDI=001ff46c EBP=001ff448 ESP=001ff43c\r\nEIP=00001f32 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    {
+      "t": 3.254207,
+      "label": "peer application context in CPL3",
+      "context": "peer",
+      "monitor": "\r\nCPU#0\r\nEAX=00000006 EBX=00000000 ECX=00000000 EDX=00025cfb\r\nESI=00000000 EDI=00000000 EBP=001bffb8 ESP=001bffac\r\nEIP=00001f32 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    }
+  ],
+  "boot_screens": [
+    {
+      "t": 0.052553,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_00.ppm"
+    },
+    {
+      "t": 0.174825,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_01.ppm"
+    },
+    {
+      "t": 0.297374,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_02.ppm"
+    },
+    {
+      "t": 0.420233,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_03.ppm"
+    },
+    {
+      "t": 0.542718,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_04.ppm"
+    },
+    {
+      "t": 0.664521,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_05.ppm"
+    },
+    {
+      "t": 0.786581,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_06.ppm"
+    },
+    {
+      "t": 0.90834,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_07.ppm"
+    },
+    {
+      "t": 1.030181,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_08.ppm"
+    },
+    {
+      "t": 1.152358,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_09.ppm"
+    },
+    {
+      "t": 1.274386,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_10.ppm"
+    },
+    {
+      "t": 1.396228,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_11.ppm"
+    },
+    {
+      "t": 1.518663,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_12.ppm"
+    },
+    {
+      "t": 1.640881,
+      "path": "/workspace/scratch/d2babe6b8709/video-basmos-v2/capture/boot_13.ppm"
+    }
+  ],
+  "uart_output_sha256": "93bf70e2c0d03fc93ed91630cf35309a564363c843b659ef5347dd9f4212fce8",
+  "jash_commit": "aa426513e9c9e55652e640ab049c2e9875eab2aa"
+}

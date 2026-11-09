@@ -18,7 +18,7 @@ import sys
 import tempfile
 import time
 
-from osif_basmos_qemu import (Wire, OsifQmp, OsifGdb, digest, elf_symbols,
+from osif_basmos_qemu import (Wire, OsifQmp, OsifGdb, PROMPT, VISIBLE_PROMPT, digest, elf_symbols,
                               file_record, gdb_upload, halt_state, plain,
                               snapshot, static_user_instructions, upload)
 
@@ -28,7 +28,6 @@ from tools.qemu_lab import parse_map
 ARENA_BASE = 0x100000
 ARENA_BYTES = 0x200000
 MAX_IMAGE = 0x1B0000
-PROMPT = b"jash[basmos]> "
 
 
 def json_lines(data):
@@ -46,6 +45,22 @@ def read_u32(q, address):
     return int.from_bytes(q.read(address, 4), "little")
 
 
+def ps_snapshot(data):
+    return next(v for v in json_lines(data)
+                if isinstance(v, dict) and v.get("model") == "fixed-contexts")
+
+
+def ps_contexts_valid(snapshot):
+    tasks = snapshot.get("tasks", [])
+    return (snapshot.get("abi") == 2 and snapshot.get("shared_arena") is True and
+            len(tasks) == 2 and [t.get("tid") for t in tasks] == [0, 1] and
+            [t.get("name") for t in tasks] == ["jash", "ipc-peer"] and
+            [t.get("state") for t in tasks] == ["running", "runnable"] and
+            all(t.get("cpl") == 3 and t.get("iopl") == 0 for t in tasks) and
+            tasks[0].get("commands", 0) > 0 and tasks[1].get("progress", 0) > 0 and
+            tasks[1].get("error") == 0)
+
+
 def progress_snapshot(q, symbols):
     return {name: read_u32(q, ARENA_BASE + symbols[name]) for name in
             ("basmos_peer_progress", "basmos_peer_received",
@@ -57,7 +72,7 @@ def run_shell(kernel, module, symbols, output):
     with tempfile.TemporaryDirectory(prefix="basmos-mt-jash-") as directory, Wire(directory) as wire:
         with OsifQmp(kernel, wire) as q:
             upload(wire, module)
-            if not wire.wait(PROMPT):
+            if not wire.wait(VISIBLE_PROMPT):
                 raise TimeoutError("Jash prompt missing: " + repr(bytes(wire.transcript[-1000:])))
             idle_before = progress_snapshot(q, symbols)
             time.sleep(0.15)
@@ -79,8 +94,8 @@ def run_shell(kernel, module, symbols, output):
                               "response": plain(data).decode("utf-8", "backslashreplace")})
                 return data
 
-            command("help_has_peer_and_ipc", b"help", lambda d:
-                    b"peer" in plain(d) and b"ipc" in plain(d))
+            command("help_has_ps_peer_and_ipc", b"help", lambda d:
+                    b" ps" in plain(d) and b"peer" in plain(d) and b"ipc" in plain(d))
             command("argv_quotes_empty_argument", b'argv "a b" \'\' x', lambda d:
                     ["a b", "", "x"] in json_lines(d))
             command("echo_json_array", b'echo --json one "two words" \'\'', lambda d:
@@ -95,6 +110,10 @@ def run_shell(kernel, module, symbols, output):
                     b"\njson: invalid input errno=17\n" in plain(d) and b"\nstatus=2\n" in plain(d))
             command("editor_backspace", b"echo worlX\x7fd", lambda d: b"\nworld\n" in plain(d))
             command("editor_left_insert", b"echo ac\x1b[Db", lambda d: b"\nabc\n" in plain(d))
+            command("editor_home_end_colour_width", b"cho ome\x1b[He\x1b[Fga", lambda d:
+                    b"\nomega\n" in plain(d) and b"\x1b[7D" in d and PROMPT in d)
+            command("editor_delete_colour_width", b"echo abXc\x1b[D\x1b[D\x1b[3~", lambda d:
+                    b"\nabc\n" in plain(d) and b"\x1b[2D" in d and PROMPT in d)
             command("editor_ctrl_u", b"echo discarded\x15echo rebuilt", lambda d: b"\nrebuilt\n" in plain(d))
             command("editor_previous_line", b"echo recalled\r\x1b[A", lambda d:
                     plain(d).count(b"\nrecalled\n") == 2)
@@ -112,11 +131,33 @@ def run_shell(kernel, module, symbols, output):
                     b"\nosif-test open=-38 unknown=-38 zero_write=0\n" in plain(d))
             command("peer_status", b"peer", lambda d:
                     b"progress" in plain(d) and b"received" in plain(d))
+            command("ps_table_real_contexts", b"ps", lambda d:
+                    b"TID CPL IOPL STATE" in plain(d) and
+                    re.search(rb"\n0 +3 +0 +running +jash\n", plain(d)) and
+                    re.search(rb"\n1 +3 +0 +runnable +ipc-peer\n", plain(d)))
+            before_ps = ps_snapshot(command("ps_json_runtime_privilege", b"ps --json", lambda d:
+                    ps_contexts_valid(ps_snapshot(d))))
+            time.sleep(0.15)
+            after_ps = ps_snapshot(command("ps_short_json_peer_progress", b"ps -j", lambda d:
+                    ps_contexts_valid(ps_snapshot(d)) and
+                    ps_snapshot(d)["tasks"][1]["progress"] != before_ps["tasks"][1]["progress"] and
+                    ps_snapshot(d)["tasks"][1]["received"] == before_ps["tasks"][1]["received"] and
+                    ps_snapshot(d)["tasks"][0]["commands"] > before_ps["tasks"][0]["commands"]))
+            initial_received = after_ps["tasks"][1]["received"]
             for value in (0, 255, 1, 127, 128, 0):
                 command("ipc_roundtrip_%d_%d" % (len(cases), value), ("ipc %d" % value).encode(),
                         lambda d, n=value: ("ipc sent=%d received=%d" % (n, n)).encode() in plain(d))
+            command("ps_observes_six_real_ipc_messages", b"ps --json", lambda d:
+                    ps_contexts_valid(ps_snapshot(d)) and
+                    ps_snapshot(d)["tasks"][1]["received"] == initial_received + 6 and
+                    ps_snapshot(d)["tasks"][1]["last"] == 0)
             command("ipc_builtin_regression", b"ipc test", lambda d:
                     b"ipc-test bytes=32 zero=pass empty=pass" in plain(d))
+            command("ps_observes_ipc_selftest", b"ps --json", lambda d:
+                    ps_contexts_valid(ps_snapshot(d)) and
+                    ps_snapshot(d)["tasks"][1]["received"] == initial_received + 38)
+            command("ps_rejects_unknown_option", b"ps --bogus\rstatus", lambda d:
+                    b"usage: ps" in plain(d) and b"\nstatus=2\n" in plain(d))
             command("ticks_explicitly_unsupported", b"ticks\rstatus", lambda d:
                     b"ticks: unavailable" in plain(d) and b"\nstatus=125\n" in plain(d))
             busy_after = progress_snapshot(q, symbols)
@@ -128,6 +169,7 @@ def run_shell(kernel, module, symbols, output):
             version = q.version
         raw = bytes(wire.transcript)
     checks = {"all_command_cases": all(c["pass"] for c in cases),
+              "colour_identity_and_reset_on_real_uart": PROMPT in raw and VISIBLE_PROMPT in plain(raw),
               "peer_progresses_while_prompt_idle": idle_after["basmos_peer_progress"] != idle_before["basmos_peer_progress"],
               "peer_progresses_during_commands": busy_after["basmos_peer_progress"] != idle_after["basmos_peer_progress"],
               "peer_reports_no_transport_error": busy_after["basmos_peer_error"] == 0,

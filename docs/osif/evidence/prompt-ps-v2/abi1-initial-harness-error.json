@@ -1,0 +1,238 @@
+{
+  "executor": "QEMU TCG",
+  "physical_hardware": false,
+  "scope": "native kernel ABI and real reduced Jash profile",
+  "pass": false,
+  "artifacts": {
+    "kernel": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/basmos-osif.bin",
+      "bytes": 512,
+      "sha256": "bc03b8f742a5eb7d04080f52d662fcf7947685fd73c0f88fa0be52493584d62a",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/basmos-osif.bin"
+    },
+    "kernel_map": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/basmos-osif.map",
+      "bytes": 454,
+      "sha256": "aea134d94aefc7c0e8937b1aab4acf914070ebfa48271c92ec96bc69339c88da",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/basmos-osif.map"
+    },
+    "jash": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/jash-basmos.bin",
+      "bytes": 14414,
+      "sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos/jash-basmos.bin"
+    },
+    "jash_elf": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/jash-basmos.elf",
+      "bytes": 21800,
+      "sha256": "540a279334da1df5934e7bc368d84670a6c8fc1a8459c3901d460886239707b7",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos/jash-basmos.elf"
+    },
+    "independent_abi_probe": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/abi-probe.bin",
+      "bytes": 618,
+      "sha256": "5fa13804148b6f92f5f7c3c2f20ba5d7e374825fbb3edaa313399000beb55cc3"
+    }
+  },
+  "checks": {
+    "sector512_signature": true,
+    "native_abi": true,
+    "loader_bounds": true,
+    "user_instructions": true
+  },
+  "coverage": {
+    "maximum_length_header_accepted": true,
+    "maximum_length_full_payload_transfer_qualified": false,
+    "full_transfers": [
+      "independent_abi_probe"
+    ],
+    "earlier_max_transfer": "Initial full 0x1f0000-byte UART transfer exceeded the 30-second GDB timeout; no PASS claimed for that transfer."
+  },
+  "kernel_and_jash_bytes": 14926,
+  "kernel_payload_bytes": 509,
+  "abi": {
+    "pass": true,
+    "checks": {
+      "query_abi1_caps15_arena2m": true,
+      "empty_poll_eagain": true,
+      "two_unknown_syscalls_enosys": true,
+      "callee_saved_registers_preserved": true,
+      "transmitted_nul_byte": true,
+      "ticks_advance_in_user_wait": true,
+      "requested_nul_input": true,
+      "nul_received_as_zero": true,
+      "empty_after_nul_eagain": true,
+      "probe_reached_done": true,
+      "exit_status7_recorded": true,
+      "exit_marker_recorded": true,
+      "exit_enters_kernel_halt": true,
+      "int80_interrupt_gate_dpl3": true,
+      "no_probe_failure": true
+    },
+    "implementation": "independent direct int 0x80 assembly client; no Jash wrapper",
+    "probe_bytes": 618,
+    "probe_sha256": "5fa13804148b6f92f5f7c3c2f20ba5d7e374825fbb3edaa313399000beb55cc3",
+    "qemu_version": {
+      "qemu": {
+        "micro": 2,
+        "minor": 2,
+        "major": 8
+      },
+      "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+    },
+    "kernel_state_hex": "020000006a02000007040000",
+    "halt_registers": "\r\nCPU#0\r\nEAX=00000004 EBX=00000407 ECX=00200000 EDX=000003f8\r\nESI=00000221 EDI=00000001 EBP=11223344 ESP=00000fec\r\nEIP=00007d4e EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+  },
+  "loader": {
+    "pass": true,
+    "cases": [
+      {
+        "length": 0,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 0,
+        "halt_registers": "\r\nCPU#0\r\nEAX=80000000 EBX=00000000 ECX=ffffffff EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000086 [--S--P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 2031617,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 2031617,
+        "halt_registers": "\r\nCPU#0\r\nEAX=80000000 EBX=00000000 ECX=001f0000 EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000012 [----A--] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 4294967295,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 4294967295,
+        "halt_registers": "\r\nCPU#0\r\nEAX=800000ff EBX=00000000 ECX=fffffffe EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000096 [--S-AP-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 1,
+        "expected": "accept complete image and enter CPL3",
+        "pass": true,
+        "observed_length": 1,
+        "entry_registers": {
+          "eax": 0,
+          "ecx": 0,
+          "edx": 1016,
+          "ebx": 0,
+          "esp": 2097136,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048577,
+          "eip": 0,
+          "eflags": 514,
+          "cs": 27,
+          "ss": 35,
+          "ds": 35,
+          "es": 35,
+          "fs": 0,
+          "gs": 0
+        }
+      },
+      {
+        "length": 2031616,
+        "expected": "accept header and enter payload loop",
+        "pass": true,
+        "observed_length": 2031616,
+        "payload_loop_registers": {
+          "eax": 2147483648,
+          "ecx": 2031616,
+          "edx": 1016,
+          "ebx": 0,
+          "esp": 4096,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048576,
+          "eip": 32025,
+          "eflags": 22,
+          "cs": 8,
+          "ss": 16,
+          "ds": 16,
+          "es": 16,
+          "fs": 0,
+          "gs": 0
+        },
+        "full_size_payload_transferred": false
+      }
+    ],
+    "note": "Boundary fixtures are serial-loaded guest images; no debugger writes."
+  },
+  "privileges": {
+    "pass": true,
+    "checks": {
+      "entry_actual_cpl3": true,
+      "entry_eip_zero": true,
+      "entry_stack_top": true,
+      "entry_ds_es_ss": true,
+      "entry_iopl_zero_if_enabled_df_clear": true,
+      "entry_code_arena": true,
+      "entry_data_arena": true,
+      "loaded_module_exact": true,
+      "tss_esp0": true,
+      "tss_ss0": true,
+      "io_bitmap_beyond_tss": true,
+      "tss_unused_fields_zero": true,
+      "single_identity_large_page": true,
+      "remaining_page_directory_zero": true,
+      "jash_prompt_actual_cpl3": true,
+      "jash_prompt_iopl_zero": true
+    },
+    "method": "QEMU GDB stdio hardware breakpoints; guest instruction bytes unchanged",
+    "guest_instructions_modified": false,
+    "entry": {
+      "registers": {
+        "eax": 0,
+        "ecx": 0,
+        "edx": 1016,
+        "ebx": 0,
+        "esp": 2097136,
+        "ebp": 0,
+        "esi": 0,
+        "edi": 1062990,
+        "eip": 0,
+        "eflags": 514,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000000 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010384e EBP=00000000 ESP=001ffff0\r\nEIP=00000000 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "prompt": {
+      "registers": {
+        "eax": 2094400,
+        "ecx": 1,
+        "edx": 0,
+        "ebx": 0,
+        "esp": 2094300,
+        "ebp": 2097128,
+        "esi": 0,
+        "edi": 147624,
+        "eip": 9250,
+        "eflags": 582,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=001ff540 EBX=00000000 ECX=00000001 EDX=00000000\r\nESI=00000000 EDI=000240a8 EBP=001fffe8 ESP=001ff4dc\r\nEIP=00002422 EFL=00000246 [---Z-P-] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "loaded_bytes": 14414,
+    "loaded_sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9"
+  },
+  "user_instructions": {
+    "pass": true,
+    "forbidden_instructions": [],
+    "scope": "objdump -d of executable sections in the linked Jash ELF; not a proof about arbitrary hostile code"
+  },
+  "error": "TimeoutError(\"Jash native prompt missing: b'BJash BasmOS native profile\\\\nCanonical editor + argv + strict JSON. Type help.\\\\n\\\\x1b[1;36mfh\\\\x1b[0;37m@\\\\x1b[1;32mnanokernel.org\\\\x1b[0m $ '\")"
+}

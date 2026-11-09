@@ -27,7 +27,8 @@ from tools.qemu_lab import Qemu, parse_map
 ARENA_BASE = 0x100000
 ARENA_BYTES = 0x200000
 MAX_IMAGE = 0x1F0000
-PROMPT = b"jash[basmos]> "
+VISIBLE_PROMPT = b"fh@nanokernel.org $ "
+PROMPT = b"\x1b[1;36mfh\x1b[0;37m@\x1b[1;32mnanokernel.org\x1b[0m $ "
 
 
 def digest(data):
@@ -343,7 +344,7 @@ def run_shell(kernel, module, output):
     with tempfile.TemporaryDirectory(prefix="osif-jash-") as directory, Wire(directory) as wire:
         with OsifQmp(kernel, wire) as q:
             upload(wire, module)
-            ready = wire.wait(PROMPT)
+            ready = wire.wait(VISIBLE_PROMPT)
             if not ready:
                 raise TimeoutError("Jash native prompt missing: " + repr(bytes(wire.transcript[-1000:])))
             ticks_before = int.from_bytes(q.read(0xB00, 4), "little")
@@ -365,7 +366,7 @@ def run_shell(kernel, module, output):
                               "response": plain(data).decode("utf-8", "backslashreplace")})
                 return data
             command("help_registry", b"help", lambda d:
-                    b"Jash BasmOS commands: help version echo argv json osif uname ticks status clear true false exit byte\n" in plain(d))
+                    b"Jash BasmOS commands: help version echo argv json osif uname ps ticks status clear true false exit byte\n" in plain(d))
             command("canonical_source_version", b"version", lambda d:
                     b"082ab18b1770ae32c54ab34acf87666935416090 / i386 OSIF v1" in d)
             command("argv_quotes_empty_argument", b'argv "a b" \'\' x', lambda d:
@@ -414,6 +415,10 @@ def run_shell(kernel, module, output):
                     b"command discarded\n" in plain(d) and b"\nstatus=2\n" in plain(d))
             command("editor_backspace", b"echo worlX\x7fd", lambda d: b"\nworld\n" in plain(d))
             command("editor_left_insert", b"echo ac\x1b[Db", lambda d: b"\nabc\n" in plain(d))
+            command("editor_home_end_colour_width", b"cho ome\x1b[He\x1b[Fga", lambda d:
+                    b"\nomega\n" in plain(d) and b"\x1b[7D" in d and PROMPT in d)
+            command("editor_delete_colour_width", b"echo abXc\x1b[D\x1b[D\x1b[3~", lambda d:
+                    b"\nabc\n" in plain(d) and b"\x1b[2D" in d and PROMPT in d)
             command("editor_ctrl_u", b"echo discarded\x15echo rebuilt", lambda d: b"\nrebuilt\n" in plain(d))
             command("editor_previous_line", b"echo recalled\r\x1b[A", lambda d: plain(d).count(b"\nrecalled\n") == 2)
             command("crlf_single_command", b"echo crlf\r\nstatus", lambda d:
@@ -422,6 +427,13 @@ def run_shell(kernel, module, output):
                     b"\njash: line too long; command discarded\n" in plain(d) and b"\nstatus=2\n" in plain(d) and
                     b"\n" + b"x"*100 not in plain(d))
             command("clear_sequence", b"clear", lambda d: b"\x1b[2J\x1b[H" in d)
+            command("ps_single_context_observed_privilege", b"ps --json", lambda d:
+                    any(isinstance(v, dict) and v.get("model") == "fixed-contexts" and
+                        v.get("abi") == 1 and v.get("shared_arena") is False and
+                        len(v.get("tasks", [])) == 1 and v["tasks"][0].get("tid") == 0 and
+                        v["tasks"][0].get("name") == "jash" and v["tasks"][0].get("cpl") == 3 and
+                        v["tasks"][0].get("iopl") == 0 and v["tasks"][0].get("commands", 0) > 0
+                        for v in json_lines(d)))
             offset = len(wire.transcript)
             wire.write(b"exit 7\r")
             exit_message = wire.wait(b"Jash BasmOS exit=7\n", offset=offset)
@@ -430,7 +442,9 @@ def run_shell(kernel, module, output):
             exit_status = exit_record[0]
             version = q.version
         raw = bytes(wire.transcript)
-    checks = {"startup_prompt": ready, "timer_progress_while_prompt_idle": ticks_after > ticks_before,
+    checks = {"startup_prompt": ready,
+              "colour_identity_and_reset_on_real_uart": PROMPT in raw and VISIBLE_PROMPT in plain(raw),
+              "timer_progress_while_prompt_idle": ticks_after > ticks_before,
               "all_command_cases": all(c["pass"] for c in cases), "exit_message": exit_message,
               "exit_status7": exit_status == 7, "exit_marker": exit_record[1] == 4,
               "exit_kernel_halt": "CPL=0" in monitor and "HLT=1" in monitor}

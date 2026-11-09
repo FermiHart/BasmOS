@@ -1,0 +1,526 @@
+{
+  "executor": "QEMU TCG",
+  "physical_hardware": false,
+  "scope": "native kernel ABI and real reduced Jash profile",
+  "pass": true,
+  "artifacts": {
+    "kernel": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/basmos-osif.bin",
+      "bytes": 512,
+      "sha256": "bc03b8f742a5eb7d04080f52d662fcf7947685fd73c0f88fa0be52493584d62a",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/basmos-osif.bin"
+    },
+    "kernel_map": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/basmos-osif.map",
+      "bytes": 454,
+      "sha256": "aea134d94aefc7c0e8937b1aab4acf914070ebfa48271c92ec96bc69339c88da",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/basmos-osif.map"
+    },
+    "jash": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/jash-basmos.bin",
+      "bytes": 14414,
+      "sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos/jash-basmos.bin"
+    },
+    "jash_elf": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/jash-basmos.elf",
+      "bytes": 21800,
+      "sha256": "540a279334da1df5934e7bc368d84670a6c8fc1a8459c3901d460886239707b7",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos/jash-basmos.elf"
+    },
+    "independent_abi_probe": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/prompt-ps-evidence/abi-probe.bin",
+      "bytes": 618,
+      "sha256": "5fa13804148b6f92f5f7c3c2f20ba5d7e374825fbb3edaa313399000beb55cc3"
+    }
+  },
+  "checks": {
+    "sector512_signature": true,
+    "native_abi": true,
+    "loader_bounds": true,
+    "user_instructions": true,
+    "commands": true,
+    "privileges": true
+  },
+  "coverage": {
+    "maximum_length_header_accepted": true,
+    "maximum_length_full_payload_transfer_qualified": false,
+    "full_transfers": [
+      "independent_abi_probe",
+      "complete_jash_module"
+    ],
+    "earlier_max_transfer": "Initial full 0x1f0000-byte UART transfer exceeded the 30-second GDB timeout; no PASS claimed for that transfer."
+  },
+  "kernel_and_jash_bytes": 14926,
+  "kernel_payload_bytes": 509,
+  "abi": {
+    "pass": true,
+    "checks": {
+      "query_abi1_caps15_arena2m": true,
+      "empty_poll_eagain": true,
+      "two_unknown_syscalls_enosys": true,
+      "callee_saved_registers_preserved": true,
+      "transmitted_nul_byte": true,
+      "ticks_advance_in_user_wait": true,
+      "requested_nul_input": true,
+      "nul_received_as_zero": true,
+      "empty_after_nul_eagain": true,
+      "probe_reached_done": true,
+      "exit_status7_recorded": true,
+      "exit_marker_recorded": true,
+      "exit_enters_kernel_halt": true,
+      "int80_interrupt_gate_dpl3": true,
+      "no_probe_failure": true
+    },
+    "implementation": "independent direct int 0x80 assembly client; no Jash wrapper",
+    "probe_bytes": 618,
+    "probe_sha256": "5fa13804148b6f92f5f7c3c2f20ba5d7e374825fbb3edaa313399000beb55cc3",
+    "qemu_version": {
+      "qemu": {
+        "micro": 2,
+        "minor": 2,
+        "major": 8
+      },
+      "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+    },
+    "kernel_state_hex": "020000006a02000007040000",
+    "halt_registers": "\r\nCPU#0\r\nEAX=00000004 EBX=00000407 ECX=00200000 EDX=000003f8\r\nESI=00000221 EDI=00000001 EBP=11223344 ESP=00000fec\r\nEIP=00007d4e EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+  },
+  "loader": {
+    "pass": true,
+    "cases": [
+      {
+        "length": 0,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 0,
+        "halt_registers": "\r\nCPU#0\r\nEAX=80000000 EBX=00000000 ECX=ffffffff EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000086 [--S--P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 2031617,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 2031617,
+        "halt_registers": "\r\nCPU#0\r\nEAX=80000000 EBX=00000000 ECX=001f0000 EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000012 [----A--] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 4294967295,
+        "expected": "reject before payload store",
+        "pass": true,
+        "payload_prefix_unchanged": true,
+        "observed_length": 4294967295,
+        "halt_registers": "\r\nCPU#0\r\nEAX=800000ff EBX=00000000 ECX=fffffffe EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d4e EFL=00000096 [--S-AP-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 1,
+        "expected": "accept complete image and enter CPL3",
+        "pass": true,
+        "observed_length": 1,
+        "entry_registers": {
+          "eax": 0,
+          "ecx": 0,
+          "edx": 1016,
+          "ebx": 0,
+          "esp": 2097136,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048577,
+          "eip": 0,
+          "eflags": 514,
+          "cs": 27,
+          "ss": 35,
+          "ds": 35,
+          "es": 35,
+          "fs": 0,
+          "gs": 0
+        }
+      },
+      {
+        "length": 2031616,
+        "expected": "accept header and enter payload loop",
+        "pass": true,
+        "observed_length": 2031616,
+        "payload_loop_registers": {
+          "eax": 2147483648,
+          "ecx": 2031616,
+          "edx": 1016,
+          "ebx": 0,
+          "esp": 4096,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048576,
+          "eip": 32025,
+          "eflags": 22,
+          "cs": 8,
+          "ss": 16,
+          "ds": 16,
+          "es": 16,
+          "fs": 0,
+          "gs": 0
+        },
+        "full_size_payload_transferred": false
+      }
+    ],
+    "note": "Boundary fixtures are serial-loaded guest images; no debugger writes."
+  },
+  "privileges": {
+    "pass": true,
+    "checks": {
+      "entry_actual_cpl3": true,
+      "entry_eip_zero": true,
+      "entry_stack_top": true,
+      "entry_ds_es_ss": true,
+      "entry_iopl_zero_if_enabled_df_clear": true,
+      "entry_code_arena": true,
+      "entry_data_arena": true,
+      "loaded_module_exact": true,
+      "tss_esp0": true,
+      "tss_ss0": true,
+      "io_bitmap_beyond_tss": true,
+      "tss_unused_fields_zero": true,
+      "single_identity_large_page": true,
+      "remaining_page_directory_zero": true,
+      "jash_prompt_actual_cpl3": true,
+      "jash_prompt_iopl_zero": true
+    },
+    "method": "QEMU GDB stdio hardware breakpoints; guest instruction bytes unchanged",
+    "guest_instructions_modified": false,
+    "entry": {
+      "registers": {
+        "eax": 0,
+        "ecx": 0,
+        "edx": 1016,
+        "ebx": 0,
+        "esp": 2097136,
+        "ebp": 0,
+        "esi": 0,
+        "edi": 1062990,
+        "eip": 0,
+        "eflags": 514,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000000 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010384e EBP=00000000 ESP=001ffff0\r\nEIP=00000000 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "prompt": {
+      "registers": {
+        "eax": 2094400,
+        "ecx": 1,
+        "edx": 0,
+        "ebx": 0,
+        "esp": 2094300,
+        "ebp": 2097128,
+        "esi": 0,
+        "edi": 147624,
+        "eip": 9250,
+        "eflags": 582,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=001ff540 EBX=00000000 ECX=00000001 EDX=00000000\r\nESI=00000000 EDI=000240a8 EBP=001fffe8 ESP=001ff4dc\r\nEIP=00002422 EFL=00000246 [---Z-P-] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "loaded_bytes": 14414,
+    "loaded_sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9"
+  },
+  "user_instructions": {
+    "pass": true,
+    "forbidden_instructions": [],
+    "scope": "objdump -d of executable sections in the linked Jash ELF; not a proof about arbitrary hostile code"
+  },
+  "commands": {
+    "pass": true,
+    "checks": {
+      "startup_prompt": true,
+      "colour_identity_and_reset_on_real_uart": true,
+      "timer_progress_while_prompt_idle": true,
+      "all_command_cases": true,
+      "exit_message": true,
+      "exit_status7": true,
+      "exit_marker": true,
+      "exit_kernel_halt": true
+    },
+    "cases": [
+      {
+        "name": "help_registry",
+        "input": "help",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "help\nJash BasmOS commands: help version echo argv json osif uname ps ticks status clear true false exit byte\nCanonical editor/keymap/argv/JSON; literal arguments and single-command execution.\nQuoted JSON: json '{\"message\":\"hello\",\"value\":0}'\nps [--json|-j]: observe this profile's fixed contexts.\nNo filesystem, process spawn, pipelines, expansion, network or IPC in this kernel ABI.\nfh@nanokernel.org $ echo __OSIF_CASE_00__\n__OSIF_CASE_00__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "canonical_source_version",
+        "input": "version",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "version\nJash BasmOS native profile / canonical source 082ab18b1770ae32c54ab34acf87666935416090 / i386 OSIF v1\nfh@nanokernel.org $ echo __OSIF_CASE_01__\n__OSIF_CASE_01__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "argv_quotes_empty_argument",
+        "input": "argv \"a b\" '' x",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "argv \"a b\" '' x\n[\"a b\",\"\",\"x\"]\nfh@nanokernel.org $ echo __OSIF_CASE_02__\n__OSIF_CASE_02__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "echo_json_array",
+        "input": "echo --json one \"two words\" ''",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo --json one \"two words\" ''\n[\"one\",\"two words\",\"\"]\nfh@nanokernel.org $ echo __OSIF_CASE_03__\n__OSIF_CASE_03__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "echo_literal_arguments",
+        "input": "echo alpha 'two words' '' omega",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo alpha 'two words' '' omega\nalpha two words  omega\nfh@nanokernel.org $ echo __OSIF_CASE_04__\n__OSIF_CASE_04__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "quoted_operators_stay_literal",
+        "input": "argv 'a|b' 'x;y' '$HOME'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "argv 'a|b' 'x;y' '$HOME'\n[\"a|b\",\"x;y\",\"$HOME\"]\nfh@nanokernel.org $ echo __OSIF_CASE_05__\n__OSIF_CASE_05__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "strict_json_nested_types",
+        "input": "json '{\"name\":\"BasmOS\",\"n\":7,\"ratio\":3.125,\"exponent\":6.02e2,\"ok\":true,\"a\":[null,false]}'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"name\":\"BasmOS\",\"n\":7,\"ratio\":3.125,\"exponent\":6.02e2,\"ok\":true,\"a\":[null,false]}'\n{\"name\":\"BasmOS\",\"n\":7,\"ratio\":3.125,\"exponent\":6.02e2,\"ok\":true,\"a\":[null,false]}\nfh@nanokernel.org $ echo __OSIF_CASE_06__\n__OSIF_CASE_06__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "strict_json_escapes",
+        "input": "json '{\"s\":\"line\\nquote\\\" slash\\\\ zero\\u0000\"}'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"s\":\"line\\nquote\\\" slash\\\\ zero\\u0000\"}'\n{\"s\":\"line\\u000aquote\\\" slash\\\\ zero\\u0000\"}\nfh@nanokernel.org $ echo __OSIF_CASE_07__\n__OSIF_CASE_07__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "reject_duplicate_json_keys",
+        "input": "json '{\"a\":1,\"a\":2}'\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"a\":1,\"a\":2}'\njson: invalid input errno=17\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __OSIF_CASE_08__\n__OSIF_CASE_08__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "reject_json_trailing_content",
+        "input": "json '{\"a\":1}x'\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"a\":1}x'\njson: invalid input errno=22\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __OSIF_CASE_09__\n__OSIF_CASE_09__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "osif_actual_capabilities",
+        "input": "osif",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "osif\n{\"target\":\"basmos\",\"abi\":1,\"kernel_caps\":15,\"arena_bytes\":2097152,\"osinfo_caps\":1,\"console\":true,\"ticks\":true,\"filesystem\":false,\"process_spawn\":false,\"ipc\":false,\"network\":false,\"profile\":\"canonical-reduced\"}\nfh@nanokernel.org $ echo __OSIF_CASE_10__\n__OSIF_CASE_10__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "osif_unsupported_and_zero_length",
+        "input": "osif test",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "osif test\nosif-test open=-38 unknown=-38 zero_write=0\nfh@nanokernel.org $ echo __OSIF_CASE_11__\n__OSIF_CASE_11__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "osinfo_identity",
+        "input": "uname",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "uname\nBasmOS osif-1 i386\nfh@nanokernel.org $ echo __OSIF_CASE_12__\n__OSIF_CASE_12__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ticks_command",
+        "input": "ticks",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ticks\nticks=24\nfh@nanokernel.org $ echo __OSIF_CASE_13__\n__OSIF_CASE_13__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ticks_advance",
+        "input": "ticks",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ticks\nticks=29\nfh@nanokernel.org $ echo __OSIF_CASE_14__\n__OSIF_CASE_14__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "byte_zero_output",
+        "input": "byte 0",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "byte 0\nbyte[\u0000] value=0\nfh@nanokernel.org $ echo __OSIF_CASE_15__\n__OSIF_CASE_15__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "false_status",
+        "input": "false\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "false\nfh@nanokernel.org $ status\nstatus=1\nfh@nanokernel.org $ echo __OSIF_CASE_16__\n__OSIF_CASE_16__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "true_status",
+        "input": "true\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "true\nfh@nanokernel.org $ status\nstatus=0\nfh@nanokernel.org $ echo __OSIF_CASE_17__\n__OSIF_CASE_17__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "unknown_command_status",
+        "input": "no_such_command\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "no_such_command\njash: unavailable command: no_such_command\nfh@nanokernel.org $ status\nstatus=127\nfh@nanokernel.org $ echo __OSIF_CASE_18__\n__OSIF_CASE_18__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "reject_unquoted_pipeline",
+        "input": "echo left | echo right\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo left | echo right\njash: unsupported syntax or unclosed quote; command discarded\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __OSIF_CASE_19__\n__OSIF_CASE_19__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "reject_unclosed_quote",
+        "input": "echo 'unfinished\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo 'unfinished\njash: unsupported syntax or unclosed quote; command discarded\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __OSIF_CASE_20__\n__OSIF_CASE_20__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_backspace",
+        "input": "echo worlX\u007fd",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo worlXfh@nanokernel.org $ echo world\nworld\nfh@nanokernel.org $ echo __OSIF_CASE_21__\n__OSIF_CASE_21__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_left_insert",
+        "input": "echo ac\u001b[Db",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo acfh@nanokernel.org $ echo acfh@nanokernel.org $ echo abc\nabc\nfh@nanokernel.org $ echo __OSIF_CASE_22__\n__OSIF_CASE_22__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_home_end_colour_width",
+        "input": "cho ome\u001b[He\u001b[Fga",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "cho omefh@nanokernel.org $ cho omefh@nanokernel.org $ echo omefh@nanokernel.org $ echo omega\nomega\nfh@nanokernel.org $ echo __OSIF_CASE_23__\n__OSIF_CASE_23__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_delete_colour_width",
+        "input": "echo abXc\u001b[D\u001b[D\u001b[3~",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo abXcfh@nanokernel.org $ echo abXcfh@nanokernel.org $ echo abXcfh@nanokernel.org $ echo abc\nabc\nfh@nanokernel.org $ echo __OSIF_CASE_24__\n__OSIF_CASE_24__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_ctrl_u",
+        "input": "echo discarded\u0015echo rebuilt",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo discardedfh@nanokernel.org $ echo rebuilt\nrebuilt\nfh@nanokernel.org $ echo __OSIF_CASE_25__\n__OSIF_CASE_25__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_previous_line",
+        "input": "echo recalled\r\u001b[A",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo recalled\nrecalled\nfh@nanokernel.org $ fh@nanokernel.org $ echo recalled\nrecalled\nfh@nanokernel.org $ echo __OSIF_CASE_26__\n__OSIF_CASE_26__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "crlf_single_command",
+        "input": "echo crlf\r\nstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo crlf\ncrlf\nfh@nanokernel.org $ status\nstatus=0\nfh@nanokernel.org $ echo __OSIF_CASE_27__\n__OSIF_CASE_27__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "oversize_line_discarded",
+        "input": "echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\njash: line too long; command discarded\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __OSIF_CASE_28__\n__OSIF_CASE_28__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "clear_sequence",
+        "input": "clear",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "clear\nfh@nanokernel.org $ echo __OSIF_CASE_29__\n__OSIF_CASE_29__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_single_context_observed_privilege",
+        "input": "ps --json",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps --json\n{\"model\":\"fixed-contexts\",\"abi\":1,\"shared_arena\":false,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":68}]}\nfh@nanokernel.org $ echo __OSIF_CASE_30__\n__OSIF_CASE_30__\nfh@nanokernel.org $ "
+      }
+    ],
+    "qemu_version": {
+      "qemu": {
+        "micro": 2,
+        "minor": 2,
+        "major": 8
+      },
+      "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+    },
+    "serial_bytes": 8399,
+    "idle_ticks": [
+      2,
+      10
+    ],
+    "exit_status": 7,
+    "exit_registers": "\r\nCPU#0\r\nEAX=00000004 EBX=00000407 ECX=00000001 EDX=00000001\r\nESI=00000000 EDI=00000000 EBP=001ff4b8 ESP=00000fec\r\nEIP=00007d4e EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+    "normalization": "ANSI CSI sequences and CR removed; NUL escaped in text copy; raw bytes retained"
+  },
+  "initial_attempt_error": "TimeoutError(\"Jash native prompt missing: b'BJash BasmOS native profile\\\\nCanonical editor + argv + strict JSON. Type help.\\\\n\\\\x1b[1;36mfh\\\\x1b[0;37m@\\\\x1b[1;32mnanokernel.org\\\\x1b[0m $ '\")",
+  "resume": {
+    "reason": "Wire.wait strips ANSI; corrected startup wait to visible prompt, kept raw SGR assertion",
+    "repeated": "shell phase only",
+    "reused": "unchanged frozen kernel/module and passing ABI/loader/privilege phases",
+    "initial_report": "report.json"
+  }
+}

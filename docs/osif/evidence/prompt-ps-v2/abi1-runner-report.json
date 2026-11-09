@@ -1,0 +1,65 @@
+{
+  "pass": true,
+  "abi": 1,
+  "executor": "QEMU TCG",
+  "physical_hardware": false,
+  "checks": {
+    "real_module_emits_colour_prompt": true,
+    "real_module_visible_identity": true,
+    "real_exit0_returns0": true,
+    "real_exit0_marker4": true,
+    "real_exit7_returns7": true,
+    "real_exit7_marker4": true,
+    "echo_executed": true,
+    "json_executed": true,
+    "legacy_prompt_still_receives_input": true,
+    "ud2_not_reported_exit0": true,
+    "ud2_marker0_abnormal": true,
+    "ud2_fixture_reached_prompt": true,
+    "fault_matches_exit_register_signature": true,
+    "runner_unchanged_during_test": true
+  },
+  "artifacts": {
+    "kernel": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif/basmos-osif.bin",
+      "bytes": 512,
+      "sha256": "bc03b8f742a5eb7d04080f52d662fcf7947685fd73c0f88fa0be52493584d62a"
+    },
+    "jash": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos/jash-basmos.bin",
+      "bytes": 14414,
+      "sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9"
+    },
+    "runner": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/tools/run_osif_jash.py",
+      "bytes": 11757,
+      "sha256": "c86666d78da0aba7556acf6e162b12d2232bfa1fa9de87ef54327582c2dcbbc4"
+    }
+  },
+  "runs": {
+    "real_exit0": {
+      "returncode": 0,
+      "stdout": "Jash BasmOS native profile\nCanonical editor + argv + strict JSON. Type help.\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ exit 0\nJash BasmOS exit=0\n",
+      "stderr": "\n[BasmOS] guest OSIF exit: status=0; memory[0xB08]=0; exit_marker=4; halted=yes.\n"
+    },
+    "real_exit7": {
+      "returncode": 7,
+      "stdout": "Jash BasmOS native profile\nCanonical editor + argv + strict JSON. Type help.\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ echo OSIF marker ready\nOSIF marker ready\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ json '{\"demo\":\"BasmOS\",\"n\":0,\"ok\":true}'\n{\"demo\":\"BasmOS\",\"n\":0,\"ok\":true}\n\u001b[1;36mfh\u001b[0;37m@\u001b[1;32mnanokernel.org\u001b[0m $ exit 7\nJash BasmOS exit=7\n",
+      "stderr": "\n[BasmOS] guest OSIF exit: status=7; memory[0xB08]=7; exit_marker=4; halted=yes.\n"
+    },
+    "legacy_prompt_input": {
+      "returncode": 0,
+      "stdout": "jash[basmos]> ",
+      "stderr": "\n[BasmOS] guest OSIF exit: status=0; memory[0xB08]=0; exit_marker=4; halted=yes.\n"
+    },
+    "ud2_collision": {
+      "returncode": 125,
+      "stdout": "jash[basmos]> ",
+      "stderr": "\n[BasmOS] abnormal guest halt: memory[0xB08]=0; exit_marker=0; verified OSIF exit absent.\n"
+    }
+  },
+  "fault_fixture_sha256": "44f42e5ac7c5bec57c554cfad4b8646e4dd6df8a56d1fd4ae7775302f8dc0621",
+  "legacy_fixture_sha256": "f515ebb837c454124954b331cfb07dd2050d3c8a89fd85265d7a309cac60500a",
+  "fault_registers": "\r\nCPU#0\r\nEAX=00000004 EBX=00000000 ECX=00000000 EDX=000003f8\r\nESI=00000036 EDI=00100036 EBP=00000000 ESP=00000fec\r\nEIP=00007d4e EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcd 0000002f\r\nIDT=     00000500 00000407\r\nCR0=80000011 CR2=00000000 CR3=00001000 CR4=00000010\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+  "fault_status_marker_hex": "0000"
+}

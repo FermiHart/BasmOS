@@ -1,0 +1,30 @@
+{
+  "kernel_sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a",
+  "kernel_bytes": 512,
+  "jash_mt_bytes": 16948,
+  "jash_mt_sha256": "e79238bc03aabe5004834d4cade3cc6422dd53736631196874b1b524672f65f1",
+  "jash_abi1_bytes": 14414,
+  "jash_abi1_sha256": "1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9",
+  "jash_parent_commit": "5a069316e1330b3a1c9b3508492e7e5a57fbc648",
+  "kernel_source_commit": "42a46df7697c15cc9dc1707a352fa18756bf2d4e",
+  "tests": {
+    "tests/osif_basmos_qemu.py": "952971caec41dcba8f0176e37549a9e401125fc63399bc087ea67bcabb306d5b",
+    "tests/osif_mt_qemu.py": "57dc72611036e5f262728319f50506551a1cd40bb6e6252de284b79ca340798c",
+    "tests/osif_runner_regression.py": "8a9e7c89e313950cc3191aaec52d61797987de5a23d08e160f65b5b3b238a14c",
+    "tools/run_osif_jash.py": "c86666d78da0aba7556acf6e162b12d2232bfa1fa9de87ef54327582c2dcbbc4"
+  },
+  "jash_sources": {
+    "basmos.h": "02ab7a04afd82176b6b4683b66b63d89e8cd644b7ec69bd67a6e1a7520641546",
+    "profile_entry.c": "c1a8f269afb3186970c4cae2973adf8d0480a5104cd6506b48e3fa54b4dd997b",
+    "mt.c": "9eb921fe32cf9f0470b436a87580da997e8c14169368efe7c895ecd73f75925c"
+  },
+  "qualification": {
+    "mt_shell_cases": 34,
+    "abi1_shell_cases": 31,
+    "runner_checks_per_abi": 14,
+    "demo_commands": 18
+  },
+  "initial_harness_issue": "The first shell pass searched a raw ANSI prompt through Wire.wait(), which already strips ANSI. Corrected to the visible prompt and reran only shell phases against the frozen artifacts. Original probe results and failed reports are retained.",
+  "scope": "Real QEMU TCG execution, fixed-context inspection, ANSI editing, IPC and 512-byte budget. No new claim of memory containment or physical-hardware qualification.",
+  "jash_commit": "aa426513e9c9e55652e640ab049c2e9875eab2aa"
+}

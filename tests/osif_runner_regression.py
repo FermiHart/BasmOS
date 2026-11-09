@@ -8,7 +8,8 @@ Its non-error-code exception leaves the same CPL0 stack shape as int 0x80.
 Only the kernel-written exit marker reliably distinguishes that fault from
 normal exit zero. The ABI 2 variant provides a harmless peer at offset 4 and
 uses EAX=0, the post-dispatch exit value. All modules enter through the real
-serial loader in QEMU.
+serial loader in QEMU. A positive legacy-prompt fixture waits for the first
+command byte before exit zero, while the real Jash requires its ANSI prompt.
 """
 import argparse
 import hashlib
@@ -19,7 +20,7 @@ import subprocess
 import sys
 import tempfile
 
-from osif_basmos_qemu import OsifQmp, Wire, halt_state, upload
+from osif_basmos_qemu import OsifQmp, Wire, PROMPT, VISIBLE_PROMPT, halt_state, plain, upload
 
 ROOT = Path(__file__).resolve().parents[1]
 FAULT_SOURCE = r'''/* SPDX-License-Identifier: BSD-3-Clause */
@@ -68,6 +69,29 @@ def fault_source(abi):
             .replace("movl $4, %eax", "xorl %eax, %eax"))
 
 
+def legacy_prompt_source(abi):
+    """A real legacy-prompt guest that must receive input before exit zero."""
+    source = fault_source(abi)
+    trap = "int $0x80" if abi == 1 else "int $0x21"
+    return (source.split("fault:\n", 1)[0] + f'''fault:
+    movl $2, %eax
+    {trap}
+    cmpl $-11, %eax
+    je fault
+    cmpl $101, %eax
+    jne bad_input
+    xorl %ebx, %ebx
+    jmp do_exit
+bad_input:
+    movl $99, %ebx
+do_exit:
+    movl $4, %eax
+    {trap}
+    jmp do_exit
+prompt:
+''' + source.split("prompt:\n", 1)[1])
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--kernel", type=Path, required=True)
@@ -102,11 +126,19 @@ def main():
             report["fault_fixture_sha256"] = sha(fault.read_bytes())
             (output / "fault-exit-collision.S").write_text(fault_source(args.abi))
             (output / "fault-exit-collision.bin").write_bytes(fault.read_bytes())
+            legacy_source, legacy_obj, legacy = (temporary / ("legacy." + s) for s in ("S", "o", "bin"))
+            legacy_source.write_text(legacy_prompt_source(args.abi))
+            subprocess.run(["as", "--32", "-o", str(legacy_obj), str(legacy_source)], check=True)
+            subprocess.run(["ld", "-m", "elf_i386", "-Ttext", "0", "--oformat", "binary",
+                            "-o", str(legacy), str(legacy_obj)], check=True)
+            report["legacy_fixture_sha256"] = sha(legacy.read_bytes())
+            (output / "legacy-prompt-input.S").write_text(legacy_prompt_source(args.abi))
+            (output / "legacy-prompt-input.bin").write_bytes(legacy.read_bytes())
             commands0, commands7 = temporary / "exit0.txt", temporary / "exit7.txt"
             commands0.write_text("exit 0\n")
             commands7.write_text("echo OSIF marker ready\njson '{\"demo\":\"BasmOS\",\"n\":0,\"ok\":true}'\nexit 7\n")
             cases = (("real_exit0", module, commands0), ("real_exit7", module, commands7),
-                     ("ud2_collision", fault, commands0))
+                     ("legacy_prompt_input", legacy, commands0), ("ud2_collision", fault, commands0))
             for name, image, commands in cases:
                 command = [sys.executable, str(runner), "--kernel", str(kernel),
                            "--abi", str(args.abi),
@@ -120,13 +152,19 @@ def main():
                     "stderr": result.stderr.decode("utf-8", "backslashreplace")}
 
             zero, seven, negative = (report["runs"][k] for k in ("real_exit0", "real_exit7", "ud2_collision"))
+            legacy_run = report["runs"]["legacy_prompt_input"]
             report["checks"].update({
+                "real_module_emits_colour_prompt": PROMPT.decode("ascii") in zero["stdout"],
+                "real_module_visible_identity": VISIBLE_PROMPT in plain(zero["stdout"].encode()),
                 "real_exit0_returns0": zero["returncode"] == 0,
                 "real_exit0_marker4": "memory[0xB08]=0; exit_marker=4; halted=yes." in zero["stderr"],
                 "real_exit7_returns7": seven["returncode"] == 7,
                 "real_exit7_marker4": "memory[0xB08]=7; exit_marker=4; halted=yes." in seven["stderr"],
                 "echo_executed": "\nOSIF marker ready\n" in seven["stdout"],
                 "json_executed": '\n{"demo":"BasmOS","n":0,"ok":true}\n' in seven["stdout"],
+                "legacy_prompt_still_receives_input": legacy_run["returncode"] == 0 and
+                    "jash[basmos]> " in legacy_run["stdout"] and
+                    "memory[0xB08]=0; exit_marker=4; halted=yes." in legacy_run["stderr"],
                 "ud2_not_reported_exit0": negative["returncode"] == 125,
                 "ud2_marker0_abnormal": "abnormal guest halt: memory[0xB08]=0; exit_marker=0; verified OSIF exit absent." in negative["stderr"],
                 "ud2_fixture_reached_prompt": "jash[basmos]> " in negative["stdout"],

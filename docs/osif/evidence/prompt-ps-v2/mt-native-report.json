@@ -1,0 +1,729 @@
+{
+  "pass": true,
+  "executor": "QEMU TCG",
+  "physical_hardware": false,
+  "pass_scope": "functional execution, preemption, IPC and byte budget; not memory containment",
+  "memory_protection_qualified": false,
+  "artifacts": {
+    "kernel": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/basmos-mt.bin",
+      "bytes": 512,
+      "sha256": "26cb19b7bebdd0074bd312287f5dc766c0a06d533ceb41043d53b13b6f6fa60a",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/basmos-mt.bin"
+    },
+    "kernel_map": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/basmos-mt.map",
+      "bytes": 502,
+      "sha256": "bd5e6bb7e34205353bf2589e671b27a945a73f582e22fd5a70f33b776a944a1d",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/basmos-mt.map"
+    },
+    "independent_probe": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/mt-probe.bin",
+      "bytes": 4124,
+      "sha256": "161d8ae8890e0f9fac01964352c3e67d6860c32d5e2b99bc46663a281dba5fa5"
+    },
+    "jash": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/jash-basmos-mt.bin",
+      "bytes": 16948,
+      "sha256": "e79238bc03aabe5004834d4cade3cc6422dd53736631196874b1b524672f65f1",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos-mt/jash-basmos.bin"
+    },
+    "jash_elf": {
+      "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/jash-basmos-mt.elf",
+      "bytes": 25024,
+      "sha256": "2e5f54d552109a7d71b97eda43332533e40162b5266e32833479862c9f31f6fa",
+      "source_path": "/dev/shm/basmos-512-v2-d2babe6b8709/Jash-basmos/build-basmos-mt/jash-basmos.elf"
+    }
+  },
+  "checks": {
+    "hard512_footprint": true,
+    "native_abi_and_preemption": true,
+    "loader_bounds": true,
+    "both_native_cpl3_contexts": true,
+    "faults_not_normal_exit": true,
+    "real_jash_and_peer": true
+  },
+  "profile": "two preempted CPL3 contexts sharing one 2 MiB user arena; two capacity-one named byte mailboxes",
+  "footprint": {
+    "pass": true,
+    "checks": {
+      "kernel_is_exactly512": true,
+      "boot_signature55aa": true,
+      "payload_within510": true,
+      "padding_is_zero": true,
+      "no_privileged_instructions_in_jash_text": true
+    },
+    "payload_bytes": 507,
+    "padding_bytes": 3,
+    "signature_bytes": 2,
+    "module_instruction_audit": {
+      "pass": true,
+      "forbidden_instructions": [],
+      "scope": "objdump -d of executable sections in the linked Jash ELF; not a proof about arbitrary hostile code"
+    },
+    "scope": "All supplied supervisor implementation is this boot sector. The separately loaded shell is entered at CPL3. Ordinary BIOS initialization and emulated hardware are not counted as project kernel bytes."
+  },
+  "abi": {
+    "pass": true,
+    "checks": {
+      "abi2_caps59_arena2m": true,
+      "both_contexts_preserve_all_gprs_segments_and_df": true,
+      "main_cpu_loop_progress_without_syscall": true,
+      "peer_cpu_loop_progress_without_syscall": true,
+      "peer_context_error_zero": true,
+      "callee_saved_registers_and_enosys": true,
+      "mailbox_empty_distinct_from_nul": true,
+      "full_rejected_without_overwrite": true,
+      "channels_independent": true,
+      "all256_values_both_channels_recovery": true,
+      "channel_selector_bounded_to_bit0": true,
+      "actual512_cross_context_roundtrips": true,
+      "requested_native_rx_nul": true,
+      "native_rx_nul_then_empty": true,
+      "native_tx_nul": true,
+      "probe_finished": true,
+      "no_failure_marker": true,
+      "exit_status7_marker4": true,
+      "exit_kernel_halted": true
+    },
+    "counters": {
+      "main_loops": 329311,
+      "peer_loops": 347639,
+      "peer_error": 0,
+      "peer_received": 512
+    },
+    "kernel_state_hex": "000000001c10000007040000bc0f0000",
+    "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000407 ECX=33333333 EDX=000003f8\r\nESI=000006c7 EDI=89abcdef EBP=00000200 ESP=000017ec\r\nEIP=00007d34 EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+    "qemu_version": {
+      "qemu": {
+        "micro": 2,
+        "minor": 2,
+        "major": 8
+      },
+      "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+    },
+    "implementation": "Independent direct-int21 assembly client; no Jash wrapper; two capacity-one named mailboxes.",
+    "capacity_per_channel": 1,
+    "channels": 2,
+    "fifo255_claimed": false,
+    "exclusive_cycles": 512,
+    "cross_context_roundtrips": 512
+  },
+  "loader": {
+    "pass": true,
+    "cases": [
+      {
+        "length": 0,
+        "expected": "reject before payload store",
+        "observed_length": 0,
+        "pass": true,
+        "prefix_unchanged": true,
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=ffffffff EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d34 EFL=00000086 [--S--P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 1769473,
+        "expected": "reject before payload store",
+        "observed_length": 1769473,
+        "pass": true,
+        "prefix_unchanged": true,
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=001b0000 EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d34 EFL=00000012 [----A--] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 4294967295,
+        "expected": "reject before payload store",
+        "observed_length": 4294967295,
+        "pass": true,
+        "prefix_unchanged": true,
+        "halt_registers": "\r\nCPU#0\r\nEAX=000000ff EBX=00000a00 ECX=fffffffe EDX=000003f8\r\nESI=00000000 EDI=00000b08 EBP=00000000 ESP=00001000\r\nEIP=00007d34 EFL=00000096 [--S-AP-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nFS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nGS =0000 00000000 0000ffff 00009300 DPL=0 DS16 [-WA]\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+      },
+      {
+        "length": 1,
+        "expected": "accept complete transfer and reach launch setup",
+        "pass": true,
+        "observed_length": 1,
+        "registers": {
+          "eax": 144,
+          "ecx": 0,
+          "edx": 1016,
+          "ebx": 2560,
+          "esp": 4096,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048577,
+          "eip": 31962,
+          "eflags": 2,
+          "cs": 8,
+          "ss": 16,
+          "ds": 16,
+          "es": 16,
+          "fs": 0,
+          "gs": 0
+        }
+      },
+      {
+        "length": 1769472,
+        "expected": "accept header and enter payload loop",
+        "pass": true,
+        "observed_length": 1769472,
+        "registers": {
+          "eax": 0,
+          "ecx": 1769472,
+          "edx": 1016,
+          "ebx": 2560,
+          "esp": 4096,
+          "ebp": 0,
+          "esi": 0,
+          "edi": 1048576,
+          "eip": 31954,
+          "eflags": 22,
+          "cs": 8,
+          "ss": 16,
+          "ds": 16,
+          "es": 16,
+          "fs": 0,
+          "gs": 0
+        },
+        "full_size_payload_transferred": false
+      }
+    ],
+    "maximum_image_bytes": 1769472,
+    "maximum_length_full_payload_transfer_qualified": false
+  },
+  "contexts": {
+    "pass": true,
+    "checks": {
+      "main_actual_cpl3": true,
+      "main_entry_offset0": true,
+      "main_stack1ffff0": true,
+      "peer_actual_cpl3": true,
+      "peer_entry_offset4": true,
+      "peer_stack1bfff0": true,
+      "both_iopl0_if1_df0_initial": true,
+      "both_ds_es_ss23_initial": true,
+      "both_fs_gs_null_initial": true,
+      "shared_user_code_arena": true,
+      "shared_user_data_arena": true,
+      "paging_disabled": true,
+      "module_loaded_exactly": true,
+      "main_tss_kernel_stack1800": true,
+      "peer_tss_kernel_stack1000": true,
+      "tss_ss0_kernel_data": true,
+      "io_bitmap_beyond_tss": true,
+      "int21_gate_interrupt_dpl3": true,
+      "irq0_gate_interrupt_dpl0": true,
+      "jash_prompt_actual_cpl3": true,
+      "jash_prompt_iopl0": true
+    },
+    "main": {
+      "registers": {
+        "eax": 0,
+        "ecx": 0,
+        "edx": 1016,
+        "ebx": 2560,
+        "esp": 2097136,
+        "ebp": 0,
+        "esi": 0,
+        "edi": 1065524,
+        "eip": 0,
+        "eflags": 514,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=00104234 EBP=00000000 ESP=001ffff0\r\nEIP=00000000 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "peer": {
+      "registers": {
+        "eax": 0,
+        "ecx": 0,
+        "edx": 1016,
+        "ebx": 2560,
+        "esp": 1834992,
+        "ebp": 0,
+        "esi": 0,
+        "edi": 1065524,
+        "eip": 4,
+        "eflags": 514,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=00104234 EBP=00000000 ESP=001bfff0\r\nEIP=00000004 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "prompt": {
+      "registers": {
+        "eax": 2094400,
+        "ecx": 1,
+        "edx": 0,
+        "ebx": 2560,
+        "esp": 2094300,
+        "ebp": 2097128,
+        "esi": 0,
+        "edi": 150252,
+        "eip": 9601,
+        "eflags": 582,
+        "cs": 27,
+        "ss": 35,
+        "ds": 35,
+        "es": 35,
+        "fs": 0,
+        "gs": 0
+      },
+      "monitor": "\r\nCPU#0\r\nEAX=001ff540 EBX=00000a00 ECX=00000001 EDX=00000000\r\nESI=00000000 EDI=00024aec EBP=001fffe8 ESP=001ff4dc\r\nEIP=00002581 EFL=00000246 [---Z-P-] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n"
+    },
+    "loaded_bytes": 16948,
+    "loaded_sha256": "e79238bc03aabe5004834d4cade3cc6422dd53736631196874b1b524672f65f1",
+    "debugger_memory_writes": false,
+    "debugger_register_writes": false,
+    "guest_instruction_bytes_modified": false
+  },
+  "faults": {
+    "pass": true,
+    "cases": [
+      {
+        "name": "ud2_exit_collision",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000000 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000e EBP=00000000 ESP=000017ec\r\nEIP=00007d34 EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/ud2_exit_collision.bin",
+          "bytes": 14,
+          "sha256": "10f56c30d8b08b75aa05feb881e08d580b634252715e5fd802bd4115e1e7301c"
+        },
+        "pass": true
+      },
+      {
+        "name": "privileged_cli",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=00100009 EBP=00000000 ESP=000017e8\r\nEIP=00007d34 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/privileged_cli.bin",
+          "bytes": 9,
+          "sha256": "5f4d8c859efd953f64fc276d96d59146e203bb96d5db9e1fb20dde78110c455d"
+        },
+        "pass": true
+      },
+      {
+        "name": "privileged_hlt",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=00100009 EBP=00000000 ESP=000017e8\r\nEIP=00007d34 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/privileged_hlt.bin",
+          "bytes": 9,
+          "sha256": "b2969d1738da55652df9b6cfc48674a512a3989d298f7cc661c9d5f8d8eee10d"
+        },
+        "pass": true
+      },
+      {
+        "name": "privileged_port_io",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000a EBP=00000000 ESP=000017e8\r\nEIP=00007d34 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/privileged_port_io.bin",
+          "bytes": 10,
+          "sha256": "821571d17d18be61cb59f3514428339ba7de4117b237f8918ef89bc0cd65ea70"
+        },
+        "pass": true
+      },
+      {
+        "name": "kernel_data_selector",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000010 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000e EBP=00000000 ESP=000017e8\r\nEIP=00007d34 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/kernel_data_selector.bin",
+          "bytes": 14,
+          "sha256": "a8f65c49099b0315606a0e65bbbb2ecbdce35ec4ab5a3c060ed0a7739d44faed"
+        },
+        "pass": true
+      },
+      {
+        "name": "forged_timer_interrupt",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000a EBP=00000000 ESP=000017e8\r\nEIP=00007d34 EFL=00000002 [-------] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/forged_timer_interrupt.bin",
+          "bytes": 10,
+          "sha256": "f1879b7cbe5e92eed197f06405d0e8d6156928f526efe5968f0a77a9f8e28b5c"
+        },
+        "pass": true
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "data_segment_limit",
+        "status_marker_hex": "0000",
+        "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000d EBP=00000000 ESP=001ffff0\r\nEIP=00000006 EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+        "fixture": {
+          "path": "/dev/shm/basmos-512-v2-d2babe6b8709/BasmOS/build/osif-mt/prompt-ps-evidence/data_segment_limit.bin",
+          "bytes": 13,
+          "sha256": "150503d88e1fc8570b15f52c9818907d2c3b8162d23931714452fd8c80bb2d49"
+        },
+        "status": "observed_no_trap",
+        "protection_qualified": false,
+        "expected": "DS load at offset 0x200000 raises #GP beyond configured limit 0x1fffff",
+        "included_in_functional_pass": false,
+        "offending_load_completed": true,
+        "post_load_observation": {
+          "method": "fresh serial boot; hardware breakpoint immediately after the offending MOV",
+          "load_offset": 6,
+          "after_load_offset": 11,
+          "load_instruction_hex": "a100002000",
+          "registers": {
+            "eax": 0,
+            "ecx": 0,
+            "edx": 1016,
+            "ebx": 2560,
+            "esp": 2097136,
+            "ebp": 0,
+            "esi": 0,
+            "edi": 1048589,
+            "eip": 11,
+            "eflags": 514,
+            "cs": 27,
+            "ss": 35,
+            "ds": 35,
+            "es": 35,
+            "fs": 0,
+            "gs": 0
+          },
+          "monitor": "\r\nCPU#0\r\nEAX=00000000 EBX=00000a00 ECX=00000000 EDX=000003f8\r\nESI=00000000 EDI=0010000d EBP=00000000 ESP=001ffff0\r\nEIP=0000000b EFL=00000202 [-------] CPL=3 II=0 A20=1 SMM=0 HLT=0\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =001b 00100000 001fffff 00c0fa00 DPL=3 CS32 [-R-]\r\nSS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+          "debugger_memory_writes": false,
+          "debugger_register_writes": false,
+          "guest_instruction_bytes_modified": false
+        }
+      }
+    ],
+    "memory_boundary_protection_qualified": false,
+    "scope": "Required cases qualify privilege instructions and faults versus normal exit. Segment-boundary enforcement is retained as a separate explicit diagnostic; a functional pass does not qualify memory containment. No process recovery or mutual task isolation is claimed."
+  },
+  "shell": {
+    "pass": true,
+    "checks": {
+      "all_command_cases": true,
+      "colour_identity_and_reset_on_real_uart": true,
+      "peer_progresses_while_prompt_idle": true,
+      "peer_progresses_during_commands": true,
+      "peer_reports_no_transport_error": true,
+      "peer_received_requests": true,
+      "exit_message": true,
+      "exit_status7": true,
+      "exit_marker4": true,
+      "exit_halts_kernel": true
+    },
+    "cases": [
+      {
+        "name": "help_has_ps_peer_and_ipc",
+        "input": "help",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "help\nJash BasmOS commands: help version echo argv json osif uname ps ticks status clear true false exit byte peer ipc\nCanonical editor/keymap/argv/JSON; literal arguments and single-command execution.\nQuoted JSON: json '{\"message\":\"hello\",\"value\":0}'\nps [--json|-j]: observe this profile's fixed contexts.\nTwo preemptive CPL3 contexts share one arena; two capacity-one byte mailboxes.\nNo filesystem, process spawn, pipelines, expansion or network in this profile.\nfh@nanokernel.org $ echo __MT_CASE_00__\n__MT_CASE_00__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "argv_quotes_empty_argument",
+        "input": "argv \"a b\" '' x",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "argv \"a b\" '' x\n[\"a b\",\"\",\"x\"]\nfh@nanokernel.org $ echo __MT_CASE_01__\n__MT_CASE_01__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "echo_json_array",
+        "input": "echo --json one \"two words\" ''",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo --json one \"two words\" ''\n[\"one\",\"two words\",\"\"]\nfh@nanokernel.org $ echo __MT_CASE_02__\n__MT_CASE_02__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "quoted_operators_literal",
+        "input": "argv 'a|b' 'x;y' '$HOME'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "argv 'a|b' 'x;y' '$HOME'\n[\"a|b\",\"x;y\",\"$HOME\"]\nfh@nanokernel.org $ echo __MT_CASE_03__\n__MT_CASE_03__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "strict_json_nested_types",
+        "input": "json '{\"n\":0,\"ratio\":3.125,\"ok\":true,\"a\":[null,false]}'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"n\":0,\"ratio\":3.125,\"ok\":true,\"a\":[null,false]}'\n{\"n\":0,\"ratio\":3.125,\"ok\":true,\"a\":[null,false]}\nfh@nanokernel.org $ echo __MT_CASE_04__\n__MT_CASE_04__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "strict_json_nul_escape",
+        "input": "json '{\"s\":\"zero\\u0000\"}'",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"s\":\"zero\\u0000\"}'\n{\"s\":\"zero\\u0000\"}\nfh@nanokernel.org $ echo __MT_CASE_05__\n__MT_CASE_05__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "strict_json_duplicate_rejected",
+        "input": "json '{\"a\":1,\"a\":2}'\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "json '{\"a\":1,\"a\":2}'\njson: invalid input errno=17\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __MT_CASE_06__\n__MT_CASE_06__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_backspace",
+        "input": "echo worlX\u007fd",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo worlXfh@nanokernel.org $ echo world\nworld\nfh@nanokernel.org $ echo __MT_CASE_07__\n__MT_CASE_07__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_left_insert",
+        "input": "echo ac\u001b[Db",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo acfh@nanokernel.org $ echo acfh@nanokernel.org $ echo abc\nabc\nfh@nanokernel.org $ echo __MT_CASE_08__\n__MT_CASE_08__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_home_end_colour_width",
+        "input": "cho ome\u001b[He\u001b[Fga",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "cho omefh@nanokernel.org $ cho omefh@nanokernel.org $ echo omefh@nanokernel.org $ echo omega\nomega\nfh@nanokernel.org $ echo __MT_CASE_09__\n__MT_CASE_09__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_delete_colour_width",
+        "input": "echo abXc\u001b[D\u001b[D\u001b[3~",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo abXcfh@nanokernel.org $ echo abXcfh@nanokernel.org $ echo abXcfh@nanokernel.org $ echo abc\nabc\nfh@nanokernel.org $ echo __MT_CASE_10__\n__MT_CASE_10__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_ctrl_u",
+        "input": "echo discarded\u0015echo rebuilt",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo discardedfh@nanokernel.org $ echo rebuilt\nrebuilt\nfh@nanokernel.org $ echo __MT_CASE_11__\n__MT_CASE_11__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "editor_previous_line",
+        "input": "echo recalled\r\u001b[A",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo recalled\nrecalled\nfh@nanokernel.org $ fh@nanokernel.org $ echo recalled\nrecalled\nfh@nanokernel.org $ echo __MT_CASE_12__\n__MT_CASE_12__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "reject_unquoted_pipeline",
+        "input": "echo left | echo right\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "echo left | echo right\njash: unsupported syntax or unclosed quote; command discarded\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __MT_CASE_13__\n__MT_CASE_13__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "false_status",
+        "input": "false\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "false\nfh@nanokernel.org $ status\nstatus=1\nfh@nanokernel.org $ echo __MT_CASE_14__\n__MT_CASE_14__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "true_status",
+        "input": "true\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "true\nfh@nanokernel.org $ status\nstatus=0\nfh@nanokernel.org $ echo __MT_CASE_15__\n__MT_CASE_15__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "native_tx_nul",
+        "input": "byte 0",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "byte 0\nbyte[\u0000] value=0\nfh@nanokernel.org $ echo __MT_CASE_16__\n__MT_CASE_16__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "osif_two_context_profile",
+        "input": "osif",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "osif\n{\"target\":\"basmos\",\"abi\":2,\"kernel_caps\":59,\"arena_bytes\":2097152,\"osinfo_caps\":1,\"console\":true,\"ticks\":false,\"filesystem\":false,\"process_spawn\":false,\"ipc\":true,\"preemptive_contexts\":2,\"mailboxes\":2,\"mailbox_capacity\":1,\"shared_arena\":true,\"network\":false,\"profile\":\"canonical-reduced\"}\nfh@nanokernel.org $ echo __MT_CASE_17__\n__MT_CASE_17__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "osif_unknown_and_zero_length",
+        "input": "osif test",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "osif test\nosif-test open=-38 unknown=-38 zero_write=0\nfh@nanokernel.org $ echo __MT_CASE_18__\n__MT_CASE_18__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "peer_status",
+        "input": "peer",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "peer\n{\"progress\":364766,\"received\":0,\"last\":0,\"error\":0}\nfh@nanokernel.org $ echo __MT_CASE_19__\n__MT_CASE_19__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_table_real_contexts",
+        "input": "ps",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps\nTID CPL IOPL STATE     NAME\n0   3   0    running   jash\n1   3   0    runnable  ipc-peer\n2 fixed contexts; preemptive; shared arena\npeer: progress=364766 rx=0 error=0\nfh@nanokernel.org $ echo __MT_CASE_20__\n__MT_CASE_20__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_json_runtime_privilege",
+        "input": "ps --json",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps --json\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":47},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":384665,\"received\":0,\"last\":0,\"error\":0}]}\nfh@nanokernel.org $ echo __MT_CASE_21__\n__MT_CASE_21__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_short_json_peer_progress",
+        "input": "ps -j",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps -j\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":49},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":561820,\"received\":0,\"last\":0,\"error\":0}]}\nfh@nanokernel.org $ echo __MT_CASE_22__\n__MT_CASE_22__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_23_0",
+        "input": "ipc 0",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 0\nipc sent=0 received=0\nfh@nanokernel.org $ echo __MT_CASE_23__\n__MT_CASE_23__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_24_255",
+        "input": "ipc 255",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 255\nipc sent=255 received=255\nfh@nanokernel.org $ echo __MT_CASE_24__\n__MT_CASE_24__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_25_1",
+        "input": "ipc 1",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 1\nipc sent=1 received=1\nfh@nanokernel.org $ echo __MT_CASE_25__\n__MT_CASE_25__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_26_127",
+        "input": "ipc 127",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 127\nipc sent=127 received=127\nfh@nanokernel.org $ echo __MT_CASE_26__\n__MT_CASE_26__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_27_128",
+        "input": "ipc 128",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 128\nipc sent=128 received=128\nfh@nanokernel.org $ echo __MT_CASE_27__\n__MT_CASE_27__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_roundtrip_28_0",
+        "input": "ipc 0",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc 0\nipc sent=0 received=0\nfh@nanokernel.org $ echo __MT_CASE_28__\n__MT_CASE_28__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_observes_six_real_ipc_messages",
+        "input": "ps --json",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps --json\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":63},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":726482,\"received\":6,\"last\":0,\"error\":0}]}\nfh@nanokernel.org $ echo __MT_CASE_29__\n__MT_CASE_29__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ipc_builtin_regression",
+        "input": "ipc test",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ipc test\nipc-test bytes=32 zero=pass empty=pass\nfh@nanokernel.org $ echo __MT_CASE_30__\n__MT_CASE_30__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_observes_ipc_selftest",
+        "input": "ps --json",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps --json\n{\"model\":\"fixed-contexts\",\"abi\":2,\"shared_arena\":true,\"tasks\":[{\"tid\":0,\"name\":\"jash\",\"state\":\"running\",\"cpl\":3,\"iopl\":0,\"commands\":67},{\"tid\":1,\"name\":\"ipc-peer\",\"state\":\"runnable\",\"cpl\":3,\"iopl\":0,\"progress\":1370660,\"received\":38,\"last\":234,\"error\":0}]}\nfh@nanokernel.org $ echo __MT_CASE_31__\n__MT_CASE_31__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ps_rejects_unknown_option",
+        "input": "ps --bogus\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ps --bogus\nusage: ps [--json|-j]\nfh@nanokernel.org $ status\nstatus=2\nfh@nanokernel.org $ echo __MT_CASE_32__\n__MT_CASE_32__\nfh@nanokernel.org $ "
+      },
+      {
+        "name": "ticks_explicitly_unsupported",
+        "input": "ticks\rstatus",
+        "pass": true,
+        "completed": true,
+        "predicate_error": null,
+        "response": "ticks\nticks: unavailable\nfh@nanokernel.org $ status\nstatus=125\nfh@nanokernel.org $ echo __MT_CASE_33__\n__MT_CASE_33__\nfh@nanokernel.org $ "
+      }
+    ],
+    "qemu_version": {
+      "qemu": {
+        "micro": 2,
+        "minor": 2,
+        "major": 8
+      },
+      "package": "Debian 1:8.2.2+ds-0ubuntu1.18"
+    },
+    "idle_before": {
+      "basmos_peer_progress": 0,
+      "basmos_peer_received": 0,
+      "basmos_peer_last": 0,
+      "basmos_peer_error": 0
+    },
+    "idle_after": {
+      "basmos_peer_progress": 146534,
+      "basmos_peer_received": 0,
+      "basmos_peer_last": 0,
+      "basmos_peer_error": 0
+    },
+    "busy_after": {
+      "basmos_peer_progress": 1430908,
+      "basmos_peer_received": 38,
+      "basmos_peer_last": 234,
+      "basmos_peer_error": 0
+    },
+    "exit_status_marker_hex": "0704",
+    "halt_registers": "\r\nCPU#0\r\nEAX=00000000 EBX=00000407 ECX=00000001 EDX=00000001\r\nESI=00000000 EDI=00000000 EBP=001ff4b8 ESP=000017ec\r\nEIP=00007d34 EFL=00000046 [---Z-P-] CPL=0 II=0 A20=1 SMM=0 HLT=1\r\nES =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nCS =0008 00000000 ffffffff 00cf9a00 DPL=0 CS32 [-R-]\r\nSS =0010 00000000 ffffffff 00cf9300 DPL=0 DS   [-WA]\r\nDS =0023 00100000 001fffff 00c0f300 DPL=3 DS   [-WA]\r\nFS =0000 00000000 00000000 00000000\r\nGS =0000 00000000 00000000 00000000\r\nLDT=0000 00000000 0000ffff 00008200 DPL=0 LDT\r\nTR =0028 00000a00 00000067 00008900 DPL=0 TSS32-avl\r\nGDT=     00007dcb 0000002f\r\nIDT=     00000500 0000010f\r\nCR0=00000011 CR2=00000000 CR3=00000000 CR4=00000000\r\nDR0=00000000 DR1=00000000 DR2=00000000 DR3=00000000 \r\nDR6=ffff0ff0 DR7=00000400\r\nEFER=0000000000000000\r\nFCW=037f FSW=0000 [ST=0] FTW=00 MXCSR=00001f80\r\nFPR0=0000000000000000 0000 FPR1=0000000000000000 0000\r\nFPR2=0000000000000000 0000 FPR3=0000000000000000 0000\r\nFPR4=0000000000000000 0000 FPR5=0000000000000000 0000\r\nFPR6=0000000000000000 0000 FPR7=0000000000000000 0000\r\nXMM00=0000000000000000 0000000000000000 XMM01=0000000000000000 0000000000000000\r\nXMM02=0000000000000000 0000000000000000 XMM03=0000000000000000 0000000000000000\r\nXMM04=0000000000000000 0000000000000000 XMM05=0000000000000000 0000000000000000\r\nXMM06=0000000000000000 0000000000000000 XMM07=0000000000000000 0000000000000000\r\n",
+    "serial_bytes": 8433
+  },
+  "initial_attempt_error": "TimeoutError(\"Jash prompt missing: b'BJash BasmOS native profile\\\\nCanonical editor + argv + strict JSON. Type help.\\\\n\\\\x1b[1;36mfh\\\\x1b[0;37m@\\\\x1b[1;32mnanokernel.org\\\\x1b[0m $ '\")",
+  "resume": {
+    "reason": "Wire.wait strips ANSI; corrected startup wait to visible prompt, kept raw SGR assertion",
+    "repeated": "shell phase only",
+    "reused": "unchanged frozen kernel/module and passing ABI/loader/context/fault phases",
+    "initial_report": "report.json"
+  }
+}

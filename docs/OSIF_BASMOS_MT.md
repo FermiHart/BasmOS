@@ -51,12 +51,15 @@ or terminal routines.
 The complete selected command list is:
 
 ```text
-help version echo argv json osif uname ticks status clear true false exit byte peer ipc
+help version echo argv json osif uname ps ticks status clear true false exit byte peer ipc
 ```
 
-The two new commands expose the running peer and real message exchanges:
+The native inspection and IPC commands expose the running contexts and real
+message exchanges:
 
 ```text
+ps
+ps --json
 peer
 ipc 0
 ipc 255
@@ -70,6 +73,28 @@ checks 32 exchanges, including zero and 255, and verifies that the reply
 mailbox is empty after each completed exchange. Waiting stays in user mode.
 After a transport failure or exhausted retry budget, the shell disables its
 IPC session until reboot to avoid accepting a late reply for a later request.
+
+### Native colour prompt and `ps`
+
+The module emits the visible prompt `fh@nanokernel.org $ ` with real ANSI
+SGR colours: cyan `fh`, neutral `@`, green `nanokernel.org`, and a reset
+before the command. Colours are emitted by Jash over COM1. The terminal
+runner preserves them and recognizes both this prompt and the legacy prompt.
+The canonical editor continues to count command characters, not SGR bytes.
+
+`ps` and `ps --json` (alias `ps -j`) inspect the ABI's fixed execution slots.
+They name TID 0 (`jash`) and TID 1 (`ipc-peer`), report CPL/IOPL read from
+CS/EFLAGS by each context, and expose real command/peer counters. The peer
+publishes coherent observations through two user-space buffers and a
+generation word; a preempted publisher leaves its previous snapshot readable.
+Until the peer publishes its first CPU observation, its state is `starting`
+and its privilege values are unknown. The shell is running when it takes its
+snapshot; the other fixed context is runnable, including while it polls IPC.
+
+This is a working inspection command for the two fixed contexts, not a
+dynamic POSIX process table. No new kernel syscall, supervisor extension,
+CPU percentage, private RSS or wall-clock estimate is introduced. The
+complete kernel bytes and SHA-256 remain unchanged.
 
 ## Decisions required by the 512-byte ceiling
 
@@ -98,8 +123,9 @@ appropriate. `ticks` returns an unavailable status. The peer activity counter
 is an observation of work, not a clock.
 
 The original [single-context ABI 1 profile](OSIF_BASMOS.md) remains available
-through its existing targets. Its kernel and Jash module retain their previous
-binary hashes. ABI 1's tick service and `int 0x80` gateway are unchanged.
+through its existing targets. Its kernel retains its previous binary hash;
+the shared prompt and `ps` upgrade changes the user module in both profiles.
+ABI 1's tick service and `int 0x80` gateway are unchanged.
 
 ## Build, verify and run
 
@@ -139,7 +165,7 @@ runner failure is 125. An explicit kernel exit marker distinguishes normal
 exit zero from a fault that leaves superficially similar register values.
 Ctrl-] detaches an interactive terminal and restores its terminal settings.
 
-## Recorded native qualification
+## Initial ABI 2 qualification
 
 The 2026-11-08 QEMU TCG run used these exact artifacts:
 
@@ -169,6 +195,39 @@ privileged instructions in the application text. The separate sector gate
 passed nine checks; the terminal exit regression passed eleven checks for
 ABI 2, with ABI 1 compatibility checked separately. These layers have
 different scopes and do not substitute for one another.
+
+## Colour prompt and context-inspection qualification
+
+Matching Jash upgrade: [`aa426513`](https://github.com/FermiHart/jash/commit/aa426513e9c9e55652e640ab049c2e9875eab2aa).
+
+The later prompt/`ps` upgrade uses these application artifacts with the same
+512-byte kernels. Historical artifact measurements above remain preserved.
+
+| Application artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Jash ABI 2 | 16,948 | `e79238bc03aabe5004834d4cade3cc6422dd53736631196874b1b524672f65f1` |
+| Jash ABI 1 | 14,414 | `1e924b52e34b0b4dc73443396fd245c56818b9999927d59660f779b5ef1581d9` |
+
+Native QEMU qualification passed 34 shell cases for ABI 2 and 31 for ABI 1.
+Both runner suites passed 14 checks, including the new ANSI prompt, legacy
+prompt compatibility, verified exits and fault discrimination. New checks
+exercise Home/End/Delete, `ps`, both JSON spellings, unknown-option rejection,
+observed CPL3/IOPL0 and peer progress/message counters. Hosted/static adapter
+gates also pass (86 hosted assertions for ABI 2, 69 for ABI 1). The sector
+budget was rebuilt and remained exactly 507 + 3 + 2 = 512 bytes.
+
+The first shell-phase attempt exposed a harness error: it searched a raw
+SGR-bearing prompt through `Wire.wait()`, which already strips ANSI. After
+correcting the matcher, only the shell phases were repeated against the same
+frozen artifacts. The successful independent ABI, loader, CPU and fault
+probes were retained. Both original failed reports and explicit resumed
+reports are included in [prompt/ps evidence](osif/evidence/prompt-ps-v2/).
+
+A separate fresh 18-command demo recorded the native colour prompt, `ps`
+and `ps --json`, then `ipc 0`, `ipc 255` and the 32-exchange self-test.
+The final `ps --json` reported 34 received requests, last byte 234 and error
+zero; both tasks reported CPL3/IOPL0. Raw output and CPU observations were
+captured without guest instruction patches or debugger memory writes.
 
 ## Limits of the result
 
