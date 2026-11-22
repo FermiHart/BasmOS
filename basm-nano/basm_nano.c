@@ -21,8 +21,10 @@
  *   branches:   rel8 only, with range checking
  *
  *   output:     flat binary · --map FILE|- (byte budget by symbol)
+ *               --boot-sector requires 512 bytes ending in 55 AA
  *
- * Usage: basm-nano -f bin -o out.bin [-DBEMU_CONTRACT] [--map -] in.basm
+ * Usage: basm-nano -f bin -o out.bin [-DBEMU_CONTRACT] [--map -]
+ *                 [--boot-sector] in.basm
  */
 #define _XOPEN_SOURCE 700
 #include <stdio.h>
@@ -54,6 +56,15 @@ static const char *g_file = "<command-line>";
 #define SOURCE_MAX (1024 * 1024)
 #define EXPR_DEPTH 64
 #define SYM_SLOTS 512 /* Fixed upper bound, <= 50% full; no heap allocation. */
+#if SYM_SLOTS < 2 || (SYM_SLOTS & (SYM_SLOTS - 1)) != 0
+#error "SYM_SLOTS must be a power of two"
+#endif
+#if SYM_MAX < 1 || SYM_MAX > SYM_SLOTS / 2
+#error "SYM_MAX must keep the symbol index at most half full"
+#endif
+#if SYM_MAX > USHRT_MAX
+#error "symbol indexes must fit in unsigned short"
+#endif
 static int g_expr_depth, g_unresolved, g_symbolic;
 static int g_org_seen;
 
@@ -202,9 +213,12 @@ static inline long number(const char **pp) {
         p += 2;
         const char *start = p;
         for (;;) {
-            unsigned digit = (unsigned char)*p - (unsigned)'0';
-            if (digit > 9) digit = ((unsigned char)*p | 32u) - (unsigned)'a' + 10u;
-            if (digit >= 16) break;
+            unsigned char c = (unsigned char)*p;
+            unsigned digit;
+            if (c >= '0' && c <= '9') digit = (unsigned)(c - '0');
+            else if (c >= 'a' && c <= 'f') digit = (unsigned)(c - 'a') + 10u;
+            else if (c >= 'A' && c <= 'F') digit = (unsigned)(c - 'A') + 10u;
+            else break;
             if (value > (unsigned long)LONG_MAX / 16 ||
                 (value == (unsigned long)LONG_MAX / 16 && digit > (unsigned)(LONG_MAX % 16)))
                 die("numeric literal overflow");
@@ -298,6 +312,16 @@ static inline long eval(const char *s) {
 static long signed32(long v) {
     if (v < INT32_MIN || v > (long)UINT32_MAX) die("32-bit immediate out of range");
     return v > INT32_MAX ? v - (long)UINT32_MAX - 1 : v;
+}
+/* MOV accepts signed values or unsigned bit patterns of its operand width.
+ * Forward expressions are provisional in pass one. Data directives and
+ * low-byte immediates keep their deliberate low-bit extraction contract. */
+static void check_mov_immediate(long v, int width) {
+    if (g_pass == 1 && g_unresolved) return;
+    if (width == 2 && (v < INT16_MIN || v > UINT16_MAX))
+        die("16-bit mov immediate out of range");
+    if (width == 4 && (v < INT32_MIN || v > (long)UINT32_MAX))
+        die("32-bit mov immediate out of range");
 }
 /* ── registers ────────────────────────────────────────────────────────── */
 static const char *SRG[] = {"es","cs","ss","ds","fs","gs"};
@@ -431,6 +455,7 @@ static void asm_mov(const char *dst, const char *src) {
         int w = (dst[0]=='b') ? 1 : (dst[0]=='w') ? 2 : 4;
         Mem m; parse_mem(dst + (w == 4 ? 6 : 5), &m);
         long imm = eval(src);
+        check_mov_immediate(imm, w);
         if (w != 1) emit66_if(w == 2);
         address_prefix(&m);
         emit(w == 1 ? 0xC6 : 0xC7);
@@ -496,6 +521,7 @@ static void asm_mov(const char *dst, const char *src) {
     /* mov reg, imm */
     if (dr >= 0) {
         long imm = eval(src);
+        check_mov_immediate(imm, dsz);
         if (dsz == 1) { emit(0xB0 + dr); emit(imm & 0xFF); }
         else { emit66_if(dsz == 2); emit(0xB8 + dr);
                if (dsz == 2) emit16(imm); else emit32(imm); }
@@ -947,7 +973,7 @@ static void publish_file(const char *path, int slot) {
 /* ── main ─────────────────────────────────────────────────────────────── */
 int main(int argc, char **argv) {
     const char *in = NULL, *out = "a.bin", *map = NULL;
-    int options = 1;
+    int options = 1, boot_sector = 0;
     if (sizeof(long) < 8) die("this host build requires a 64-bit long");
     if (atexit(cleanup_staged) != 0) die("cannot register output cleanup");
     for (int i = 1; i < argc; i++) {
@@ -957,6 +983,8 @@ int main(int argc, char **argv) {
         } else if (options && !strcmp(argv[i], "-o")) {
             if (++i >= argc) die("-o requires an argument");
             out = argv[i];
+        } else if (options && !strcmp(argv[i], "--boot-sector")) {
+            boot_sector = 1;
         } else if (options && !strcmp(argv[i], "--map")) {
             if (++i >= argc) die("--map requires an argument");
             map = argv[i];
@@ -970,7 +998,7 @@ int main(int argc, char **argv) {
             in = argv[i];
         }
     }
-    if (!in) die("usage: basm-nano -f bin -o out.bin [-DNAME] [--map FILE|-] in.basm");
+    if (!in) die("usage: basm-nano -f bin -o out.bin [-DNAME] [--map FILE|-] [--boot-sector] in.basm");
     g_file = in;
     int fd = open(in, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
     if (fd < 0) die("cannot open input");
@@ -1003,6 +1031,11 @@ int main(int argc, char **argv) {
     long image_size = g_off;
     g_pass = 2; assemble(src);
     if (g_off != image_size) die("size changed between passes");
+    if (boot_sector) {
+        if (g_off != 512) die("boot sector must be exactly 512 bytes");
+        if (g_out[510] != 0x55 || g_out[511] != 0xAA)
+            die("boot sector must end with 0x55 0xAA");
+    }
     free(src); g_input_bytes = NULL;
 
     f = stage_file(out_path, 0);

@@ -64,16 +64,18 @@ toolchain-install: ## install the complete toolchain on Debian/Ubuntu
 $(BASM): basm-nano/basm_nano.c
 	$(MAKE) -C basm-nano
 
-$(KERNEL): basmos.basm $(BASM)
-	$(BASM) -f bin -o $@ $<
+# Validate both the 512-byte budget and 55 AA signature before publication.
+# The assembler's general output limit still supports the larger JASH Pack.
+$(KERNEL): basmos.basm $(BASM) Makefile
+	$(BASM) --boot-sector -f bin -o $@ $<
 
 # Machine-contract variant: the same source assembled with -DBEMU_CONTRACT.
 # bEMU-NANO enters directly in PM32 with paging; the guest contains only the product.
 $(VMKERN): basmos.basm $(BASM)
 	$(BASM) -f bin -DBEMU_CONTRACT -o $@ $<
 
-$(SHKERN): basmos-sh.basm $(BASM)
-	$(BASM) -f bin -o $@ $<
+$(SHKERN): basmos-sh.basm $(BASM) Makefile
+	$(BASM) --boot-sector -f bin -o $@ $<
 
 $(JASH): jash/jash.basm $(BASM)
 	$(BASM) -f bin -o $@ $<
@@ -252,10 +254,10 @@ clean-room-proof: ## remove outputs, rebuild and run the full gate
 
 # Per-symbol byte map: where each byte is spent in the sector.
 map: basmos.basm $(BASM) ## record-artifact byte budget by symbol
-	$(BASM) -f bin -o $(KERNEL) basmos.basm --map -
+	$(BASM) --boot-sector -f bin -o $(KERNEL) basmos.basm --map -
 
 shell-map: basmos-sh.basm $(BASM) ## ring-3 sector byte budget
-	$(BASM) -f bin -o $(SHKERN) basmos-sh.basm --map -
+	$(BASM) --boot-sector -f bin -o $(SHKERN) basmos-sh.basm --map -
 
 jash-map: jash/jash.basm $(BASM) ## 256-byte JASH nucleus byte budget
 	$(BASM) -f bin -o $(JASH) jash/jash.basm --map -

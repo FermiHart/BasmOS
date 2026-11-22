@@ -44,8 +44,11 @@ not a successful boot claim.
   operand arity, conditional balance, line/input/image bounds.
 - Decimal/hex literals, register/mnemonic spellings, quoted comments and
   word/dword emission at the output boundary.
+- Invalid hexadecimal digits, MOV immediate boundaries and forward references,
+  deliberate byte-immediate truncation, and worst-case symbol hash collisions.
 - Output/source aliases, late write failure and preservation of prior output.
-- All five guest image sizes and SHA-256 identities.
+- All five guest image sizes, committed bytes and SHA-256 identities, including
+  the exact 512-byte size and `55 AA` signature of both boot sectors.
 - Deterministic malformed-input mutations under GCC and Clang, with and
   without ASan/UBSan.
 - A bounded interpreter of send/receive handler bytes: 393,216 transitions
@@ -53,6 +56,40 @@ not a successful boot claim.
 
 The IPC model is not a complete x86 emulator and does not model IRQ delivery,
 paging or interrupt-return semantics. It complements the existing native gates.
+
+## Numeric and symbol contracts
+
+Hexadecimal literals accept only `0` through `9`, `a` through `f`, and `A`
+through `F` after the `0x` or `0X` prefix. Invalid characters must fail assembly
+without replacing an existing binary or map.
+
+MOV immediates for 16-bit registers and memory must be in `-32768..65535`;
+32-bit forms must be in `-2147483648..4294967295`. Both signed values and their
+unsigned bit patterns are accepted. An unresolved forward expression is checked
+after resolution, so a provisional pass-one value cannot reject valid code.
+Byte-immediate MOV, TEST, CMP, OR, INT, IN and OUT retain their existing low-byte
+extraction contract. Data directives `db/dw/dd` and `times ... db` also retain
+deliberate low-bit extraction. Range checks belong to instruction operands,
+not the shared byte-emission primitives.
+
+The symbol vector accepts at most 256 definitions; its 512-slot index is at
+most half full even when every name has the same starting hash. Compile-time
+guards preserve the power-of-two table size, load bound and index width.
+The 257th definition fails with `too many symbols`; hash collisions do not
+lower the supported symbol count.
+
+## Boot sector publication
+
+`basm-nano --boot-sector` requires exactly 512 output bytes with `55 AA` in the
+last two positions. Both checks run after final assembly and before any binary
+or map is published, including map output to stdout. An oversized, undersized
+or incorrectly signed sector leaves existing output files intact.
+
+The main Makefile uses this mode for `basmos.bin`, `basmos-sh.bin`, `make map`
+and `make shell-map`. The source-level `times 510-($-$$) db 0` padding remains
+an additional budget check; the explicit mode also catches bytes appended
+after the signature. General assembly keeps its 65,536-byte output limit,
+which permits the separate 3,584-byte JASH Pack.
 
 ## Output publication contract
 
