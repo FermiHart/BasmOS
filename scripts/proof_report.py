@@ -92,7 +92,7 @@ def write_reports(out, report):
         f"- UTC: {report['utc']}",
         f"- Duration: {report['duration_seconds']:.2f}s",
         "- Source: `Makefile:proof-core` (unmodified underlying checks)",
-        "- Full log: `evidence/PROOF-REPORT.log`",
+        f"- Full log: `{report['log']}`",
         "",
         "| Artifact | Bytes | Size | SHA-256 manifest |",
         "| --- | ---: | --- | --- |",
