@@ -233,6 +233,7 @@ proof: ## run the canonical full gate and always produce a PASS/FAIL report
 
 # Keep the original full gate intact; the report wrapper must not weaken it.
 proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
+	@test -c /dev/kvm && test -r /dev/kvm && test -w /dev/kvm || { echo 'PROOF FAIL: accessible /dev/kvm required by full gate' >&2; exit 1; }
 	@python3 -m unittest discover -s tests -p 'test_proof_report.py'
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
