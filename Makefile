@@ -23,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof proof-core manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -228,7 +228,11 @@ manifest: all ## generate deterministic hashes and sizes
 	@cat ARTIFACTS.manifest
 	@cat SHA256SUMS
 
-proof: all $(PROOFCTL) verify-readme ## run the full reproducible gate
+proof: ## run the canonical full gate and always produce a PASS/FAIL report
+	+@python3 scripts/proof_report.py -- $(MAKE) --no-print-directory proof-core
+
+# Keep the original full gate intact; the report wrapper must not weaken it.
+proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
 	@if command -v nasm >/dev/null 2>&1; then \
