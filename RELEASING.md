@@ -34,6 +34,14 @@ git add --dry-run .
 git status --short --ignored
 ```
 
+`make proof` executes the complete existing verifier stack through a report
+wrapper and writes ignored `evidence/PROOF-REPORT.{json,md,log}` files.
+A failed full gate produces a FAIL report where the wrapper can execute;
+CI uploads these diagnostics with `if: always()`. They are execution records,
+**not** signed release provenance. The founder-signed tag and attestation
+procedures below remain authoritative. Full proof requires NASM and KVM;
+`make verify-ci` alone cannot authorize a release.
+
 Review every generated binary and manifest change. `make manifest` records the
 current bytes; it does not decide whether those bytes are correct.
 
