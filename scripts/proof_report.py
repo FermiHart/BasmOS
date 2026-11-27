@@ -88,26 +88,26 @@ def write_reports(out, report):
         "# BasmOS full proof report",
         "",
         f"- Status: **{report['status']}** (exit {report['exit_code']})",
-        f"- Commit: \`{report['commit']}\`",
+        f"- Commit: `{report['commit']}`",
         f"- UTC: {report['utc']}",
         f"- Duration: {report['duration_seconds']:.2f}s",
-        "- Source: \`Makefile:proof-core\` (unmodified underlying checks)",
-        "- Full log: \`evidence/PROOF-REPORT.log\`",
+        "- Source: `Makefile:proof-core` (unmodified underlying checks)",
+        "- Full log: `evidence/PROOF-REPORT.log`",
         "",
         "| Artifact | Bytes | Size | SHA-256 manifest |",
         "| --- | ---: | --- | --- |",
     ]
     for artifact in report["artifacts"]:
         lines.append(
-            f"| \`{artifact['path']}\` | {artifact['observed_bytes']} | "
+            f"| `{artifact['path']}` | {artifact['observed_bytes']} | "
             f"{'PASS' if artifact['size_ok'] else 'FAIL'} | "
             f"{'PASS' if artifact['sha256_matches_manifest'] else 'FAIL'} |"
         )
     lines.extend([
         "",
         "This is a record of execution, **not** a signature, formal proof,",
-        "or proof of tests not invoked by \`Makefile:proof-core\`.",
-        "See \`readme/PROOF.md\` for scope and limitations.",
+        "or proof of tests not invoked by `Makefile:proof-core`.",
+        "See `readme/PROOF.md` for scope and limitations.",
         "",
     ])
     for path, data in (
