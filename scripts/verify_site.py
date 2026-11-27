@@ -30,6 +30,7 @@ EXPECTED = {
     "readme/hero-proof-geometry-mobile.svg", "readme/artifact-constellation.svg",
     "readme/artifact-constellation-mobile.svg", "readme/proof-lattice.svg",
     "readme/proof-lattice-mobile.svg",
+    "readme/REPO_MAP.md", "readme/PROOF.md",
 }
 
 
