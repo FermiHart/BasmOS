@@ -233,6 +233,7 @@ proof: ## run the canonical full gate and always produce a PASS/FAIL report
 
 # Keep the original full gate intact; the report wrapper must not weaken it.
 proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
+	@python3 -m unittest discover -s tests -p 'test_proof_report.py'
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
 	@command -v nasm >/dev/null 2>&1 || { echo "PROOF FAIL: NASM is required for the full proof" >&2; exit 1; }
