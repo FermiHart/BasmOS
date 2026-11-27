@@ -275,6 +275,8 @@ Full evidence, neighbors and limitations: [`RESEARCH.md`](RESEARCH.md).
 
 | Read | Purpose |
 |---|---|
+| [`readme/REPO_MAP.md`](readme/REPO_MAP.md) | Repository layout and stable public entry points |
+| [`readme/PROOF.md`](readme/PROOF.md) | Exact gate-to-claim map and diagnostic report scope |
 | [`WAVES.md`](WAVES.md) | Verification layers and what each one can honestly establish |
 | [`OPTIMIZATIONS.md`](OPTIMIZATIONS.md) | Byte-level engineering decisions and sensitivity accounting |
 | [`DOMAINS.md`](DOMAINS.md) | Task data/code windows and exact denial probes |
