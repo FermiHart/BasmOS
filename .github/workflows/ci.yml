@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -22,44 +22,32 @@ jobs:
       - name: Verify toolchain entrypoint
         run: make toolchain
 
-      - name: Build exact artifacts
-        run: make all
-
       - name: Verify assembler contracts with GCC, Clang and sanitizers
         run: make -f Makefile.upgrade upgrade-test
 
-      - name: Verify executable Metatron source art
-        run: make verify-sacred
-
-      - name: Verify artifact-bound README geometry
-        run: make verify-readme
-
-      - name: Verify committed hashes
-        run: |
-          sha256sum -c SHA256SUMS
-          sha256sum -c evidence/jash-session.manifest
-
-      - name: Verify QEMU and browser contracts
-        run: make verify-ci
-
-      - name: Verify Pages staging and README links
-        run: make verify-site
-
-      - name: Require KVM
+      - name: Require KVM for the complete release gate
         run: |
           test -c /dev/kvm
           sudo chmod a+rw /dev/kvm
           test -r /dev/kvm && test -w /dev/kvm
 
-      - name: Verify KVM contracts (domains, IPC and both personalities)
-        run: |
-          make verify-domains verify-ipc verify-bemu verify-shell-bemu \
-            verify-jash-bemu verify-jash-capture
-          python3 verify_jash_fuzz.py bemu/bemu-nano basmos-sh.bin \
-            jash/jash.bin jash/jash-pack.bin
+      - name: Run the canonical complete proof
+        run: make proof
 
-      - name: Check independent NASM assembly
-        run: make verify-nasm
+      - name: Verify committed JASH capture integrity
+        run: sha256sum -c evidence/jash-session.manifest
 
       - name: Ensure generated artifacts are current
         run: make manifest && git diff --exit-code -- ARTIFACTS.manifest SHA256SUMS basmos.bin basmos-vm.bin basmos-sh.bin jash/jash.bin jash/jash-pack.bin
+
+      - name: Upload complete proof diagnostics (pass or fail)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: basmos-proof-${{ github.sha }}
+          path: |
+            evidence/PROOF-REPORT.json
+            evidence/PROOF-REPORT.md
+            evidence/PROOF-REPORT.log
+          if-no-files-found: warn
+          retention-days: 14
