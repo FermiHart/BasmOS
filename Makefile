@@ -235,16 +235,15 @@ proof: ## run the canonical full gate and always produce a PASS/FAIL report
 proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
-	@if command -v nasm >/dev/null 2>&1; then \
-		$(MAKE) --no-print-directory verify-nasm; \
-	else echo "SKIP: nasm not found; the independent assembler gate did not run"; fi
+	@command -v nasm >/dev/null 2>&1 || { echo "PROOF FAIL: NASM is required for the full proof" >&2; exit 1; }
+	@$(MAKE) --no-print-directory verify-nasm
 	@$(MAKE) verify
 	@$(MAKE) verify-shell
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
 	@$(MAKE) verify-site
 	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, bEMU stack bounds, sacred C, README geometry, shell, JASH, capture, staged site, fuzz, mutations'
-	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
+	@printf ' + NASM'
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \
 		$(MAKE) --no-print-directory verify-bear; \
