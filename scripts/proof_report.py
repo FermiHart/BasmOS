@@ -134,8 +134,13 @@ def main():
     try:
         with log_path.open("w", encoding="utf-8", errors="replace") as log:
             try:
+                # Ignore inherited make options (especially -n, -t and -i).
+                # Command-line variables such as BEAR are exported separately.
+                environment = os.environ.copy()
+                for name in ("MAKEFLAGS", "MFLAGS", "GNUMAKEFLAGS", "MAKEOVERRIDES"):
+                    environment.pop(name, None)
                 child = subprocess.Popen(
-                    command, cwd=ROOT, stdout=subprocess.PIPE,
+                    command, cwd=ROOT, env=environment, stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT, text=True, encoding="utf-8",
                     errors="replace", bufsize=1,
                 )
