@@ -229,7 +229,7 @@ manifest: all ## generate deterministic hashes and sizes
 	@cat SHA256SUMS
 
 proof: ## run the canonical full gate and always produce a PASS/FAIL report
-	+@python3 scripts/proof_report.py
+	@python3 scripts/proof_report.py
 
 # Keep the original full gate intact; the report wrapper must not weaken it.
 proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
