@@ -47,6 +47,7 @@ class ReportTests(unittest.TestCase):
         with (
             mock.patch.object(MODULE, "ROOT", self.root),
             mock.patch.object(MODULE.subprocess, "Popen", return_value=Child(child_exit)),
+            mock.patch.object(MODULE, "command_output", return_value="fixture"),
             mock.patch.object(MODULE.sys, "argv", ["proof_report.py"]),
         ):
             result = MODULE.main()
