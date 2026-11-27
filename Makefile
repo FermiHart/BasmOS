@@ -23,7 +23,7 @@ BEAR ?=
 BEARFLAGS ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof manifest clean-room-proof map shell-map jash-map size clean
+.PHONY: help toolchain toolchain-install all shell jash jash-live readme-art bemu bemu-contract verify verify-ci verify-nasm verify-bear verify-sacred verify-readme verify-site verify-sensitivity verify-qemu verify-domains verify-ipc-model verify-ipc verify-browser verify-bemu verify-bemu-bounds verify-shell verify-shell-qemu verify-shell-bemu verify-jash verify-jash-qemu verify-jash-bemu verify-jash-capture verify-hardening proof proof-core manifest clean-room-proof map shell-map jash-map size clean
 
 help: ## display this menu
 	@printf '\033[32mBasmOS: a complete record artifact in one 512-byte sector\033[0m\n\n'
@@ -228,19 +228,24 @@ manifest: all ## generate deterministic hashes and sizes
 	@cat ARTIFACTS.manifest
 	@cat SHA256SUMS
 
-proof: all $(PROOFCTL) verify-readme ## run the full reproducible gate
+proof: ## run the canonical full gate and always produce a PASS/FAIL report
+	@python3 scripts/proof_report.py
+
+# Keep the original full gate intact; the report wrapper must not weaken it.
+proof-core: all $(PROOFCTL) verify-readme ## internal full gate, called by proof
+	@test -c /dev/kvm && test -r /dev/kvm && test -w /dev/kvm || { echo 'PROOF FAIL: accessible /dev/kvm required by full gate' >&2; exit 1; }
+	@python3 -m unittest discover -s tests -p 'test_proof_report.py'
 	@sha256sum -c SHA256SUMS
 	@$(PROOFCTL)
-	@if command -v nasm >/dev/null 2>&1; then \
-		$(MAKE) --no-print-directory verify-nasm; \
-	else echo "SKIP: nasm not found; the independent assembler gate did not run"; fi
+	@command -v nasm >/dev/null 2>&1 || { echo "PROOF FAIL: NASM is required for the full proof" >&2; exit 1; }
+	@$(MAKE) --no-print-directory verify-nasm
 	@$(MAKE) verify
 	@$(MAKE) verify-shell
 	@$(MAKE) verify-jash
 	@$(MAKE) verify-hardening
 	@$(MAKE) verify-site
 	@printf 'gates executed: SHA256SUMS, proofctl, QEMU, domains, IPC model, browser, KVM, bEMU stack bounds, sacred C, README geometry, shell, JASH, capture, staged site, fuzz, mutations'
-	@command -v nasm >/dev/null 2>&1 && printf ' + NASM' || true
+	@printf ' + NASM'
 	@printf '\n'
 	@if [ -n "$(BEAR)" ]; then \
 		$(MAKE) --no-print-directory verify-bear; \

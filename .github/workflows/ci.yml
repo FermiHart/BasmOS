@@ -3,7 +3,12 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -11,7 +16,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -22,44 +27,32 @@ jobs:
       - name: Verify toolchain entrypoint
         run: make toolchain
 
-      - name: Build exact artifacts
-        run: make all
-
       - name: Verify assembler contracts with GCC, Clang and sanitizers
         run: make -f Makefile.upgrade upgrade-test
 
-      - name: Verify executable Metatron source art
-        run: make verify-sacred
-
-      - name: Verify artifact-bound README geometry
-        run: make verify-readme
-
-      - name: Verify committed hashes
+      - name: Grant KVM access when present (full proof enforces it)
         run: |
-          sha256sum -c SHA256SUMS
-          sha256sum -c evidence/jash-session.manifest
+          if [ -c /dev/kvm ]; then
+            sudo chmod a+rw /dev/kvm
+          fi
 
-      - name: Verify QEMU and browser contracts
-        run: make verify-ci
+      - name: Run the canonical complete proof
+        run: make proof
 
-      - name: Verify Pages staging and README links
-        run: make verify-site
-
-      - name: Require KVM
-        run: |
-          test -c /dev/kvm
-          sudo chmod a+rw /dev/kvm
-          test -r /dev/kvm && test -w /dev/kvm
-
-      - name: Verify KVM contracts (domains, IPC and both personalities)
-        run: |
-          make verify-domains verify-ipc verify-bemu verify-shell-bemu \
-            verify-jash-bemu verify-jash-capture
-          python3 verify_jash_fuzz.py bemu/bemu-nano basmos-sh.bin \
-            jash/jash.bin jash/jash-pack.bin
-
-      - name: Check independent NASM assembly
-        run: make verify-nasm
+      - name: Verify committed JASH capture integrity
+        run: sha256sum -c evidence/jash-session.manifest
 
       - name: Ensure generated artifacts are current
         run: make manifest && git diff --exit-code -- ARTIFACTS.manifest SHA256SUMS basmos.bin basmos-vm.bin basmos-sh.bin jash/jash.bin jash/jash-pack.bin
+
+      - name: Upload complete proof diagnostics (pass or fail)
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: basmos-proof-${{ github.sha }}
+          path: |
+            evidence/PROOF-REPORT.json
+            evidence/PROOF-REPORT.md
+            evidence/PROOF-REPORT.log
+          if-no-files-found: warn
+          retention-days: 14

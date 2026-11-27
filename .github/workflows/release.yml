@@ -39,11 +39,11 @@ jobs:
       - name: Verify toolchain
         run: make toolchain
 
-      - name: Require KVM
+      - name: Grant KVM access when present (full proof enforces it)
         run: |
-          test -c /dev/kvm
-          sudo chmod a+rw /dev/kvm
-          test -r /dev/kvm && test -w /dev/kvm
+          if [ -c /dev/kvm ]; then
+            sudo chmod a+rw /dev/kvm
+          fi
 
       - name: Run complete artifact proof
         run: make proof
@@ -77,3 +77,15 @@ jobs:
             --title "BasmOS ${GITHUB_REF_NAME#v}" \
             --generate-notes \
             --latest
+
+      - name: Upload proof diagnostics even on release failure
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: basmos-release-proof-${{ github.sha }}
+          path: |
+            evidence/PROOF-REPORT.json
+            evidence/PROOF-REPORT.md
+            evidence/PROOF-REPORT.log
+          if-no-files-found: warn
+          retention-days: 30

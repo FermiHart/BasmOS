@@ -17,7 +17,8 @@ cp website/jash-live.svg "$out/jash-live.svg"
 cp website/jash-live.svg "$out/website/jash-live.svg"
 cp readme/hero-proof-geometry.svg readme/hero-proof-geometry-mobile.svg \
    readme/artifact-constellation.svg readme/artifact-constellation-mobile.svg \
-   readme/proof-lattice.svg readme/proof-lattice-mobile.svg "$out/readme/"
+   readme/proof-lattice.svg readme/proof-lattice-mobile.svg \
+   readme/REPO_MAP.md readme/PROOF.md "$out/readme/"
 cp website/CNAME "$out/CNAME"
 cp LICENSE README.md AUTHORS.md DOMAINS.md RESEARCH.md RING3.md THREAT_MODEL.md \
    SECURITY.md THIRD_PARTY_NOTICES.md TRADEMARKS.md RELEASING.md WAVES.md \

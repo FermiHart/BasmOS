@@ -29,3 +29,6 @@ core
 /PRIVATE_AUDIT_AND_VALUATION.md
 /PRIVATE_HISTORICAL_AUDIT.md
 /PRIVATE_DEVELOPMENT_LOG.md
+
+# Local proof diagnostics; CI uploads these separately
+/evidence/PROOF-REPORT.*
