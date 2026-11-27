@@ -120,10 +120,11 @@ def write_reports(out, report):
 
 
 def main():
-    if len(sys.argv) < 3 or sys.argv[1] != "--":
-        print("usage: scripts/proof_report.py -- make proof-core", file=sys.stderr)
+    if len(sys.argv) != 1:
+        print("usage: python3 scripts/proof_report.py", file=sys.stderr)
         return 2
-    command = sys.argv[2:]
+    # Never accept an alternate command: a PASS always runs the full gate.
+    command = ["make", "--no-print-directory", "proof-core"]
     out = ROOT / os.environ.get("PROOF_DIR", "evidence")
     out.mkdir(parents=True, exist_ok=True)
     log_path = out / "PROOF-REPORT.log"
