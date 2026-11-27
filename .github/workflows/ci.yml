@@ -25,11 +25,11 @@ jobs:
       - name: Verify assembler contracts with GCC, Clang and sanitizers
         run: make -f Makefile.upgrade upgrade-test
 
-      - name: Require KVM for the complete release gate
+      - name: Grant KVM access when present (full proof enforces it)
         run: |
-          test -c /dev/kvm
-          sudo chmod a+rw /dev/kvm
-          test -r /dev/kvm && test -w /dev/kvm
+          if [ -c /dev/kvm ]; then
+            sudo chmod a+rw /dev/kvm
+          fi
 
       - name: Run the canonical complete proof
         run: make proof
