@@ -5,6 +5,17 @@
 Contributions that improve correctness, reproducibility, documentation and
 verification are welcome.
 
+## Repository layout
+
+Before adding or relocating a file, consult [the repository map](readme/REPO_MAP.md).
+Keep canonical root entry points and the five committed guest images stable.
+New harnesses belong in `scripts/` or `tests/`, with an explicit Make target;
+add their scope and limitations to [the proof contract](readme/PROOF.md).
+
+`make proof` is the full release gate and emits ignored PASS/FAIL reports under
+`evidence/PROOF-REPORT.*`. If KVM is unavailable, `make verify-ci` is a useful
+partial check, **not** release approval. Do not add a parallel QEMU workflow.
+
 ## Development
 
 1. Build with `make all`.
