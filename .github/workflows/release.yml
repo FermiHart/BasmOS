@@ -77,3 +77,15 @@ jobs:
             --title "BasmOS ${GITHUB_REF_NAME#v}" \
             --generate-notes \
             --latest
+
+      - name: Upload proof diagnostics even on release failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: basmos-release-proof-${{ github.sha }}
+          path: |
+            evidence/PROOF-REPORT.json
+            evidence/PROOF-REPORT.md
+            evidence/PROOF-REPORT.log
+          if-no-files-found: warn
+          retention-days: 30
